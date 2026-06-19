@@ -121,6 +121,26 @@
   padding: 20px 10px;
 }
 
+/* ===========================
+   TABLET LANDSCAPE — max-width: 1024px
+   =========================== */
+@media (max-width: 1024px) {
+  .search-info {
+    padding: 24px 20px 16px;
+  }
+
+  .search-title {
+    font-size: 1.4rem;
+  }
+
+  .pagination-bar {
+    padding: 12px 20px;
+  }
+}
+
+/* ===========================
+   TABLET PORTRAIT — max-width: 768px
+   =========================== */
 @media (max-width: 768px) {
   .search-info {
     padding: 20px 16px 16px;
@@ -130,18 +150,204 @@
     font-size: 1.2rem;
   }
 
+  .search-subtitle {
+    font-size: 0.82rem;
+  }
+
   .back-btn span {
     display: none;
+  }
+
+  .back-btn {
+    padding: 8px 10px;
   }
 
   .pagination-bar {
     flex-direction: column;
     gap: 12px;
     padding: 12px 16px;
+    align-items: stretch;
+  }
+
+  .per-page-selector {
+    justify-content: center;
   }
 
   .page-nav {
     flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .page-info {
+    margin-left: 0;
+    text-align: center;
+    width: 100%;
+    margin-top: 4px;
+  }
+
+  .pagination-bottom {
+    padding: 16px 16px 28px;
+  }
+}
+
+/* ===========================
+   LARGE PHONE — max-width: 600px
+   =========================== */
+@media (max-width: 600px) {
+  .search-info {
+    padding: 16px 12px 12px;
+  }
+
+  .search-title {
+    font-size: 1.1rem;
+  }
+
+  .search-subtitle {
+    font-size: 0.78rem;
+  }
+
+  .back-btn {
+    padding: 6px 8px;
+    font-size: 0.8rem;
+  }
+
+  .back-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .pagination-bar {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .per-page-selector label {
+    font-size: 0.78rem;
+  }
+
+  .per-page-selector select {
+    padding: 6px 28px 6px 10px;
+    font-size: 0.82rem;
+  }
+
+  .page-btn {
+    min-width: 32px;
+    height: 32px;
+    font-size: 0.78rem;
+    padding: 0 8px;
+  }
+
+  .page-ellipsis {
+    min-width: 24px;
+    height: 32px;
+    font-size: 0.78rem;
+  }
+
+  .card-count {
+    padding: 3px 10px;
+    font-size: 0.7rem;
+    margin-left: 6px;
+  }
+
+  .loading-indicator {
+    padding: 40px 16px;
+    gap: 12px;
+  }
+
+  .spinner {
+    width: 32px;
+    height: 32px;
+  }
+
+  .loading-text {
+    font-size: 0.82rem;
+  }
+
+  .error-msg {
+    padding: 28px 16px;
+    font-size: 0.85rem;
+  }
+
+  .card-not-found p {
+    font-size: 0.78rem;
+    padding: 16px 8px;
+  }
+}
+
+/* ===========================
+   SMALL PHONE — max-width: 480px
+   =========================== */
+@media (max-width: 480px) {
+  .search-info {
+    padding: 14px 10px 10px;
+  }
+
+  .search-title {
+    font-size: 1rem;
+  }
+
+  .search-subtitle {
+    font-size: 0.75rem;
+  }
+
+  .pagination-bar {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+
+  .per-page-selector {
+    gap: 6px;
+  }
+
+  .per-page-selector label {
+    font-size: 0.72rem;
+  }
+
+  .per-page-selector select {
+    padding: 5px 24px 5px 8px;
+    font-size: 0.78rem;
+  }
+
+  .page-btn {
+    min-width: 28px;
+    height: 28px;
+    font-size: 0.72rem;
+    padding: 0 6px;
+    border-radius: 6px;
+  }
+
+  .page-ellipsis {
+    min-width: 20px;
+    height: 28px;
+    font-size: 0.72rem;
+  }
+
+  .page-info {
+    font-size: 0.72rem;
+  }
+
+  .pagination-bottom {
+    padding: 12px 10px 24px;
+  }
+}
+
+/* ===========================
+   VERY SMALL PHONE — max-width: 360px
+   =========================== */
+@media (max-width: 360px) {
+  .search-title {
+    font-size: 0.9rem;
+  }
+
+  .page-btn {
+    min-width: 26px;
+    height: 26px;
+    font-size: 0.68rem;
+    padding: 0 5px;
+  }
+
+  .page-info {
+    font-size: 0.68rem;
   }
 }
 
