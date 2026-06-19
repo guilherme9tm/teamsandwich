@@ -2,7 +2,7 @@
 
 Ce projet est une application web moderne et performante permettant de rechercher des cartes Magic: The Gathering (MTG), de charger des collections entières de sets ou d'importer des listes de cartes depuis un fichier texte, puis de comparer leurs prix et d'accéder directement aux liens de recherche de diverses boutiques de jeux spécialisées.
 
-## 🚀 Fonctionnalités principales
+##  Fonctionnalités principales
 
 - **Recherche de cartes** : Recherche instantanée par nom exact ou partiel via l'API Scryfall.
 - **Comparateur de boutiques** : Liens directs et logos de nombreuses boutiques de cartes et de jeux (Face to Face, Levalet, Secret Desk, Cardhoarder, Gamekeeper, Expedition, TCGPlayer, MTGTop8, etc.).
@@ -20,7 +20,7 @@ Ce projet est une application web moderne et performante permettant de recherche
 - **Scryfall API** : API REST publique utilisée pour récupérer les données de cartes en temps réel.
 - **Google Fonts** : Intégration de la police d'écriture moderne *Inter*.
 
-## 📁 Structure du projet
+##  Structure du projet
 
 Le projet est organisé de manière professionnelle pour séparer proprement le code source, les styles et les ressources multimédias :
 
@@ -42,7 +42,7 @@ teamsandwich/
 └── README.md                    # Documentation du projet (ce fichier)
 ```
 
-## ⚙️ Comment exécuter le projet localement
+##  Comment exécuter le projet localement
 
 1. Cloner ou télécharger ce dépôt dans le répertoire de votre choix.
 2. Lancez un serveur de développement local (par exemple avec l'extension **Live Server** sur VS Code, ou avec `python -m http.server 5500` dans votre terminal).
