@@ -1,232 +1,140 @@
 // ===========================
-// STORE DEFINITIONS
+// SCRIPT.JS — INDEX PAGE LOGIC
 // ===========================
-const sites = [
+
+// Mock events data with standard formats
+const mockEvents = [
   {
-    id: 'facetoface',
-    nome: 'Face to Face',
-    link: n => `https://facetofacegames.com/search?q=${n}`,
-    logo: 'https://facetofacegames.com/cdn/shop/files/F2F_Black_Logo_074ba862-2d20-45b5-85c5-99f407f34e31.png?v=1742222734'
+    id: 1,
+    name: "Friday Night Magic - Standard",
+    format: "standard",
+    date: "26 Jun",
+    day: "26",
+    month: "JUN",
+    location: "Boutique Sandwich",
+    img: "assets/images/mtg_standard_event.png",
+    details: "Tournoi amical Standard. Venez tester vos nouveaux decks !",
+    ranking: [
+      { pos: 1, name: "Guillaume", pts: "15 pts" },
+      { pos: 2, name: "Alexandre", pts: "12 pts" },
+      { pos: 3, name: "Hugo", pts: "10 pts" }
+    ]
   },
   {
-    id: 'levalet',
-    nome: 'Levalet',
-    link: n => `https://levalet.crystalcommerce.com/products/search?q=${n}&c=1`,
-    logo: 'https://cc-client-assets.nyc3.cdn.digitaloceanspaces.com/store/levalet/13b0d4f01acb11e9a8aac9b93f52c525/large/logolevalet.png'
+    id: 2,
+    name: "Pioneer Showdown",
+    format: "pioneer",
+    date: "28 Jun",
+    day: "28",
+    month: "JUN",
+    location: "L'Abyss MTG",
+    img: "assets/images/mtg_pioneer_event.png",
+    details: "Entrée: 10$. Boosters de participation et dotation aux vainqueurs.",
+    ranking: [
+      { pos: 1, name: "Maxime", pts: "18 pts" },
+      { pos: 2, name: "Lucas", pts: "15 pts" },
+      { pos: 3, name: "Chloé", pts: "11 pts" }
+    ]
   },
   {
-    id: 'secretdesk',
-    nome: 'Secret Desk',
-    link: n => `https://www.lesecretdeskorrigans.com/products/search?q=${n}`,
-    logo: 'https://cc-client-assets.nyc3.cdn.digitaloceanspaces.com/store/lesecretdeskorrigans/d6c705a0588d40bcad29108b0f9fda1b/medium/logolesecretfavi.png'
+    id: 3,
+    name: "Modern Championship Qualifying",
+    format: "modern",
+    date: "02 Jul",
+    day: "02",
+    month: "JUL",
+    location: "Face to Face Games",
+    img: "assets/images/mtg_modern_event.png",
+    details: "Format Modern compétitif. Decklist requise.",
+    ranking: [
+      { pos: 1, name: "Julien", pts: "24 pts" },
+      { pos: 2, name: "Thomas", pts: "21 pts" },
+      { pos: 3, name: "Sébastien", pts: "18 pts" }
+    ]
   },
   {
-    id: 'cardhoarder',
-    nome: 'Cardhoarder',
-    link: n => `https://www.cardhoarder.com/cards?cardname=${n}`,
-    logo: 'https://cdn.shopify.com/s/files/1/1781/6359/files/nav-logo.png?height=628&pad_color=fff&v=1613525588&width=1200'
-  },
-  {
-    id: 'gamekeeper',
-    nome: 'Gamekeeper',
-    link: n => `https://www.gamekeeperonline.com/products/search?q=${n}`,
-    logo: 'https://cc-client-assets.nyc3.cdn.digitaloceanspaces.com/photo/gamekeeperonline/file/768163/logo-2017.png?1508604932'
-  },
-  {
-    id: 'expedition',
-    nome: 'Expedition',
-    link: n => `https://www.expeditionjeux.com/products/search?q=${n}`,
-    logo: 'https://cc-client-assets.nyc3.cdn.digitaloceanspaces.com/store/expeditionjeux/26105d544a1449c7b3d28a192b99b961/large/expedition_logo_long.png'
-  },
-  {
-    id: 'tcgplayer',
-    nome: 'TCGPlayer',
-    link: n => `https://www.tcgplayer.com/search/magic/product?q=${n}`,
-    logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRwc05VHb_4Y30nHRhc-thfIAdqVAN19LqSgQ&s'
-  },
-  {
-    id: 'mtgtop8',
-    nome: 'MTGTop8',
-    link: n => `https://www.mtgtop8.com/search.php?cards=${n}`,
-    logo: 'https://mtgtop8.com/graph/title.png'
-  },
-  {
-    id: 'silvergoblin',
-    nome: 'Silver Goblin',
-    link: n => `https://silvergoblin.cards/search?q=${n}&options%5Bprefix%5D=last`,
-    logo: 'https://silvergoblin.cards/cdn/shop/files/Homepage_logo_5f1b015e-ccda-4e73-8c97-9259e49ab786.png?v=1741746772&width=1500'
-  },
-  {
-    id: 'altf4',
-    nome: 'Alt F4',
-    link: n => `https://altf4online.com/search?options%5Bprefix%5D=last&q=${n}`,
-    logo: 'data:image/png;base64,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'
-  },
-  {
-    id: 'threekings',
-    nome: 'Three Kings Loot',
-    link: n => `https://www.threekingsloot.com/products/search?q=${n}`,
-    logo: 'https://bluedefault.crystalcommerce.com/themes/clients/threekingsloot/assets/img/logo.png?1415786210'
-  },
-  {
-    id: 'mythicstore',
-    nome: 'Boutique Mythic',
-    link: n => `https://themythicstore.com/a/search?q=${n}`,
-    logo: 'https://cdn.shopify.com/s/files/1/0360/6895/0061/files/Social_Media_Share_TMS.png?v=1714682307'
-  },
-  {
-    id: 'wizardtower',
-    nome: 'Wizard Tower',
-    link: n => `https://store.wizardtower.com/search?q=${n}&options%5Bprefix%5D=last`,
-    logo: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAT4AAACfCAMAAABX0UX9AAAA0lBMVEX///8AAABTAdL//v8AAANTANT29vZTAdCsrKz///3Nzc367f1TBsdRBM8hCFFDAK7/+f85ALOenp6Li4vYyeikgsXV1dVfMrBDQ0Pn5+dGAMYzC326urrc3Nzs3voyMjJmQqRiYmKWlpZXV1cZGRmlpaVKSkr///js7OzGxsZ1dXX/9f9tbW05OTkpKSmJZ761tbXo4O4nAHdKAKl8XLIWC1JMCLwxAJzXwOYDABpBCpn13vsoCWcKAyhKD7GAgIBrQ64XBULAp9kAABM7DY5PGKtxYIZ6VLNcMaHEsNqXdr6LarpPF5mQqJVIK0WADUeA0xcOaE+OUqumXFzAAAK3ElEQVR4nO2dC1vcNhaGhYXGmMH1ONxdZshwM2QSQnYoUJoGQsoSQtst6e42u5u9/P9fsbrYMJZ8kYw9Y3jOGx6GysYzX498dHR0ZBACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgObi0C8HYezg1GP8oPjp0eI4VFxIvzlpIBw6VP6jVhhZykGqOtEuvjWV1u7qKLtR66rEm14mbWbftC7cCFpnW1MJVkX7+pTEnzzP8xVYmzc87NG7tKEKV2Uhz0T7TLJ1euq7I2IR9pXEcuk31z0+aWg3xYqp9sWBliz8+1OLWJnYZPhDMxWibVnJnmifl9vfzmXrsyzXDl7jcLJS0lFMtSnau8kuOj3147s8gRaxibcwWSkZnMkKu6J9UzGhm9NHaS+1bPe8M1ktqXRlIWeifU9uf/+O5Cu0beJfNPBGVEzVEu37UvOHn2zi5nZTqtG9bPOQYLKSkiim2hbtivv55sgqVmgFi8hpWOwmmyprpPhwSjQU2u6w5zQr/H4mK4lGCsX9/HlIiF2s0HavUNikwEYxVR/xj6e4n/3Oa7dAn1BI/JNG3YcvZCVZI8Wa0/PsfF8a2dD92GmQwCVZSDRSrMntOwg7i0dFCgX+Z+Q0ZC6M0Y6sRIwUWHY/1LROOLi0iV0s0LaP22yK0Ygo/EAWciDaN1TTshHg2tewIO2oc5+QmCZPVh2lJU0Kp14JN7MrC2SmZR3vY6GvYbGbZXkLDVGomGpWtCvuhwUBLM+0cKxhRHqvBledRgQ2yrz3pWhX3A8PArhNbgKLTX9zBbLD/nU4eX0I9WUlPDmjzofjIIDeij0v0OPndjh5I+6ezSeJ3ExXbt8Q7SyNiC4W9fjl1wbEbhmhVUqzaGIKtfsebnDaLQtHOJsoL4r4P/GCEi/8fg3FSY8LahKe+WUfHhfB8+OPzYYIxXbDohPyV/7v/hs/hPnqxp0FMe/fTHX9ksu8g/Q73ICG3Y8n/sOxeJ7WrDF7LeXTtn5dMKbHI4C6M42ryoxIg03pIswWf/lNzevn4w2XT+p3PUqkosWuch3HGSy7LDeqNZOyrCjt713UfR8qUbYWG8q9y1zMiecSl811dbAJDcaJS44XSvkBfZQMvQ5bLfVCrKsdBqQoKaWE4y6Nxp0a03BKlK3FQcbVep6hQKbRv651kOyXEbiTcTEHLQYak/1RaEclXwdxTFQDs6VMuJSlMGxfUldjpNB1SXBLnU1Yk0JlQqTDi6yrsTmGZ25E67gd4nJxRyEzxXJSUEeKWCFGnXPLTCJ1TSS4QTWZUEn7avEs+4J0ZDvxuGWMZBJvoaY+qmToddjKuSCLul8HVlGSX1HoPu/U0keVDL0We3kKafDWO7ZJ/oppikT/upbYrV9GoByQygoRWvSNFdrk53YNK/3KAqEW3bzuxDLaePCVKjSTaFv+ouncS4NSI8VZ7iV50p6lwLlCWxtrzhr22PykUpXKAuF04iWDlIBUxumcszmGCcS2gkOWDalymiFGimkTpu5WunMJ0YKXV0CUBqEjxknFFYwvWCFMvr1UXulcWaTAjWzIJAbLnQoTjbj0SKHzEXDYpiOGCfRs1/YvUHUzDEddINShrxU8svzw56M5c04HVfVSOlF589235vz+V57AL7w8/Rr87Rtj3n//d4PkeS7sjr4JXHfO0ss3sJQDwz0f6PlzXC4e3K+sl7K0bW/oUodONB2C8HeE3il6l+8aemnup6f2qlvTYJ3t1icFC34KrvW1rWNDjDaNvfQUiwedimb6ItM8+EKDR22FkccLFjWiRzxSsWFixC5b2KhKISsxO/Hpbag/jWMllDbxeho7C1r7LDKaNjTjPP1QlZaDO/gqMJzGuZYb/MEHjPwPosSDOqQlKB+oEPU8yyy4Imwid8IsmCtQrdjQYaZqgSy2+mSY+qMKXXe5w+e5OVd+WUbgSuUCUYid9qVhfppOAWz/M/vlHIXl1kGyEpQPgJcX+Ga5TeJSdzNs53fSlTICX1YvkBfsdpbZ1EzfobK1FDv4hMMcT6MUjGmRmaB8CCyyoSOGbepuyPFCTictu5RVA2xUbKGrwLZMcyrueSdr2MfllrKm6hDIIxvs9I5NQzcapfrXmTYst5S1VotCoRL9cmSYb2Dp7OV21hX7ZQRmLWU9XB8LA9uXpnciWyxaFEVBCuUSlDWMFPeEzoXPFrj0RbJhnwx/CFPnwq/KCMxcyqoEJxycB2zawAoMxBbCuxeiNolmiwSvUzN/FS9lVQIdMtpffJeN5tpZI3ojEu8kJTott5Q1W6tANu6Hg9vloWfKPzAK5TFDKSEuZv+sXgvGxYSdtjkYK65mt2VMzfLuNEbPBbhvivaaR/4y8eJE+9IfYRVlBEsGOffVkiMvoz+LSstJf9ZSsOJJR2jJPy19QGw+Uc9LffyDTCOq7s1pyL6k+mCl2G/++fxfjOfZ0GP0hMORsOZsJcn+rujlfal9Pa8MYDzQ7rfo0ziuKM1Pv44uULyQoaQu5sXVlL1uNeRjTGHR+FdWqVQ48yf2aduJEosZe92QMh+uNcrWguV7aTRuzelE4sEnJIoKFVNFuUElc1pvlK0FG+qczrk1p5WG83ohj79lIZl73eqO0XRg95WzcKxVtmW7V2zwVPe6LQmFSqCaUzA2Lng0hkJ0E+jtCuUpcMVUWXvd1icrbpSwN9QyIiHLA0dNckeP6VHcz+RHihjaxW4DnV5qW/6tWoUb5QYV97NZc8m6EWHnUqPW13YJGfZWpOXQrRYXomZOVyetagS+e1lDoUWsuY9yGVX2rujmwOcN58UFhuxWtb33SYlR1KJmTscy3dWELxIveDx7UyjR/elDQkgUtfRlgTNNugsRn2DcBLZWFeXR29EV7ShqUdyPVsHY+GDbH1B7yFbTihWSyx9HlERRi5I5rTmlZgrmm9E++1oF22Tu7b2Q9Ae68YKxRuFwhYMvOrUMxLXf/TsWsi/uNTVz2qSRAkUPs+TLixqRDbGJ+218H2Y90G1+soIyoLfiYcAKI4tCVDoX/g9/blv6A90oW81yozFOGA7+8ANW/JY727dcEpyKESPjMT37DeujMWxU7FxcfVzW4L//W19f34/64uzW+ig7200a65NgtqMMd3TAI3VSzeySaUQPlRXPCcgERY8RNt6sPnnE+oSDCxLEbLOT2AP6WBcyAAAAAAAAAGCs4JSfan+rWtmbSTDyzJndbd6yLU3N12bSyCjw3U49OcoptqI36CZO3q54CVxZgb5fV4gX/qQcZ/q+04wK39Rz4/eIc3EzyZOrLWhP2Zx0lxDLUJj+TLCMhyykK5zPVVjpEnHq7qtY4lNQmLF1Z+3pKMx4ehIofOoKK/Cl41c4K4qR4zR8vsKocjn+3aXcSubopA2cVvY8RoXRGBsvSecrRMmj3dSjMbkfevwK9WyIkkcflcL6bLi+M8pKpGGMCvsvOf3aFEo03Jei5NEKFB4kT36CCvsbnDiEfIIKJUAhKJyIwlf9UTYj54n7DVGYnlUwUpj6+DOcEcXXofCgy4n370oKZ7pLo+yWUJj5odMkjj+mybfwwxSi/tTWHfUrzIhLa1SI0cikY3KRd602LH2yHqAQFD4ehdGYHiuMYv18hdL/nfwPrZfGNjpZj/hvdrRw4j/jv7o9u5T2Vzt2pd/NfQd+ytKsXlWi0ckAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABPif8DzIQgct667rkAAAAASUVORK5CYII='
-  },
-  {
-    id: 'chezgeeks',
-    nome: 'Chez Geeks',
-    link: n => `https://www.chezgeeks.com/products/search?q=${n}`,
-    logo: 'https://cc-client-assets.nyc3.cdn.digitaloceanspaces.com/photo/chezgeeks/file/30f1d741378c4f31909b23ade89a46ae/Chez%20Geeks%20LOGO%20scaled.png'
+    id: 4,
+    name: "Commander Casual Night",
+    format: "commander",
+    date: "05 Jul",
+    day: "05",
+    month: "JUL",
+    location: "Chez Geeks",
+    img: "assets/images/mtg_commander_event.png",
+    details: "Venez jouer en Commander (EDH) multijoueur. Tables libres !",
+    ranking: [
+      { pos: 1, name: "Arthur", pts: "9 pts" },
+      { pos: 2, name: "Nicolas", pts: "6 pts" },
+      { pos: 3, name: "Valérie", pts: "6 pts" }
+    ]
   }
 ];
 
-// ===========================
-// HAMBURGER MENU
-// ===========================
-function toggleMenu() {
-  const menu = document.getElementById('slideMenu');
-  const overlay = document.getElementById('menuOverlay');
-  const btn = document.getElementById('hamburgerBtn');
+function filterHomepageEvents(fmt) {
+  const grid = document.getElementById("eventsGrid");
+  const panelEvents = document.getElementById("panelEvents");
+  const welcomeSection = document.getElementById("welcomeSection");
+  if (!grid || !panelEvents || !welcomeSection) return;
 
-  menu.classList.toggle('open');
-  overlay.classList.toggle('open');
-  btn.classList.toggle('active');
+  // If no format selected/clicked yet, hide the events panel completely, show welcome Section
+  if (!fmt || fmt === "") {
+    welcomeSection.classList.remove("hidden");
+    panelEvents.classList.add("hidden");
 
-  // Prevent body scroll when menu is open
-  document.body.style.overflow = menu.classList.contains('open') ? 'hidden' : '';
-}
+    if (typeof I18N !== 'undefined') I18N.updateDOM();
+    return;
+  }
 
-// ===========================
-// FILTER CHIPS
-// ===========================
-function applyFilter(filter) {
-  const chips = document.querySelectorAll('.chip');
-  chips.forEach(chip => {
-    chip.classList.toggle('active', chip.dataset.filter === filter);
-  });
-  // Placeholder: future filter logic can be added here
-}
+  // Otherwise, show events panel and hide welcome section
+  welcomeSection.classList.add("hidden");
+  panelEvents.classList.remove("hidden");
 
-// ===========================
-// STORE INITIALIZATION
-// ===========================
-function initStores() {
-  const saved = JSON.parse(localStorage.getItem("stores") || "[]");
-  const container = document.getElementById("storeList");
+  // Filter events
+  const filtered = fmt === "all" ? mockEvents : mockEvents.filter(e => e.format === fmt);
 
-  sites.forEach(site => {
-    const checked = saved.length ? saved.includes(site.id) : true;
-
-    const div = document.createElement("div");
-    div.className = "store-item";
-    div.innerHTML = `
-      <input type="checkbox" value="${site.id}" ${checked ? "checked" : ""}>
-      <img src="${site.logo}">
-      ${site.nome}
+  if (filtered.length === 0) {
+    grid.innerHTML = `
+      <div class="event-card placeholder-card" style="width: 100%; border: 2px dashed var(--border-medium); padding: 40px 20px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; height: 100%;">
+        <div class="event-img-placeholder" style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; background: var(--bg-glass); border-radius: 50%; font-size: 2rem;"><span>📸</span></div>
+        <p class="event-label" data-i18n="noEvents">Aucun événement pour le moment</p>
+        <p class="event-sublabel" data-i18n="eventsSublabel">Les photos des événements apparaîtront ici</p>
+      </div>
     `;
-    container.appendChild(div);
-  });
-}
-
-function getSelected() {
-  const boxes = document.querySelectorAll("#storeList input");
-  const selected = [];
-  boxes.forEach(b => {
-    if (b.checked) selected.push(b.value);
-  });
-  localStorage.setItem("stores", JSON.stringify(selected));
-  return selected;
-}
-
-// ===========================
-// SET (COLLECTION) LOADING
-// ===========================
-async function loadSets() {
-  const res = await fetch("https://api.scryfall.com/sets");
-  const data = await res.json();
-
-  const container = document.getElementById("setList");
-
-  // Sort from newest to oldest
-  const sets = data.data.sort((a, b) =>
-    new Date(b.released_at) - new Date(a.released_at)
-  );
-
-  sets.forEach(set => {
-    if (!set.icon_svg_uri) return;
-
-    const div = document.createElement("div");
-    div.className = "store-item";
-
-    div.innerHTML = `
-      <img src="${set.icon_svg_uri}" width="24">
-      <span>${set.code.toUpperCase()} - ${set.name}</span>
+    if (typeof I18N !== 'undefined') I18N.updateDOM();
+  } else {
+    grid.innerHTML = `
+      <div class="events-list-grid">
+        ${filtered.map(event => `
+          <div class="event-card" style="border: 1px solid var(--border-subtle); border-radius: var(--radius-md); overflow: hidden; display: flex; flex-direction: column; background: var(--bg-card); transition: var(--transition);">
+            <img src="${event.img}" alt="${event.name}" class="event-img" style="width: 100%; height: 140px; object-fit: cover;" onerror="this.src='assets/images/IMG_6262.jpg'">
+            <div class="event-info" style="padding: 14px; display: flex; flex-direction: column; gap: 6px;">
+              <span class="event-date-badge" style="display: inline-block; align-self: flex-start; padding: 3px 6px; background: var(--accent); color: white; font-size: 0.7rem; font-weight: 700; border-radius: 4px;">${event.date}</span>
+              <h3 class="event-name-title" style="font-size: 0.95rem; font-weight: 700; margin: 4px 0 0 0; color: var(--text-primary);">${event.name}</h3>
+              <p class="event-location-text" style="font-size: 0.8rem; color: var(--text-secondary); margin: 0;">📍 ${event.location}</p>
+              <p class="event-desc-text" style="font-size: 0.78rem; color: var(--text-muted); margin: 0; line-height: 1.3;">${event.details}</p>
+            </div>
+          </div>
+        `).join('')}
+      </div>
     `;
-
-    div.style.cursor = "pointer";
-    div.onclick = () => carregarColecao(set.code);
-
-    container.appendChild(div);
-  });
+  }
 }
 
-function carregarColecao(code) {
-  window.location.href = `card.html?set=${encodeURIComponent(code)}`;
-}
+// On page load, read URL format parameter and apply filter
+document.addEventListener("DOMContentLoaded", () => {
+  const params = new URLSearchParams(window.location.search);
+  const format = params.get("format") || ""; // Default is empty to trigger select format prompt!
 
-// ===========================
-// FILE PROCESSING
-// ===========================
-async function processarArquivo() {
-  const arquivoInput = document.getElementById('arquivoInput');
-  if (!arquivoInput.files.length) return alert('Veuillez choisir un fichier TXT');
+  // Sync sidebar active class
+  if (format) {
+    document.querySelectorAll('.format-links li').forEach(li => {
+      li.classList.toggle('active', li.dataset.format === format);
+    });
+  } else {
+    document.querySelectorAll('.format-links li').forEach(li => {
+      li.classList.remove('active');
+    });
+  }
 
-  const texto = await arquivoInput.files[0].text();
-  const linhas = texto.split(/\r?\n/);
-  const cartas = [];
-
-  linhas.forEach(linha => {
-    const l = linha.trim();
-    if (!l) return;
-
-    const match = l.match(/^(\d+)\s+(.+)$/);
-    if (match) {
-      const qtd = parseInt(match[1], 10);
-      const nome = match[2];
-      for (let i = 0; i < qtd; i++) cartas.push(nome);
-    } else {
-      cartas.push(l);
-    }
-  });
-
-  // Store card list and redirect
-  sessionStorage.setItem("fileCards", JSON.stringify(cartas));
-  window.location.href = "card.html?source=file";
-}
-
-// ===========================
-// CARD SEARCH — REDIRECTS
-// ===========================
-function buscarCartaManuellement() {
-  const nome = document.getElementById("pesquisaInput").value.trim();
-  if (!nome) return alert("Entrez un nom");
-  window.location.href = `card.html?name=${encodeURIComponent(nome)}`;
-}
-
-function limparResultado() {
-  // No-op on index page (results are on card.html)
-}
-
-// ===========================
-// INITIALIZATION
-// ===========================
-initStores();
-loadSets();
+  filterHomepageEvents(format);
+});
