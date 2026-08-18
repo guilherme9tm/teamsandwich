@@ -215,7 +215,9 @@ async function loadPopularSets() {
   const grid = document.getElementById("popularSetsGrid");
   if (!grid) return;
   try {
-    const res = await fetch("https://api.scryfall.com/sets");
+    const res = await fetch("https://api.scryfall.com/sets", {
+      headers: { 'Accept': 'application/json;q=0.9,*/*;q=0.8' }
+    });
     if (!res.ok) return;
     const data = await res.json();
     const relevantTypes = ['expansion', 'core', 'masters', 'draft_innovation'];

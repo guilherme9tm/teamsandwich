@@ -300,11 +300,15 @@ function getSelected() {
 
 let allSetsData = []; 
 
+const SCRYFALL_COMMON_HEADERS = {
+  'Accept': 'application/json;q=0.9,*/*;q=0.8'
+};
+
 async function loadSets() {
   const container = document.getElementById("setList");
   if (!container) return;
   try {
-    const res = await fetch("https://api.scryfall.com/sets");
+    const res = await fetch("https://api.scryfall.com/sets", { headers: SCRYFALL_COMMON_HEADERS });
     const data = await res.json();
     allSetsData = data.data
       .filter(set => set.icon_svg_uri)
@@ -474,7 +478,7 @@ function initHeaderSearch() {
 async function fetchAutocomplete(query) {
   currentAutocompleteQuery = query;
   try {
-    const res = await fetch(`https://api.scryfall.com/cards/autocomplete?q=${encodeURIComponent(query)}`);
+    const res = await fetch(`https://api.scryfall.com/cards/autocomplete?q=${encodeURIComponent(query)}`, { headers: SCRYFALL_COMMON_HEADERS });
     if (currentAutocompleteQuery !== query) return;
     const data = await res.json();
     if (currentAutocompleteQuery !== query) return;
@@ -489,7 +493,8 @@ async function fetchAutocomplete(query) {
     const collectionRes = await fetch('https://api.scryfall.com/cards/collection', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'Accept': 'application/json;q=0.9,*/*;q=0.8'
       },
       body: JSON.stringify({
         identifiers: sliceNames.map(name => ({ name }))

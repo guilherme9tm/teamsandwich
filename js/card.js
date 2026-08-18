@@ -69,12 +69,17 @@ function renderCardElement(cardData) {
   return card;
 }
 
+const SCRYFALL_HEADERS = {
+  'Accept': 'application/json;q=0.9,*/*;q=0.8'
+};
+
 async function fetchCardData(nome) {
   const n = encodeURIComponent(nome);
 
-  let res = await fetch(`https://api.scryfall.com/cards/named?exact=${n}`);
+  let res = await fetch(`https://api.scryfall.com/cards/named?exact=${n}`, { headers: SCRYFALL_HEADERS });
   if (!res.ok) {
-    res = await fetch(`https://api.scryfall.com/cards/named?fuzzy=${n}`);
+    await new Promise(r => setTimeout(r, 100));
+    res = await fetch(`https://api.scryfall.com/cards/named?fuzzy=${n}`, { headers: SCRYFALL_HEADERS });
   }
   if (!res.ok) {
     return { _notFound: true, name: nome };
@@ -471,7 +476,7 @@ async function init() {
       let loaded = 0;
 
       while (url) {
-        const res = await fetch(url);
+        const res = await fetch(url, { headers: SCRYFALL_HEADERS });
         if (!res.ok) break;
         const data = await res.json();
 
@@ -480,7 +485,12 @@ async function init() {
           loaded++;
         }
         subtitleEl.textContent = `${loaded} carte(s) trouvée(s)...`;
-        url = data.has_more ? data.next_page : null;
+        if (data.has_more && data.next_page) {
+          await new Promise(r => setTimeout(r, 100));
+          url = data.next_page;
+        } else {
+          url = null;
+        }
       }
     } catch (e) {
       console.warn('Search error:', e);
@@ -528,17 +538,27 @@ async function init() {
     let url = `https://api.scryfall.com/cards/search?q=set:${code}`;
     let loaded = 0;
 
-    while (url) {
-      const res = await fetch(url);
-      const data = await res.json();
+    try {
+      while (url) {
+        const res = await fetch(url, { headers: SCRYFALL_HEADERS });
+        if (!res.ok) break;
+        const data = await res.json();
 
-      for (let card of data.data) {
-        allCards.push(card);
-        loaded++;
-        subtitleEl.textContent = `${loaded} carte(s) chargée(s)...`;
+        for (let card of data.data) {
+          allCards.push(card);
+          loaded++;
+          subtitleEl.textContent = `${loaded} carte(s) chargée(s)...`;
+        }
+
+        if (data.has_more && data.next_page) {
+          await new Promise(r => setTimeout(r, 100));
+          url = data.next_page;
+        } else {
+          url = null;
+        }
       }
-
-      url = data.has_more ? data.next_page : null;
+    } catch (e) {
+      console.warn('Set loading error:', e);
     }
 
     removeLoader();
