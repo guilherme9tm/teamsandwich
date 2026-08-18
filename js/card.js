@@ -16,6 +16,7 @@ function toggleCard(btn) {
 
 function renderCardElement(cardData) {
   const n = encodeURIComponent(cardData.name);
+  const cardDetailUrl = `card-detail.html?id=${encodeURIComponent(cardData.id || '')}&name=${n}`;
 
   let img = cardData.image_uris?.normal || cardData.card_faces?.[0]?.image_uris?.normal || cardData.image_uris?.small || cardData.card_faces?.[0]?.image_uris?.small;
   if (img) img = img.split('?')[0];
@@ -28,14 +29,22 @@ function renderCardElement(cardData) {
   const card = document.createElement("div");
   card.className = "card";
 
-  if (img) card.innerHTML += `<img src="${img}">`;
+  if (img) {
+    card.innerHTML += `<a href="${cardDetailUrl}" class="card-img-link" title="Voir les détails de ${cardData.name}"><img src="${img}" alt="${cardData.name}"></a>`;
+  }
 
   card.innerHTML += `
-    <strong>${cardData.name}</strong><br>
+    <a href="${cardDetailUrl}" class="card-title-link"><strong>${cardData.name}</strong></a><br>
     <em>${cad}</em>
-    <button class="toggle-btn" onclick="toggleCard(this)">
-      Afficher plus
-    </button>
+    <div class="card-actions-row">
+      <a href="${cardDetailUrl}" class="btn-card-detail">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+        Détails & Magasins
+      </a>
+      <button class="toggle-btn" onclick="toggleCard(this)" title="Aperçu rapide des magasins">
+        ⚡
+      </button>
+    </div>
   `;
 
   const extra = document.createElement("div");

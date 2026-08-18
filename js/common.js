@@ -512,6 +512,7 @@ async function fetchAutocomplete(query) {
         image = card.card_faces[0].image_uris.small;
       }
       return {
+        id: card.id,
         name: card.name,
         image: image
       };
@@ -535,7 +536,7 @@ function showAutocomplete(cards) {
     const imgHtml = card.image
       ? `<img src="${card.image}" class="ac-thumbnail" alt="${card.name}" loading="lazy">`
       : `<div class="ac-thumbnail-placeholder"></div>`;
-    return `<div class="ac-item" onclick="selectAutocomplete('${escapedName}')">
+    return `<div class="ac-item" onclick="selectAutocomplete('${escapedName}', '${card.id || ''}')">
       ${imgHtml}
       <span class="ac-name">${card.name}</span>
     </div>`;
@@ -548,11 +549,13 @@ function hideAutocomplete() {
   if (dd) dd.classList.remove('visible');
 }
 
-function selectAutocomplete(name) {
-  const input = document.getElementById('headerSearchInput');
-  if (input) input.value = name;
+function selectAutocomplete(name, cardId) {
   hideAutocomplete();
-  submitHeaderSearch();
+  if (cardId) {
+    window.location.href = `card-detail.html?id=${encodeURIComponent(cardId)}&name=${encodeURIComponent(name)}`;
+  } else {
+    window.location.href = `card-detail.html?name=${encodeURIComponent(name)}`;
+  }
 }
 
 function submitHeaderSearch() {
