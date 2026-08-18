@@ -211,6 +211,41 @@ function triggerImportFile() {
   }
 }
 
+async function loadPopularSets() {
+  const grid = document.getElementById("popularSetsGrid");
+  if (!grid) return;
+  try {
+    const res = await fetch("https://api.scryfall.com/sets");
+    if (!res.ok) return;
+    const data = await res.json();
+    const relevantTypes = ['expansion', 'core', 'masters', 'draft_innovation'];
+    
+    const latestSets = data.data
+      .filter(s => relevantTypes.includes(s.set_type) && !s.digital && s.card_count > 20)
+      .sort((a, b) => new Date(b.released_at) - new Date(a.released_at))
+      .slice(0, 8);
+
+    if (latestSets.length > 0) {
+      grid.innerHTML = latestSets.map(set => {
+        const year = set.released_at ? new Date(set.released_at).getFullYear() : '';
+        const typeLabel = set.set_type === 'expansion' ? 'Standard, Pioneer, Modern' : (set.set_type === 'masters' ? 'Modern, Commander, Legacy' : 'Universes Beyond / Spécial');
+        return `
+          <a href="card.html?set=${encodeURIComponent(set.code)}" class="popular-set-card">
+            <span class="popular-set-code">${set.code.toUpperCase()}</span>
+            <div class="popular-set-info">
+              <h4>${set.name}</h4>
+              <p>${year} • ${typeLabel}</p>
+            </div>
+            <span class="popular-set-arrow">→</span>
+          </a>
+        `;
+      }).join('');
+    }
+  } catch (e) {
+    console.warn("Could not load latest sets from Scryfall:", e);
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const params = new URLSearchParams(window.location.search);
   const format = params.get("format") || "all";
@@ -223,4 +258,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
   renderHomepageEvents(format);
   renderHomeStores();
+  loadPopularSets();
 });
