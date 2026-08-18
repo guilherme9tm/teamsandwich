@@ -67,14 +67,124 @@
 
     <!-- SEARCH INFO -->
     <section class="search-info" id="searchInfo">
-      <h1 class="search-title" id="searchTitle">Recherche...</h1>
-      <p class="search-subtitle" id="searchSubtitle"></p>
+      <div class="search-info-header">
+        <a href="index.html" class="back-btn" aria-label="Retour à l'accueil" title="Accueil">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </a>
+        <div class="search-title-group">
+          <h1 class="search-title" id="searchTitle">Recherche...</h1>
+          <p class="search-subtitle" id="searchSubtitle"></p>
+        </div>
+      </div>
     </section>
+
+    <!-- FILTERS BAR -->
+    <section class="card-filters-bar" id="cardFiltersBar">
+      <!-- Desktop filters (hidden on mobile) -->
+      <div class="filters-desktop">
+        <!-- Price sort -->
+        <div class="filter-dropdown" id="filterPrice">
+          <button class="filter-dropdown-btn" onclick="toggleFilterDropdown('filterPrice')">
+            <span data-i18n="sortByPrice">Trier par prix</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="filter-dropdown-menu">
+            <button class="filter-option" data-value="price-asc" onclick="setFilterSort('price-asc')">
+              <span data-i18n="priceLowToHigh">Moins cher → Plus cher</span>
+            </button>
+            <button class="filter-option" data-value="price-desc" onclick="setFilterSort('price-desc')">
+              <span data-i18n="priceHighToLow">Plus cher → Moins cher</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Rarity filter -->
+        <div class="filter-dropdown" id="filterRarity">
+          <button class="filter-dropdown-btn" onclick="toggleFilterDropdown('filterRarity')">
+            <span data-i18n="filterByRarity">Rarité</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="filter-dropdown-menu">
+            <label class="filter-checkbox"><input type="checkbox" value="common" onchange="updateFilters()"><span data-i18n="rarityCommon">Common</span></label>
+            <label class="filter-checkbox"><input type="checkbox" value="uncommon" onchange="updateFilters()"><span data-i18n="rarityUncommon">Uncommon</span></label>
+            <label class="filter-checkbox"><input type="checkbox" value="rare" onchange="updateFilters()"><span data-i18n="rarityRare">Rare</span></label>
+            <label class="filter-checkbox"><input type="checkbox" value="mythic" onchange="updateFilters()"><span data-i18n="rarityMythic">Mythic Rare</span></label>
+          </div>
+        </div>
+
+        <!-- Color filter -->
+        <div class="filter-dropdown" id="filterColor">
+          <button class="filter-dropdown-btn" onclick="toggleFilterDropdown('filterColor')">
+            <span data-i18n="filterByColor">Couleur</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="filter-dropdown-menu">
+            <label class="filter-checkbox"><input type="checkbox" value="W" onchange="updateFilters()"><span data-i18n="colorWhite">Blanc</span></label>
+            <label class="filter-checkbox"><input type="checkbox" value="U" onchange="updateFilters()"><span data-i18n="colorBlue">Bleu</span></label>
+            <label class="filter-checkbox"><input type="checkbox" value="B" onchange="updateFilters()"><span data-i18n="colorBlack">Noir</span></label>
+            <label class="filter-checkbox"><input type="checkbox" value="R" onchange="updateFilters()"><span data-i18n="colorRed">Rouge</span></label>
+            <label class="filter-checkbox"><input type="checkbox" value="G" onchange="updateFilters()"><span data-i18n="colorGreen">Vert</span></label>
+            <label class="filter-checkbox"><input type="checkbox" value="C" onchange="updateFilters()"><span data-i18n="colorColorless">Incolore</span></label>
+            <label class="filter-checkbox"><input type="checkbox" value="M" onchange="updateFilters()"><span data-i18n="colorMulticolor">Multicolore</span></label>
+          </div>
+        </div>
+
+        <!-- Type filter -->
+        <div class="filter-dropdown" id="filterType">
+          <button class="filter-dropdown-btn" onclick="toggleFilterDropdown('filterType')">
+            <span data-i18n="filterByType">Type</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="filter-dropdown-menu">
+            <label class="filter-checkbox"><input type="checkbox" value="Creature" onchange="updateFilters()"><span>Creature</span></label>
+            <label class="filter-checkbox"><input type="checkbox" value="Instant" onchange="updateFilters()"><span>Instant</span></label>
+            <label class="filter-checkbox"><input type="checkbox" value="Sorcery" onchange="updateFilters()"><span>Sorcery</span></label>
+            <label class="filter-checkbox"><input type="checkbox" value="Artifact" onchange="updateFilters()"><span>Artifact</span></label>
+            <label class="filter-checkbox"><input type="checkbox" value="Enchantment" onchange="updateFilters()"><span>Enchantment</span></label>
+            <label class="filter-checkbox"><input type="checkbox" value="Planeswalker" onchange="updateFilters()"><span>Planeswalker</span></label>
+            <label class="filter-checkbox"><input type="checkbox" value="Land" onchange="updateFilters()"><span>Land</span></label>
+            <label class="filter-checkbox"><input type="checkbox" value="Battle" onchange="updateFilters()"><span>Battle</span></label>
+          </div>
+        </div>
+
+        <!-- Clear filters -->
+        <button class="filter-clear-btn" id="filterClearBtn" onclick="clearAllFilters()" style="display:none;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          <span data-i18n="clearFilters">Effacer les filtres</span>
+        </button>
+      </div>
+
+      <!-- Mobile filter button (hidden on desktop) -->
+      <button class="filters-mobile-btn" id="filtersMobileBtn" onclick="openFilterDrawer()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+        <span data-i18n="filters">Filtres</span>
+        <span class="filter-badge" id="filterBadge" style="display:none;">0</span>
+      </button>
+
+      <!-- Layout toggles -->
+      <div class="layout-toggles">
+        <button class="layout-toggle-btn active" data-layout="auto" onclick="setGridLayout('auto')" title="Auto">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="0" y="0" width="4.5" height="4.5" rx="1"/><rect x="5.75" y="0" width="4.5" height="4.5" rx="1"/><rect x="11.5" y="0" width="4.5" height="4.5" rx="1"/><rect x="0" y="5.75" width="4.5" height="4.5" rx="1"/><rect x="5.75" y="5.75" width="4.5" height="4.5" rx="1"/><rect x="11.5" y="5.75" width="4.5" height="4.5" rx="1"/><rect x="0" y="11.5" width="4.5" height="4.5" rx="1"/><rect x="5.75" y="11.5" width="4.5" height="4.5" rx="1"/><rect x="11.5" y="11.5" width="4.5" height="4.5" rx="1"/></svg>
+        </button>
+        <button class="layout-toggle-btn" data-layout="grid-2" onclick="setGridLayout('grid-2')" title="2 colonnes">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="0" y="0" width="7" height="7" rx="1"/><rect x="9" y="0" width="7" height="7" rx="1"/><rect x="0" y="9" width="7" height="7" rx="1"/><rect x="9" y="9" width="7" height="7" rx="1"/></svg>
+        </button>
+        <button class="layout-toggle-btn" data-layout="grid-list" onclick="setGridLayout('grid-list')" title="Liste">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="0" y="0" width="16" height="3" rx="1"/><rect x="0" y="4.33" width="16" height="3" rx="1"/><rect x="0" y="8.66" width="16" height="3" rx="1"/><rect x="0" y="13" width="16" height="3" rx="1"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- Active filters indicator -->
+    <div class="active-filters-strip" id="activeFiltersStrip" style="display:none;">
+      <span class="active-filters-text" id="activeFiltersText"></span>
+      <button class="active-filters-clear" onclick="clearAllFilters()">✕</button>
+    </div>
 
     <!-- PAGINATION BAR -->
     <section class="pagination-bar" id="paginationBar">
       <div class="per-page-selector">
-        <label for="perPageSelect">Cartes par page :</label>
+        <label for="perPageSelect" data-i18n="cardsPerPage">Cartes par page :</label>
         <select id="perPageSelect" onchange="changePerPage(this.value)">
           <option value="15" selected>15</option>
           <option value="30">30</option>
@@ -96,6 +206,70 @@
     <section class="pagination-bar pagination-bottom" id="paginationBarBottom">
       <div class="page-nav" id="pageNavBottom"></div>
     </section>
+  </div>
+</div>
+
+<!-- FILTER DRAWER (mobile) -->
+<div class="filter-drawer-overlay" id="filterDrawerOverlay" onclick="closeFilterDrawer()"></div>
+<div class="filter-drawer" id="filterDrawer">
+  <div class="filter-drawer-header">
+    <h3 data-i18n="filters">Filtres</h3>
+    <button class="filter-drawer-close" onclick="closeFilterDrawer()">&times;</button>
+  </div>
+  <div class="filter-drawer-body">
+    <!-- Price sort -->
+    <div class="filter-drawer-section">
+      <h4 data-i18n="sortByPrice">Trier par prix</h4>
+      <div class="filter-drawer-options">
+        <button class="filter-drawer-chip" data-value="price-asc" onclick="setFilterSort('price-asc')">
+          <span data-i18n="priceLowToHigh">Moins cher → Plus cher</span>
+        </button>
+        <button class="filter-drawer-chip" data-value="price-desc" onclick="setFilterSort('price-desc')">
+          <span data-i18n="priceHighToLow">Plus cher → Moins cher</span>
+        </button>
+      </div>
+    </div>
+    <!-- Rarity -->
+    <div class="filter-drawer-section">
+      <h4 data-i18n="filterByRarity">Rarité</h4>
+      <div class="filter-drawer-options">
+        <label class="filter-checkbox"><input type="checkbox" value="common" onchange="updateFilters()"><span data-i18n="rarityCommon">Common</span></label>
+        <label class="filter-checkbox"><input type="checkbox" value="uncommon" onchange="updateFilters()"><span data-i18n="rarityUncommon">Uncommon</span></label>
+        <label class="filter-checkbox"><input type="checkbox" value="rare" onchange="updateFilters()"><span data-i18n="rarityRare">Rare</span></label>
+        <label class="filter-checkbox"><input type="checkbox" value="mythic" onchange="updateFilters()"><span data-i18n="rarityMythic">Mythic Rare</span></label>
+      </div>
+    </div>
+    <!-- Color -->
+    <div class="filter-drawer-section">
+      <h4 data-i18n="filterByColor">Couleur</h4>
+      <div class="filter-drawer-options">
+        <label class="filter-checkbox"><input type="checkbox" value="W" onchange="updateFilters()"><span data-i18n="colorWhite">Blanc</span></label>
+        <label class="filter-checkbox"><input type="checkbox" value="U" onchange="updateFilters()"><span data-i18n="colorBlue">Bleu</span></label>
+        <label class="filter-checkbox"><input type="checkbox" value="B" onchange="updateFilters()"><span data-i18n="colorBlack">Noir</span></label>
+        <label class="filter-checkbox"><input type="checkbox" value="R" onchange="updateFilters()"><span data-i18n="colorRed">Rouge</span></label>
+        <label class="filter-checkbox"><input type="checkbox" value="G" onchange="updateFilters()"><span data-i18n="colorGreen">Vert</span></label>
+        <label class="filter-checkbox"><input type="checkbox" value="C" onchange="updateFilters()"><span data-i18n="colorColorless">Incolore</span></label>
+        <label class="filter-checkbox"><input type="checkbox" value="M" onchange="updateFilters()"><span data-i18n="colorMulticolor">Multicolore</span></label>
+      </div>
+    </div>
+    <!-- Type -->
+    <div class="filter-drawer-section">
+      <h4 data-i18n="filterByType">Type</h4>
+      <div class="filter-drawer-options">
+        <label class="filter-checkbox"><input type="checkbox" value="Creature" onchange="updateFilters()"><span>Creature</span></label>
+        <label class="filter-checkbox"><input type="checkbox" value="Instant" onchange="updateFilters()"><span>Instant</span></label>
+        <label class="filter-checkbox"><input type="checkbox" value="Sorcery" onchange="updateFilters()"><span>Sorcery</span></label>
+        <label class="filter-checkbox"><input type="checkbox" value="Artifact" onchange="updateFilters()"><span>Artifact</span></label>
+        <label class="filter-checkbox"><input type="checkbox" value="Enchantment" onchange="updateFilters()"><span>Enchantment</span></label>
+        <label class="filter-checkbox"><input type="checkbox" value="Planeswalker" onchange="updateFilters()"><span>Planeswalker</span></label>
+        <label class="filter-checkbox"><input type="checkbox" value="Land" onchange="updateFilters()"><span>Land</span></label>
+        <label class="filter-checkbox"><input type="checkbox" value="Battle" onchange="updateFilters()"><span>Battle</span></label>
+      </div>
+    </div>
+  </div>
+  <div class="filter-drawer-footer">
+    <button class="btn-secondary" onclick="clearAllFilters()" data-i18n="clearFilters">Effacer les filtres</button>
+    <button class="btn-primary" onclick="closeFilterDrawer()">OK</button>
   </div>
 </div>
 

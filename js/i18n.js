@@ -39,17 +39,30 @@ const I18N = {
       dontHaveAccount: "Pas encore de compte ? S'inscrire",
       alreadyHaveAccount: 'Vous avez déjà un compte ? Se connecter',
 
-      // Home panels
-      eventsPhotos: '🎉 Events & Photos',
+      // Home panels & Hero
+      heroTagline: 'Recherche de cartes MTG, Événements & Communauté',
+      heroSubtitle: 'Comparez les prix entre les meilleures boutiques de Magic, explorez les collections et suivez les tournois locaux.',
+      searchCardCta: 'Rechercher une carte',
+      importDeckCta: 'Importer un deck (.txt)',
+      browseSetsCta: 'Explorer les collections',
+      popularFormats: 'Formats Populaires',
+      allFormatsDesc: 'Choisissez un format pour voir les événements et détails',
+      featuredEvents: 'Prochains Événements',
+      communityRanking: 'Classement des Joueurs',
+      partnerStores: 'Boutiques Partenaires',
+      popularSetsTitle: 'Dernières Collections',
+      eventsPhotos: '🎉 Événements & Photos',
       noEvents: 'Aucun événement pour le moment',
       selectFormatPrompt: 'Sélectionnez un format',
-      selectFormatDetail: 'Choisissez un format dans le menu de gauche pour afficher ses événements.',
+      selectFormatDetail: 'Choisissez un format ci-dessous ou dans le menu de gauche pour afficher ses événements.',
       eventsSublabel: 'Les photos des événements apparaîtront ici',
       calendar: '📅 Calendrier',
       nextEvent: '⏩ Prochain Événement',
       toConfirm: 'À déterminer',
       formatConfirm: 'Format & lieu à confirmer',
       ranking: '🏆 Ranking',
+      viewAllEvents: 'Voir tous les événements',
+      backToHome: 'Retour à l\'accueil',
 
       // Card page
       searchTitle: 'Résultats',
@@ -61,6 +74,35 @@ const I18N = {
       logout: 'Déconnexion',
       filePrompt: 'Veuillez choisir un fichier TXT',
       enterName: 'Entrez un nom',
+      clear: 'Effacer',
+
+      // Filters
+      filters: 'Filtres',
+      clearFilters: 'Effacer les filtres',
+      sortByPrice: 'Trier par prix',
+      priceHighToLow: 'Plus cher → Moins cher',
+      priceLowToHigh: 'Moins cher → Plus cher',
+      filterByRarity: 'Rarité',
+      filterByColor: 'Couleur',
+      filterByType: 'Type',
+      rarityCommon: 'Common',
+      rarityUncommon: 'Uncommon',
+      rarityRare: 'Rare',
+      rarityMythic: 'Mythic Rare',
+      colorWhite: 'Blanc',
+      colorBlue: 'Bleu',
+      colorBlack: 'Noir',
+      colorRed: 'Rouge',
+      colorGreen: 'Vert',
+      colorColorless: 'Incolore',
+      colorMulticolor: 'Multicolore',
+      noFilterResults: 'Aucune carte ne correspond aux filtres sélectionnés.',
+      activeFilters: 'filtres actifs',
+
+      // Layout
+      layoutGrid: 'Grille',
+      layoutList: 'Liste',
+      cardsPerPage: 'Cartes par page :',
     },
     en: {
       // Sidebar
@@ -96,17 +138,30 @@ const I18N = {
       dontHaveAccount: "Don't have an account? Sign up",
       alreadyHaveAccount: 'Already have an account? Log in',
 
-      // Home panels
+      // Home panels & Hero
+      heroTagline: 'MTG Card Search, Events & Community Hub',
+      heroSubtitle: 'Compare card prices across top Canadian & international stores, explore sets and follow local tournaments.',
+      searchCardCta: 'Search Cards',
+      importDeckCta: 'Import Deck (.txt)',
+      browseSetsCta: 'Browse Sets',
+      popularFormats: 'Popular Formats',
+      allFormatsDesc: 'Select a format to view upcoming tournaments and details',
+      featuredEvents: 'Upcoming Events',
+      communityRanking: 'Player Rankings',
+      partnerStores: 'Partner Stores',
+      popularSetsTitle: 'Latest Collections',
       eventsPhotos: '🎉 Events & Photos',
       noEvents: 'No events at this time',
       selectFormatPrompt: 'Select a format',
-      selectFormatDetail: 'Choose a format in the left menu to display its events.',
+      selectFormatDetail: 'Choose a format below or in the left menu to display its events.',
       eventsSublabel: 'Event photos will appear here',
       calendar: '📅 Calendar',
       nextEvent: '⏩ Next Event',
       toConfirm: 'To be determined',
       formatConfirm: 'Format & location TBD',
       ranking: '🏆 Ranking',
+      viewAllEvents: 'View all events',
+      backToHome: 'Back to Home',
 
       // Card page
       searchTitle: 'Results',
@@ -118,6 +173,35 @@ const I18N = {
       logout: 'Log out',
       filePrompt: 'Please select a TXT file',
       enterName: 'Enter a name',
+      clear: 'Clear',
+
+      // Filters
+      filters: 'Filters',
+      clearFilters: 'Clear filters',
+      sortByPrice: 'Sort by price',
+      priceHighToLow: 'Highest → Lowest',
+      priceLowToHigh: 'Lowest → Highest',
+      filterByRarity: 'Rarity',
+      filterByColor: 'Color',
+      filterByType: 'Type',
+      rarityCommon: 'Common',
+      rarityUncommon: 'Uncommon',
+      rarityRare: 'Rare',
+      rarityMythic: 'Mythic Rare',
+      colorWhite: 'White',
+      colorBlue: 'Blue',
+      colorBlack: 'Black',
+      colorRed: 'Red',
+      colorGreen: 'Green',
+      colorColorless: 'Colorless',
+      colorMulticolor: 'Multicolor',
+      noFilterResults: 'No cards match the selected filters.',
+      activeFilters: 'active filters',
+
+      // Layout
+      layoutGrid: 'Grid',
+      layoutList: 'List',
+      cardsPerPage: 'Cards per page:',
     }
   },
 
@@ -149,5 +233,9 @@ const I18N = {
     // Sync dropdown
     const selector = document.querySelector('.lang-selector-select');
     if (selector) selector.value = this.current;
+
+    // Sync sidebar lang selector too
+    const sidebarSelector = document.querySelector('.sidebar-lang-select');
+    if (sidebarSelector) sidebarSelector.value = this.current;
   }
 };

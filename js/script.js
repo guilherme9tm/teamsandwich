@@ -11,9 +11,11 @@ const mockEvents = [
     date: "26 Jun",
     day: "26",
     month: "JUN",
+    time: "18:30",
     location: "Boutique Sandwich",
     img: "assets/images/mtg_standard_event.png",
-    details: "Tournoi amical Standard. Venez tester vos nouveaux decks !",
+    details: "Tournoi amical Standard. Venez tester vos nouveaux decks et gagner des boosters promos !",
+    entry: "10$",
     ranking: [
       { pos: 1, name: "Guillaume", pts: "15 pts" },
       { pos: 2, name: "Alexandre", pts: "12 pts" },
@@ -27,9 +29,11 @@ const mockEvents = [
     date: "28 Jun",
     day: "28",
     month: "JUN",
+    time: "14:00",
     location: "L'Abyss MTG",
     img: "assets/images/mtg_pioneer_event.png",
-    details: "Entrée: 10$. Boosters de participation et dotation aux vainqueurs.",
+    details: "Entrée: 10$. Boosters de participation et dotation en cartes promos aux vainqueurs.",
+    entry: "10$",
     ranking: [
       { pos: 1, name: "Maxime", pts: "18 pts" },
       { pos: 2, name: "Lucas", pts: "15 pts" },
@@ -43,9 +47,11 @@ const mockEvents = [
     date: "02 Jul",
     day: "02",
     month: "JUL",
+    time: "11:00",
     location: "Face to Face Games",
     img: "assets/images/mtg_modern_event.png",
-    details: "Format Modern compétitif. Decklist requise.",
+    details: "Format Modern compétitif. Decklist requise. Qualificatif pour le tournoi régional.",
+    entry: "25$",
     ranking: [
       { pos: 1, name: "Julien", pts: "24 pts" },
       { pos: 2, name: "Thomas", pts: "21 pts" },
@@ -59,9 +65,11 @@ const mockEvents = [
     date: "05 Jul",
     day: "05",
     month: "JUL",
+    time: "17:00",
     location: "Chez Geeks",
     img: "assets/images/mtg_commander_event.png",
-    details: "Venez jouer en Commander (EDH) multijoueur. Tables libres !",
+    details: "Venez jouer en Commander (EDH) multijoueur. Tables libres et ambiance conviviale !",
+    entry: "Gratuit",
     ranking: [
       { pos: 1, name: "Arthur", pts: "9 pts" },
       { pos: 2, name: "Nicolas", pts: "6 pts" },
@@ -70,71 +78,173 @@ const mockEvents = [
   }
 ];
 
-function filterHomepageEvents(fmt) {
+let currentHomeFormat = "all";
+
+// ===========================
+// FORMAT FILTERING
+// ===========================
+function selectFormatFromHome(fmt) {
+  currentHomeFormat = fmt;
+
+  // Update pills active state
+  document.querySelectorAll(".format-pill").forEach(pill => {
+    pill.classList.toggle("active", pill.dataset.format === fmt);
+  });
+
+  // Update sidebar active link
+  document.querySelectorAll(".format-links li").forEach(li => {
+    li.classList.toggle("active", li.dataset.format === fmt);
+  });
+
+  // Update URL without full refresh
+  const url = new URL(window.location);
+  if (fmt === "all") {
+    url.searchParams.delete("format");
+  } else {
+    url.searchParams.set("format", fmt);
+  }
+  window.history.replaceState({}, "", url);
+
+  renderHomepageEvents(fmt);
+}
+
+// Override common selectFormat for index.html
+function selectFormat(fmt, e) {
+  if (e) e.stopPropagation();
+  selectFormatFromHome(fmt);
+  if (window.innerWidth <= 768) {
+    const sidebar = document.getElementById("sidebar");
+    const overlay = document.getElementById("menuOverlay");
+    if (sidebar) sidebar.classList.remove("mobile-open");
+    if (overlay) overlay.classList.remove("open");
+  }
+}
+
+// ===========================
+// RENDER HOMEPAGE EVENTS
+// ===========================
+function renderHomepageEvents(fmt) {
   const grid = document.getElementById("eventsGrid");
-  const panelEvents = document.getElementById("panelEvents");
-  const welcomeSection = document.getElementById("welcomeSection");
-  if (!grid || !panelEvents || !welcomeSection) return;
+  const badge = document.getElementById("eventsCountBadge");
+  const title = document.getElementById("eventsPanelTitle");
+  if (!grid) return;
 
-  // If no format selected/clicked yet, hide the events panel completely, show welcome Section
-  if (!fmt || fmt === "") {
-    welcomeSection.classList.remove("hidden");
-    panelEvents.classList.add("hidden");
+  const filtered = (!fmt || fmt === "all") 
+    ? mockEvents 
+    : mockEvents.filter(e => e.format === fmt);
 
-    if (typeof I18N !== 'undefined') I18N.updateDOM();
-    return;
+  if (badge) {
+    badge.textContent = `${filtered.length} événement${filtered.length > 1 ? 's' : ''}`;
   }
 
-  // Otherwise, show events panel and hide welcome section
-  welcomeSection.classList.add("hidden");
-  panelEvents.classList.remove("hidden");
-
-  // Filter events
-  const filtered = fmt === "all" ? mockEvents : mockEvents.filter(e => e.format === fmt);
+  if (title) {
+    if (fmt && fmt !== "all") {
+      title.textContent = `Événements — ${fmt.charAt(0).toUpperCase() + fmt.slice(1)}`;
+    } else {
+      title.textContent = I18N.t("featuredEvents");
+    }
+  }
 
   if (filtered.length === 0) {
     grid.innerHTML = `
-      <div class="event-card placeholder-card" style="width: 100%; border: 2px dashed var(--border-medium); padding: 40px 20px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; height: 100%;">
-        <div class="event-img-placeholder" style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; background: var(--bg-glass); border-radius: 50%; font-size: 2rem;"><span>📸</span></div>
-        <p class="event-label" data-i18n="noEvents">Aucun événement pour le moment</p>
-        <p class="event-sublabel" data-i18n="eventsSublabel">Les photos des événements apparaîtront ici</p>
+      <div class="event-placeholder-box">
+        <div class="event-img-placeholder"><span>📸</span></div>
+        <p class="event-label" data-i18n="noEvents">${I18N.t('noEvents')}</p>
+        <p class="event-sublabel" data-i18n="eventsSublabel">${I18N.t('eventsSublabel')}</p>
       </div>
     `;
-    if (typeof I18N !== 'undefined') I18N.updateDOM();
   } else {
     grid.innerHTML = `
       <div class="events-list-grid">
         ${filtered.map(event => `
-          <div class="event-card" style="border: 1px solid var(--border-subtle); border-radius: var(--radius-md); overflow: hidden; display: flex; flex-direction: column; background: var(--bg-card); transition: var(--transition);">
-            <img src="${event.img}" alt="${event.name}" class="event-img" style="width: 100%; height: 140px; object-fit: cover;" onerror="this.src='assets/images/IMG_6262.jpg'">
-            <div class="event-info" style="padding: 14px; display: flex; flex-direction: column; gap: 6px;">
-              <span class="event-date-badge" style="display: inline-block; align-self: flex-start; padding: 3px 6px; background: var(--accent); color: white; font-size: 0.7rem; font-weight: 700; border-radius: 4px;">${event.date}</span>
-              <h3 class="event-name-title" style="font-size: 0.95rem; font-weight: 700; margin: 4px 0 0 0; color: var(--text-primary);">${event.name}</h3>
-              <p class="event-location-text" style="font-size: 0.8rem; color: var(--text-secondary); margin: 0;">📍 ${event.location}</p>
-              <p class="event-desc-text" style="font-size: 0.78rem; color: var(--text-muted); margin: 0; line-height: 1.3;">${event.details}</p>
+          <div class="event-card">
+            <div class="event-card-media">
+              <img src="${event.img}" alt="${event.name}" class="event-img" onerror="this.src='assets/images/IMG_6262.jpg'">
+              <span class="event-format-chip">${event.format.toUpperCase()}</span>
+            </div>
+            <div class="event-info">
+              <div class="event-meta-row">
+                <span class="event-date-badge">📅 ${event.date} • ${event.time || '18:00'}</span>
+                <span class="event-entry-badge">${event.entry || 'Entrée'}</span>
+              </div>
+              <h3 class="event-name-title">${event.name}</h3>
+              <p class="event-location-text">📍 ${event.location}</p>
+              <p class="event-desc-text">${event.details}</p>
             </div>
           </div>
         `).join('')}
       </div>
     `;
   }
+
+  if (typeof I18N !== 'undefined') I18N.updateDOM();
 }
 
-// On page load, read URL format parameter and apply filter
+// ===========================
+// RENDER PARTNER STORES
+// ===========================
+function renderHomeStores() {
+  const container = document.getElementById("homeStoresGrid");
+  if (!container || typeof sites === "undefined") return;
+
+  container.innerHTML = sites.map(site => `
+    <a href="card.html?name=Sol%20Ring" class="home-store-chip" title="Acheter chez ${site.nome}" target="_blank" onclick="event.preventDefault(); searchCardForStore('${site.id}');">
+      ${site.logo ? `<img src="${site.logo}" alt="${site.nome}" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">` : ''}
+      <span class="home-store-name" style="${site.logo ? 'display:none;' : ''}">${site.nome}</span>
+      <span class="home-store-ext-icon">↗</span>
+    </a>
+  `).join('');
+}
+
+function searchCardForStore(storeId) {
+  const searchInput = document.getElementById("headerSearchInput");
+  if (searchInput && searchInput.value.trim()) {
+    window.location.href = `card.html?name=${encodeURIComponent(searchInput.value.trim())}`;
+  } else {
+    window.location.href = `card.html?set=dsk`;
+  }
+}
+
+// ===========================
+// HERO ACTIONS
+// ===========================
+function focusHeaderSearch() {
+  const input = document.getElementById("headerSearchInput");
+  if (input) {
+    input.focus();
+    input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+
+function triggerImportFile() {
+  const sidebar = document.getElementById("sidebar");
+  if (sidebar && sidebar.classList.contains("collapsed")) {
+    toggleSidebar();
+  }
+  const fileSection = document.getElementById("sectionImport");
+  if (fileSection && !fileSection.classList.contains("active")) {
+    toggleSection("sectionImport");
+  }
+  const fileInput = document.getElementById("arquivoInput");
+  if (fileInput) {
+    fileInput.click();
+  }
+}
+
+// ===========================
+// INIT
+// ===========================
 document.addEventListener("DOMContentLoaded", () => {
   const params = new URLSearchParams(window.location.search);
-  const format = params.get("format") || ""; // Default is empty to trigger select format prompt!
+  const format = params.get("format") || "all";
 
-  // Sync sidebar active class
-  if (format) {
-    document.querySelectorAll('.format-links li').forEach(li => {
-      li.classList.toggle('active', li.dataset.format === format);
-    });
-  } else {
-    document.querySelectorAll('.format-links li').forEach(li => {
-      li.classList.remove('active');
-    });
-  }
+  currentHomeFormat = format;
 
-  filterHomepageEvents(format);
+  // Sync format pills
+  document.querySelectorAll(".format-pill").forEach(pill => {
+    pill.classList.toggle("active", pill.dataset.format === format);
+  });
+
+  renderHomepageEvents(format);
+  renderHomeStores();
 });

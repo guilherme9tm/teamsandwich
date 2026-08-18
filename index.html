@@ -3,17 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MTG Card Fetcher — Team Sandwich</title>
-  <meta name="description" content="TEAM SANDWICH SEARCH — MTG Card Fetcher, Events &amp; Rankings">
-  <meta property="og:title" content="MTG Card Fetcher">
-  <meta property="og:description" content="TEAM SANDWICH SEARCH">
-  <meta property="og:image" content="https://tiiny.host/assets/logo-purple-bg.png">
-  <meta property="og:url" content="https://teamsandwichsearch.tiiny.site/">
+  <title>TEAM SANDWICH — MTG Card Fetcher, Événements & Communauté</title>
+  <meta name="description" content="TEAM SANDWICH — MTG Card Fetcher, Comparateur de prix, Collections & Tournois Magic: The Gathering">
+  <meta property="og:title" content="TEAM SANDWICH — MTG Hub">
+  <meta property="og:description" content="Recherche de cartes MTG, Événements & Communauté">
+  <meta property="og:image" content="assets/images/IMG_6262.jpg">
   <meta property="og:type" content="website">
   <link rel="icon" href="assets/icons/favicon.ico">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 
@@ -71,20 +70,89 @@
 
     <!-- MAIN CONTENT -->
     <main class="main-content">
-      <!-- WELCOME SECTION -->
-      <section class="welcome-panel" id="welcomeSection">
-      </section>
 
-      <section class="panel panel-events hidden" id="panelEvents">
-        <div class="panel-header"><h2 class="panel-title" data-i18n="eventsPhotos">🎉 Events &amp; Photos</h2></div>
-        <div class="panel-body" id="eventsGrid">
-          <div class="event-card placeholder-card">
-            <div class="event-img-placeholder"><span>📸</span></div>
-            <p class="event-label" data-i18n="noEvents">Aucun événement pour le moment</p>
-            <p class="event-sublabel" data-i18n="eventsSublabel">Les photos des événements apparaîtront ici</p>
+      <!-- HERO SECTION -->
+      <section class="hero-section" id="heroSection">
+        <div class="hero-backdrop"></div>
+        <div class="hero-content">
+          <div class="hero-badge">
+            <span class="hero-badge-dot"></span>
+            <span>MAGIC: THE GATHERING</span>
+          </div>
+          <h1 class="hero-title">
+            <span class="hero-title-team">TEAM</span>
+            <span class="hero-title-sandwich">SANDWICH</span>
+          </h1>
+          <p class="hero-subtitle" data-i18n="heroSubtitle">
+            Comparez les prix entre les meilleures boutiques de Magic, explorez les collections et suivez les tournois locaux.
+          </p>
+
+          <!-- Quick Action Buttons -->
+          <div class="hero-actions">
+            <button class="hero-btn hero-btn-primary" onclick="focusHeaderSearch()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <span data-i18n="searchCardCta">Rechercher une carte</span>
+            </button>
+            <button class="hero-btn hero-btn-secondary" onclick="openCollectionsModal()">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M7 1H4L1 6V15H15V6L12 1H9V6H7V1Z"/></svg>
+              <span data-i18n="browseSetsCta">Explorer les collections</span>
+            </button>
+            <button class="hero-btn hero-btn-outline" onclick="triggerImportFile()">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M0 1H5L8 3H13V5H3.7457L2.03141 11H4.11144L5.2543 7H16L14 14H0V1Z"/></svg>
+              <span data-i18n="importDeckCta">Importer un deck (.txt)</span>
+            </button>
           </div>
         </div>
       </section>
+
+      <!-- POPULAR SETS QUICK ACCESS -->
+      <section class="popular-sets-section" id="popularSetsSection">
+        <div class="section-header">
+          <div class="section-header-info">
+            <h2 class="section-title" data-i18n="popularSetsTitle">Dernières Collections</h2>
+            <p class="section-desc">Accédez directement aux cartes des extensions récentes</p>
+          </div>
+          <button class="btn-text-action" onclick="openCollectionsModal()" data-i18n="viewAllCollections">
+            Voir toutes les collections →
+          </button>
+        </div>
+
+        <div class="popular-sets-grid">
+          <a href="card.html?set=dsk" class="popular-set-card">
+            <span class="popular-set-code">DSK</span>
+            <div class="popular-set-info">
+              <h4>Duskmourn: House of Horror</h4>
+              <p>2024 • Standard, Pioneer, Modern</p>
+            </div>
+            <span class="popular-set-arrow">→</span>
+          </a>
+          <a href="card.html?set=blb" class="popular-set-card">
+            <span class="popular-set-code">BLB</span>
+            <div class="popular-set-info">
+              <h4>Bloomburrow</h4>
+              <p>2024 • Standard, Pioneer, Modern</p>
+            </div>
+            <span class="popular-set-arrow">→</span>
+          </a>
+          <a href="card.html?set=mh3" class="popular-set-card">
+            <span class="popular-set-code">MH3</span>
+            <div class="popular-set-info">
+              <h4>Modern Horizons 3</h4>
+              <p>2024 • Modern, Commander, Legacy</p>
+            </div>
+            <span class="popular-set-arrow">→</span>
+          </a>
+          <a href="card.html?set=otj" class="popular-set-card">
+            <span class="popular-set-code">OTJ</span>
+            <div class="popular-set-info">
+              <h4>Outlaws of Thunder Junction</h4>
+              <p>2024 • Standard, Pioneer, Modern</p>
+            </div>
+            <span class="popular-set-arrow">→</span>
+          </a>
+        </div>
+      </section>
+
     </main>
   </div>
 </div>

@@ -34,12 +34,23 @@ function renderSidebar() {
   const activeFormat = params.get('format') || 'all';
 
   sidebar.innerHTML = `
-    <div class="sidebar-header">
-      <button class="sidebar-toggle-btn" id="sidebarToggleBtn" onclick="toggleSidebar()" aria-label="Toggle sidebar">
-        <svg class="arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="15 18 9 12 15 6"></polyline>
-        </svg>
+    <!-- Sidebar Drawer Header with Close Button -->
+    <div class="sidebar-drawer-header">
+      <button class="sidebar-close-btn" onclick="closeSidebarDrawer()" aria-label="Fermer le menu">
+        &times;
       </button>
+    </div>
+
+    <!-- Mobile/Drawer actions: Language & Auth -->
+    <div class="sidebar-mobile-actions">
+      <div class="sidebar-mobile-lang">
+        <label class="sidebar-field-label">Langue / Language</label>
+        <select class="sidebar-lang-select" aria-label="Language" onchange="I18N.setLang(this.value)">
+          <option value="fr">FR</option>
+          <option value="en">EN</option>
+        </select>
+      </div>
+      <div class="sidebar-mobile-auth" id="sidebarUserActions"></div>
     </div>
 
     <div class="sidebar-menu">
@@ -52,11 +63,11 @@ function renderSidebar() {
         </div>
         <div class="sidebar-section-content">
           <ul class="format-links">
-            <li class="${activeFormat === 'all' ? 'active' : ''}" data-format="all" onclick="selectFormat('all',event)"><span class="format-dot"></span><span data-i18n="all">Toutes</span></li>
-            <li class="${activeFormat === 'standard' ? 'active' : ''}" data-format="standard" onclick="selectFormat('standard',event)"><span class="format-dot"></span><span>Standard</span></li>
-            <li class="${activeFormat === 'pioneer' ? 'active' : ''}" data-format="pioneer" onclick="selectFormat('pioneer',event)"><span class="format-dot"></span><span>Pioneer</span></li>
-            <li class="${activeFormat === 'modern' ? 'active' : ''}" data-format="modern" onclick="selectFormat('modern',event)"><span class="format-dot"></span><span>Modern</span></li>
-            <li class="${activeFormat === 'commander' ? 'active' : ''}" data-format="commander" onclick="selectFormat('commander',event)"><span class="format-dot"></span><span>Commander (EDH)</span></li>
+            <li class="${activeFormat === 'all' ? 'active' : ''}" data-format="all" onclick="handleMenuFormatClick('all',event)"><span class="format-dot"></span><span data-i18n="all">Toutes</span></li>
+            <li class="${activeFormat === 'standard' ? 'active' : ''}" data-format="standard" onclick="handleMenuFormatClick('standard',event)"><span class="format-dot"></span><span>Standard</span></li>
+            <li class="${activeFormat === 'pioneer' ? 'active' : ''}" data-format="pioneer" onclick="handleMenuFormatClick('pioneer',event)"><span class="format-dot"></span><span>Pioneer</span></li>
+            <li class="${activeFormat === 'modern' ? 'active' : ''}" data-format="modern" onclick="handleMenuFormatClick('modern',event)"><span class="format-dot"></span><span>Modern</span></li>
+            <li class="${activeFormat === 'commander' ? 'active' : ''}" data-format="commander" onclick="handleMenuFormatClick('commander',event)"><span class="format-dot"></span><span>Commander (EDH)</span></li>
           </ul>
         </div>
       </div>
@@ -64,13 +75,13 @@ function renderSidebar() {
       <!-- Import -->
       <div class="sidebar-section" id="sectionImport">
         <div class="sidebar-section-header" onclick="toggleSection('sectionImport')">
-          <span class="sec-icon"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0 1H5L8 3H13V5H3.7457L2.03141 11H4.11144L5.2543 7H16L14 14H0V1Z" fill="#7c5cfc"/></svg></span>
+          <span class="sec-icon"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0 1H5L8 3H13V5H3.7457L2.03141 11H4.11144L5.2543 7H16L14 14H0V1Z" fill="var(--accent)"/></svg></span>
           <span class="sec-title" data-i18n="importTitle">Importer un fichier</span>
           <span class="sec-arrow">▼</span>
         </div>
         <div class="sidebar-section-content">
           <div class="menu-section-body">
-            <input type="file" id="arquivoInput" accept=".txt">
+            <input type="file" id="arquivoInput" accept=".txt" onchange="handleFileSelected(event)">
             <button class="btn-primary" onclick="processarArquivo()" data-i18n="processFile">Traiter le fichier</button>
           </div>
         </div>
@@ -79,7 +90,7 @@ function renderSidebar() {
       <!-- Stores -->
       <div class="sidebar-section" id="sectionStores">
         <div class="sidebar-section-header" onclick="toggleSection('sectionStores')">
-          <span class="sec-icon"><svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none"><g id="shop"><path fill="none" stroke="#7c5cfc" stroke-linecap="square" stroke-miterlimit="10" stroke-width="1.91" d="M7.23,6.27v5.25a2.39,2.39,0,0,1-4.78,0L4.36,6.27Z"></path><path fill="none" stroke="#7c5cfc" stroke-linecap="square" stroke-miterlimit="10" stroke-width="1.91" d="M12,6.27v5.25a2.39,2.39,0,1,1-4.77,0V6.27Z"></path><path fill="none" stroke="#7c5cfc" stroke-linecap="square" stroke-miterlimit="10" stroke-width="1.91" d="M16.77,6.27v5.25a2.39,2.39,0,1,1-4.77,0V6.27Z"></path><path fill="none" stroke="#7c5cfc" stroke-linecap="square" stroke-miterlimit="10" stroke-width="1.91" d="M21.55,11.52a2.39,2.39,0,0,1-4.78,0V6.27h2.87Z"></path><path fill="none" stroke="#7c5cfc" stroke-linecap="square" stroke-miterlimit="10" stroke-width="1.91" d="M19.64,13.91V22.5H4.36V13.91h.48a2.39,2.39,0,0,0,2.39-2.39,2.39,2.39,0,1,0,4.77,0,2.39,2.39,0,1,0,4.77,0,2.39,2.39,0,0,0,2.39,2.39Z"></path><polyline fill="none" stroke="#7c5cfc" stroke-linecap="square" stroke-miterlimit="10" stroke-width="1.91" points="1.5 22.5 4.36 22.5 19.64 22.5 22.5 22.5"></polyline><rect fill="none" stroke="#7c5cfc" stroke-linecap="square" stroke-miterlimit="10" stroke-width="1.91" x="6.27" y="1.5" width="11.45" height="4.77"></rect><rect fill="none" stroke="#7c5cfc" stroke-linecap="square" stroke-miterlimit="10" stroke-width="1.91" x="8.18" y="17.73" width="7.64" height="4.77"></rect></g></svg></span>
+          <span class="sec-icon"><svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none"><g id="shop"><path fill="none" stroke="var(--accent)" stroke-linecap="square" stroke-miterlimit="10" stroke-width="1.91" d="M7.23,6.27v5.25a2.39,2.39,0,0,1-4.78,0L4.36,6.27Z"></path><path fill="none" stroke="var(--accent)" stroke-linecap="square" stroke-miterlimit="10" stroke-width="1.91" d="M12,6.27v5.25a2.39,2.39,0,1,1-4.77,0V6.27Z"></path><path fill="none" stroke="var(--accent)" stroke-linecap="square" stroke-miterlimit="10" stroke-width="1.91" d="M16.77,6.27v5.25a2.39,2.39,0,1,1-4.77,0V6.27Z"></path><path fill="none" stroke="var(--accent)" stroke-linecap="square" stroke-miterlimit="10" stroke-width="1.91" d="M21.55,11.52a2.39,2.39,0,0,1-4.78,0V6.27h2.87Z"></path><path fill="none" stroke="var(--accent)" stroke-linecap="square" stroke-miterlimit="10" stroke-width="1.91" d="M19.64,13.91V22.5H4.36V13.91h.48a2.39,2.39,0,0,0,2.39-2.39,2.39,2.39,0,1,0,4.77,0,2.39,2.39,0,1,0,4.77,0,2.39,2.39,0,0,0,2.39,2.39Z"></path><polyline fill="none" stroke="var(--accent)" stroke-linecap="square" stroke-miterlimit="10" stroke-width="1.91" points="1.5 22.5 4.36 22.5 19.64 22.5 22.5 22.5"></polyline><rect fill="none" stroke="var(--accent)" stroke-linecap="square" stroke-miterlimit="10" stroke-width="1.91" x="6.27" y="1.5" width="11.45" height="4.77"></rect><rect fill="none" stroke="var(--accent)" stroke-linecap="square" stroke-miterlimit="10" stroke-width="1.91" x="8.18" y="17.73" width="7.64" height="4.77"></rect></g></svg></span>
           <span class="sec-title" data-i18n="stores">Magasins</span>
           <span class="sec-arrow">▼</span>
         </div>
@@ -91,7 +102,7 @@ function renderSidebar() {
       <!-- Collections -->
       <div class="sidebar-section" id="sectionCollections">
         <div class="sidebar-section-header" onclick="toggleSection('sectionCollections')">
-          <span class="sec-icon"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="shop-box"><path d="M7 1H4L1 6V15H15V6L12 1H9V6H7V1Z" fill="#7c5cfc"></path></g></svg></span>
+          <span class="sec-icon"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="shop-box"><path d="M7 1H4L1 6V15H15V6L12 1H9V6H7V1Z" fill="var(--accent)"></path></g></svg></span>
           <span class="sec-title" data-i18n="collections">Collections</span>
           <span class="sec-arrow">▼</span>
         </div>
@@ -101,64 +112,143 @@ function renderSidebar() {
   `;
 }
 
-// ===========================
-// FILE PROCESSING (Shared)
-// ===========================
-async function processarArquivo() {
-  const arquivoInput = document.getElementById('arquivoInput');
-  if (!arquivoInput || !arquivoInput.files.length) {
-    alert(I18N.t('filePrompt'));
-    return;
+// Format click handler from menu
+function handleMenuFormatClick(fmt, event) {
+  if (event) event.preventDefault();
+  closeSidebarDrawer();
+  selectFormat(fmt, event);
+}
+
+// File selected indicator
+function handleFileSelected(event) {
+  const input = event.target;
+  if (input && input.files.length) {
+    const fileName = input.files[0].name;
+    const btn = input.nextElementSibling;
+    if (btn) btn.textContent = `⚡ Traiter "${fileName}"`;
   }
-
-  const texto = await arquivoInput.files[0].text();
-  const linhas = texto.split(/\r?\n/);
-  const cartas = [];
-
-  linhas.forEach(linha => {
-    const l = inline = linha.trim();
-    if (!l) return;
-
-    const match = l.match(/^(\d+)\s+(.+)$/);
-    if (match) {
-      const qtd = parseInt(match[1], 10);
-      const nome = match[2];
-      for (let i = 0; i < qtd; i++) cartas.push(nome);
-    } else {
-      cartas.push(l);
-    }
-  });
-
-  sessionStorage.setItem("fileCards", JSON.stringify(cartas));
-  window.location.href = "card.html?source=file";
 }
 
 // ===========================
-// SIDEBAR: collapse / expand
+// FILE PROCESSING
+// ===========================
+async function processarArquivo() {
+  const arquivoInput = document.getElementById('arquivoInput');
+  if (!arquivoInput || !arquivoInput.files || !arquivoInput.files.length) {
+    alert(typeof I18N !== 'undefined' ? I18N.t('filePrompt') : 'Veuillez choisir un fichier TXT');
+    return;
+  }
+
+  try {
+    const file = arquivoInput.files[0];
+    const texto = await file.text();
+    const linhas = texto.split(/\r?\n/);
+    const cartas = [];
+
+    linhas.forEach(linha => {
+      const l = linha.trim();
+      if (!l || l.startsWith('//') || l.startsWith('#')) return;
+
+      const match = l.match(/^(\d+)\s+(.+)$/);
+      if (match) {
+        const qtd = parseInt(match[1], 10);
+        const nome = match[2].trim();
+        for (let i = 0; i < qtd; i++) cartas.push(nome);
+      } else {
+        cartas.push(l);
+      }
+    });
+
+    if (cartas.length === 0) {
+      alert("Le fichier est vide ou ne contient aucun nom de carte valide.");
+      return;
+    }
+
+    sessionStorage.setItem("fileCards", JSON.stringify(cartas));
+    closeSidebarDrawer();
+    window.location.href = "card.html?source=file";
+  } catch (err) {
+    console.error("Erreur lors de la lecture du fichier:", err);
+    alert("Erreur lors de la lecture du fichier TXT.");
+  }
+}
+
+// ===========================
+// SIDEBAR DRAWER TOGGLE (DESKTOP & MOBILE)
 // ===========================
 function initSidebar() {
-  const sidebar = document.getElementById('sidebar');
-  if (!sidebar) return;
-  const saved = localStorage.getItem('sidebarCollapsed');
-  if (saved === 'false') {
-    sidebar.classList.remove('collapsed');
-  }
+  // Listen for Escape key to close sidebar
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeSidebarDrawer();
+    }
+  });
 }
 
 function toggleSidebar() {
   const sidebar = document.getElementById('sidebar');
   if (!sidebar) return;
-  sidebar.classList.toggle('collapsed');
-  localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+
+  if (sidebar.classList.contains('open') || sidebar.classList.contains('mobile-open')) {
+    closeSidebarDrawer();
+  } else {
+    openSidebarDrawer();
+  }
 }
 
 function toggleSidebarMobile() {
+  toggleSidebar();
+}
+
+function openSidebarDrawer() {
   const sidebar = document.getElementById('sidebar');
   const overlay = document.getElementById('menuOverlay');
+  const btn = document.getElementById('hamburgerBtn');
   if (!sidebar) return;
-  sidebar.classList.toggle('mobile-open');
-  if (overlay) overlay.classList.toggle('open');
-  document.body.style.overflow = sidebar.classList.contains('mobile-open') ? 'hidden' : '';
+
+  sidebar.classList.remove('collapsed');
+  sidebar.classList.add('open');
+  sidebar.classList.add('mobile-open');
+  if (overlay) overlay.classList.add('open');
+  if (btn) btn.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeSidebarDrawer() {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('menuOverlay');
+  const btn = document.getElementById('hamburgerBtn');
+  if (!sidebar) return;
+
+  sidebar.classList.add('collapsed');
+  sidebar.classList.remove('open');
+  sidebar.classList.remove('mobile-open');
+  if (overlay) overlay.classList.remove('open');
+  if (btn) btn.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+// Alias for hamburger toggle
+function toggleMenu() {
+  toggleSidebar();
+}
+
+// Manual search from sidebar menu
+function buscarCartaManuellement() {
+  const input = document.getElementById('pesquisaInput');
+  if (!input) return;
+  const nome = input.value.trim();
+  if (!nome) {
+    alert(typeof I18N !== 'undefined' ? I18N.t('enterName') : 'Entrez un nom');
+    return;
+  }
+  closeSidebarDrawer();
+  window.location.href = `card.html?name=${encodeURIComponent(nome)}`;
+}
+
+function limparResultado() {
+  const input = document.getElementById('pesquisaInput');
+  if (input) input.value = '';
 }
 
 // ===========================
@@ -182,7 +272,11 @@ function selectFormat(fmt, event) {
   });
 
   const params = new URLSearchParams(window.location.search);
-  params.set('format', fmt);
+  if (fmt === 'all') {
+    params.delete('format');
+  } else {
+    params.set('format', fmt);
+  }
 
   const isHomepage = window.location.pathname.includes('index.html') || 
                      window.location.pathname === '/' || 
@@ -190,9 +284,12 @@ function selectFormat(fmt, event) {
                      window.location.pathname.endsWith('/teamsandwich/index.html');
 
   if (isHomepage) {
-    history.pushState(null, '', `?${params.toString()}`);
-    if (typeof filterHomepageEvents === 'function') {
-      filterHomepageEvents(fmt);
+    const newUrl = params.toString() ? `?${params.toString()}` : window.location.pathname;
+    history.pushState(null, '', newUrl);
+    if (typeof selectFormatFromHome === 'function') {
+      selectFormatFromHome(fmt);
+    } else if (typeof renderHomepageEvents === 'function') {
+      renderHomepageEvents(fmt);
     }
   } else {
     window.location.href = `index.html?format=${fmt}`;
@@ -207,14 +304,15 @@ function initStores() {
   const container = document.getElementById("storeList");
   if (!container) return;
 
+  container.innerHTML = '';
   sites.forEach(site => {
     const checked = saved.length ? saved.includes(site.id) : true;
-    const div = document.createElement("div");
-    div.className = "store-item";
+    const div = document.createElement("label");
+    div.className = "store-item-checkbox";
     div.innerHTML = `
-      <input type="checkbox" value="${site.id}" ${checked ? "checked" : ""}>
-      <img src="${site.logo}" onerror="this.style.display='none'">
-      ${site.nome}
+      <input type="checkbox" value="${site.id}" ${checked ? "checked" : ""} onchange="getSelected()">
+      ${site.logo ? `<img src="${site.logo}" alt="${site.nome}" onerror="this.style.display='none'">` : ''}
+      <span>${site.nome}</span>
     `;
     container.appendChild(div);
   });
@@ -275,6 +373,7 @@ async function loadSets() {
 let collectionsModalSort = 'newest'; // 'newest', 'oldest', 'az', 'za'
 
 function openCollectionsModal() {
+  closeSidebarDrawer();
   const modal = document.getElementById('collectionsModal');
   const overlay = document.getElementById('collectionsModalOverlay');
   if (!modal || !overlay) return;
@@ -511,17 +610,24 @@ function clearHeaderSearch() {
 // ===========================
 // AUTH MODALS (Simulated)
 // ===========================
+// Open Login
 function openLoginModal() {
   closeAuthModals();
-  document.getElementById('loginModal').classList.add('visible');
-  document.getElementById('authModalOverlay').classList.add('visible');
+  closeSidebarDrawer();
+  const modal = document.getElementById('loginModal');
+  const overlay = document.getElementById('authModalOverlay');
+  if (modal) modal.classList.add('visible');
+  if (overlay) overlay.classList.add('visible');
 }
 
 // Open Sign Up
 function openSignupModal() {
   closeAuthModals();
-  document.getElementById('signupModal').classList.add('visible');
-  document.getElementById('authModalOverlay').classList.add('visible');
+  closeSidebarDrawer();
+  const modal = document.getElementById('signupModal');
+  const overlay = document.getElementById('authModalOverlay');
+  if (modal) modal.classList.add('visible');
+  if (overlay) overlay.classList.add('visible');
 }
 
 function closeAuthModals() {
@@ -552,20 +658,26 @@ function handleSignupSubmit(e) {
 
 function updateUserUI() {
   const userActions = document.getElementById('headerUserActions');
-  if (!userActions) return;
+  const sidebarActions = document.getElementById('sidebarUserActions');
   const user = JSON.parse(localStorage.getItem('user') || 'null');
 
-  if (user) {
-    userActions.innerHTML = `
-      <span class="user-greeting">👤 ${user.username}</span>
-      <button class="btn-logout-header" onclick="logoutUser()" data-i18n="logout">${I18N.t('logout')}</button>
-    `;
-  } else {
-    userActions.innerHTML = `
-      <button class="btn-login-header" onclick="openLoginModal()" data-i18n="login">${I18N.t('login')}</button>
-      <button class="btn-signup-header" onclick="openSignupModal()" data-i18n="signup">${I18N.t('signup')}</button>
-    `;
-  }
+  const renderAuth = (container) => {
+    if (!container) return;
+    if (user) {
+      container.innerHTML = `
+        <span class="user-greeting">👤 ${user.username}</span>
+        <button class="btn-logout-header" onclick="logoutUser()" data-i18n="logout">${I18N.t('logout')}</button>
+      `;
+    } else {
+      container.innerHTML = `
+        <button class="btn-login-header" onclick="openLoginModal()" data-i18n="login">${I18N.t('login')}</button>
+        <button class="btn-signup-header" onclick="openSignupModal()" data-i18n="signup">${I18N.t('signup')}</button>
+      `;
+    }
+  };
+
+  renderAuth(userActions);
+  renderAuth(sidebarActions);
 }
 
 function logoutUser() {
@@ -577,13 +689,25 @@ function logoutUser() {
 // LANGUAGE SELECTOR
 // ===========================
 function initLangSelector() {
+  // Header lang selector
   const selector = document.querySelector('.lang-selector-select');
-  if (!selector) return;
-  selector.value = I18N.current;
-  selector.addEventListener('change', (e) => {
-    I18N.setLang(e.target.value);
-    updateUserUI(); // re-render user buttons with new lang
-  });
+  if (selector) {
+    selector.value = I18N.current;
+    selector.addEventListener('change', (e) => {
+      I18N.setLang(e.target.value);
+      updateUserUI();
+    });
+  }
+
+  // Sidebar lang selector (mobile)
+  const sidebarSelector = document.querySelector('.sidebar-lang-select');
+  if (sidebarSelector) {
+    sidebarSelector.value = I18N.current;
+    sidebarSelector.addEventListener('change', (e) => {
+      I18N.setLang(e.target.value);
+      updateUserUI();
+    });
+  }
 }
 
 // ===========================
