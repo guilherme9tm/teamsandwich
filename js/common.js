@@ -109,7 +109,7 @@ function handleFileSelected(event) {
   if (input && input.files.length) {
     const fileName = input.files[0].name;
     const btn = input.nextElementSibling;
-    if (btn) btn.textContent = `⚡ Traiter "${fileName}"`;
+    if (btn) btn.textContent = `Traiter "${fileName}"`;
   }
 }
 
@@ -617,7 +617,7 @@ function updateUserUI() {
     if (!container) return;
     if (user) {
       container.innerHTML = `
-        <span class="user-greeting">👤 ${user.username}</span>
+        <span class="user-greeting">${user.username}</span>
         <button class="btn-logout-header" onclick="logoutUser()" data-i18n="logout">${I18N.t('logout')}</button>
       `;
     } else {

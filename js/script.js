@@ -134,7 +134,7 @@ function renderHomepageEvents(fmt) {
   if (filtered.length === 0) {
     grid.innerHTML = `
       <div class="event-placeholder-box">
-        <div class="event-img-placeholder"><span>📸</span></div>
+        <div class="event-img-placeholder"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg></div>
         <p class="event-label" data-i18n="noEvents">${I18N.t('noEvents')}</p>
         <p class="event-sublabel" data-i18n="eventsSublabel">${I18N.t('eventsSublabel')}</p>
       </div>
@@ -150,11 +150,11 @@ function renderHomepageEvents(fmt) {
             </div>
             <div class="event-info">
               <div class="event-meta-row">
-                <span class="event-date-badge">📅 ${event.date} • ${event.time || '18:00'}</span>
+                <span class="event-date-badge">${event.date} • ${event.time || '18:00'}</span>
                 <span class="event-entry-badge">${event.entry || 'Entrée'}</span>
               </div>
               <h3 class="event-name-title">${event.name}</h3>
-              <p class="event-location-text">📍 ${event.location}</p>
+              <p class="event-location-text">${event.location}</p>
               <p class="event-desc-text">${event.details}</p>
             </div>
           </div>
@@ -174,7 +174,7 @@ function renderHomeStores() {
     <a href="card.html?name=Sol%20Ring" class="home-store-chip" title="Acheter chez ${site.nome}" target="_blank" onclick="event.preventDefault(); searchCardForStore('${site.id}');">
       ${site.logo ? `<img src="${site.logo}" alt="${site.nome}" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">` : ''}
       <span class="home-store-name" style="${site.logo ? 'display:none;' : ''}">${site.nome}</span>
-      <span class="home-store-ext-icon">↗</span>
+      <span class="home-store-ext-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg></span>
     </a>
   `).join('');
 }

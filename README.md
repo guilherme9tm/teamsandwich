@@ -12,7 +12,7 @@ Ce projet est une application web moderne et performante permettant de recherche
 - **Détails de carte isolés** : Système d'extension propre ("Afficher plus") qui n'impacte que la carte cliquée sans étirer les autres éléments de la grille.
 - **Interface responsive & Moderne** : Design soigné avec menu latéral type hamburger, effets de verre (glassmorphism), transitions fluides et mode sombre natif.
 
-## 🛠️ Technologies utilisées
+## Technologies utilisées
 
 - **HTML5** : Structure sémantique de l'application.
 - **CSS3 (Vanilla)** : Design system complet et sur mesure, sans framework externe, garantissant une légèreté maximale et des animations fluides.

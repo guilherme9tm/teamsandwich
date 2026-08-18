@@ -499,7 +499,7 @@ async function init() {
 
   else if (params.get("source") === "file") {
     const cartas = JSON.parse(sessionStorage.getItem("fileCards") || "[]");
-    titleEl.textContent = `📂 Importation de fichier`;
+    titleEl.textContent = `Importation de fichier`;
     subtitleEl.textContent = `${cartas.length} carte(s) à charger...`;
     showLoader(`Chargement de ${cartas.length} carte(s)...`);
 
@@ -521,7 +521,7 @@ async function init() {
 
   else if (params.has("set")) {
     const code = params.get("set");
-    titleEl.textContent = `📦 Collection : ${code.toUpperCase()}`;
+    titleEl.textContent = `Collection : ${code.toUpperCase()}`;
     subtitleEl.textContent = "Chargement de la collection...";
     showLoader(`Chargement de la collection ${code.toUpperCase()}...`);
 
