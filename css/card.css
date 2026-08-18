@@ -1,8 +1,4 @@
-/* ===========================
-   CARD PAGE — SPECIFIC STYLES (MATCHING LOGO PALETTE)
-   =========================== */
 
-/* Back button */
 .back-btn {
   display: flex;
   align-items: center;
@@ -30,7 +26,6 @@
   flex-shrink: 0;
 }
 
-/* Search info banner */
 .search-info {
   padding: 20px 24px 16px;
   max-width: 1400px;
@@ -62,7 +57,6 @@
   color: var(--text-muted);
 }
 
-/* Loading spinner */
 .loading-indicator {
   display: flex;
   flex-direction: column;
@@ -92,7 +86,6 @@
   font-weight: 500;
 }
 
-/* Error message */
 .error-msg {
   grid-column: 1 / -1;
   text-align: center;
@@ -101,7 +94,6 @@
   font-weight: 500;
 }
 
-/* Card count badge */
 .card-count {
   display: inline-flex;
   align-items: center;
@@ -116,7 +108,6 @@
   vertical-align: middle;
 }
 
-/* Not found card */
 .card-not-found {
   border-color: var(--danger) !important;
   opacity: 0.7;
@@ -129,9 +120,6 @@
   padding: 20px 10px;
 }
 
-/* ===========================
-   CARD FILTERS BAR
-   =========================== */
 .card-filters-bar {
   display: flex;
   align-items: center;
@@ -153,7 +141,6 @@
   min-width: 0;
 }
 
-/* Mobile filter button */
 .filters-mobile-btn {
   display: none;
   align-items: center;
@@ -190,7 +177,6 @@
   border-radius: 50%;
 }
 
-/* Filter dropdown */
 .filter-dropdown {
   position: relative;
 }
@@ -284,7 +270,6 @@
   font-weight: 700;
 }
 
-/* Filter checkbox */
 .filter-checkbox {
   display: flex;
   align-items: center;
@@ -309,7 +294,6 @@
   flex-shrink: 0;
 }
 
-/* Color swatches */
 .color-swatch {
   width: 14px;
   height: 14px;
@@ -326,7 +310,6 @@
 .color-c { background: linear-gradient(135deg, #9e9e9e, #bdbdbd); }
 .color-m { background: linear-gradient(135deg, #ffd700, #ff9800, #7ea48f); }
 
-/* Clear filters button */
 .filter-clear-btn {
   display: flex;
   align-items: center;
@@ -349,7 +332,6 @@
   color: white;
 }
 
-/* Active filters strip */
 .active-filters-strip {
   display: flex;
   align-items: center;
@@ -384,7 +366,6 @@
   color: white;
 }
 
-/* Layout toggles */
 .layout-toggles {
   display: flex;
   gap: 4px;
@@ -418,9 +399,6 @@
   box-shadow: 0 2px 8px var(--accent-glow);
 }
 
-/* ===========================
-   FILTER DRAWER (mobile)
-   =========================== */
 .filter-drawer-overlay {
   position: fixed;
   inset: 0;
@@ -562,9 +540,6 @@
   flex: 1;
 }
 
-/* ===========================
-   PAGINATION BAR
-   =========================== */
 .pagination-bar {
   display: flex;
   align-items: center;
@@ -698,9 +673,6 @@
   margin-left: 12px;
 }
 
-/* ===========================
-   RESPONSIVE
-   =========================== */
 @media (max-width: 768px) {
   .pagination-bar {
     flex-direction: column;

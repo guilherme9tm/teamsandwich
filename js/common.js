@@ -1,11 +1,4 @@
-// ===========================
-// COMMON.JS — SHARED LOGIC
-// All pages load this file.
-// ===========================
 
-// ===========================
-// STORE DEFINITIONS
-// ===========================
 const sites = [
   { id: 'facetoface', nome: 'Face to Face', link: n => `https://facetofacegames.com/search?q=${n}`, logo: 'https://facetofacegames.com/cdn/shop/files/F2F_Black_Logo_074ba862-2d20-45b5-85c5-99f407f34e31.png?v=1742222734' },
   { id: 'levalet', nome: 'Levalet', link: n => `https://levalet.crystalcommerce.com/products/search?q=${n}&c=1`, logo: 'https://cc-client-assets.nyc3.cdn.digitaloceanspaces.com/store/levalet/13b0d4f01acb11e9a8aac9b93f52c525/large/logolevalet.png' },
@@ -23,9 +16,6 @@ const sites = [
   { id: 'chezgeeks', nome: 'Chez Geeks', link: n => `https://www.chezgeeks.com/products/search?q=${n}`, logo: 'https://cc-client-assets.nyc3.cdn.digitaloceanspaces.com/photo/chezgeeks/file/30f1d741378c4f31909b23ade89a46ae/Chez%20Geeks%20LOGO%20scaled.png' }
 ];
 
-// ===========================
-// DYNAMIC SIDEBAR RENDER
-// ===========================
 function renderSidebar() {
   const sidebar = document.getElementById('sidebar');
   if (!sidebar) return;
@@ -34,14 +24,12 @@ function renderSidebar() {
   const activeFormat = params.get('format') || 'all';
 
   sidebar.innerHTML = `
-    <!-- Sidebar Drawer Header with Close Button -->
     <div class="sidebar-drawer-header">
       <button class="sidebar-close-btn" onclick="closeSidebarDrawer()" aria-label="Fermer le menu">
         &times;
       </button>
     </div>
 
-    <!-- Mobile/Drawer actions: Language & Auth -->
     <div class="sidebar-mobile-actions">
       <div class="sidebar-mobile-lang">
         <label class="sidebar-field-label">Langue / Language</label>
@@ -54,8 +42,7 @@ function renderSidebar() {
     </div>
 
     <div class="sidebar-menu">
-      <!-- Formats -->
-      <div class="sidebar-section active" id="sectionFormats">
+      <div class="sidebar-section" id="sectionFormats">
         <div class="sidebar-section-header" onclick="toggleSection('sectionFormats')">
           <span class="sec-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M17.56,20.17A5.75,5.75,0,0,1,15,15.39V14a1,1,0,0,0-.55-.89l-2-1a1,1,0,0,0-.9,0l-2,1A1,1,0,0,0,9,14v1.42a5.75,5.75,0,0,1-2.56,4.78A1,1,0,0,0,7,22H17a1,1,0,0,0,.56-1.83Z" fill="currentColor"/><path d="M18,22H6a1,1,0,0,1,0-2H18a1,1,0,0,1,0,2ZM19.45,7.28a1,1,0,0,0-.81-.69l-4-.56L12.89,2.55a1,1,0,0,0-1.78,0L9.34,6l-4,.56a1,1,0,0,0-.81.69,1,1,0,0,0,.26,1L7.67,11,7,14.83a1,1,0,0,0,.39,1,1,1,0,0,0,1,.09L12,14.07l3.56,1.82A1.07,1.07,0,0,0,16,16a1,1,0,0,0,1-1.17L16.33,11l2.86-2.7A1,1,0,0,0,19.45,7.28Z" fill="var(--accent)"/></svg></span>
           <span class="sec-title" data-i18n="formats">Formats de jeu</span>
@@ -72,7 +59,6 @@ function renderSidebar() {
         </div>
       </div>
 
-      <!-- Import -->
       <div class="sidebar-section" id="sectionImport">
         <div class="sidebar-section-header" onclick="toggleSection('sectionImport')">
           <span class="sec-icon"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0 1H5L8 3H13V5H3.7457L2.03141 11H4.11144L5.2543 7H16L14 14H0V1Z" fill="var(--accent)"/></svg></span>
@@ -87,7 +73,6 @@ function renderSidebar() {
         </div>
       </div>
 
-      <!-- Stores -->
       <div class="sidebar-section" id="sectionStores">
         <div class="sidebar-section-header" onclick="toggleSection('sectionStores')">
           <span class="sec-icon"><svg width="18" height="18" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none"><g id="shop"><path fill="none" stroke="var(--accent)" stroke-linecap="square" stroke-miterlimit="10" stroke-width="1.91" d="M7.23,6.27v5.25a2.39,2.39,0,0,1-4.78,0L4.36,6.27Z"></path><path fill="none" stroke="var(--accent)" stroke-linecap="square" stroke-miterlimit="10" stroke-width="1.91" d="M12,6.27v5.25a2.39,2.39,0,1,1-4.77,0V6.27Z"></path><path fill="none" stroke="var(--accent)" stroke-linecap="square" stroke-miterlimit="10" stroke-width="1.91" d="M16.77,6.27v5.25a2.39,2.39,0,1,1-4.77,0V6.27Z"></path><path fill="none" stroke="var(--accent)" stroke-linecap="square" stroke-miterlimit="10" stroke-width="1.91" d="M21.55,11.52a2.39,2.39,0,0,1-4.78,0V6.27h2.87Z"></path><path fill="none" stroke="var(--accent)" stroke-linecap="square" stroke-miterlimit="10" stroke-width="1.91" d="M19.64,13.91V22.5H4.36V13.91h.48a2.39,2.39,0,0,0,2.39-2.39,2.39,2.39,0,1,0,4.77,0,2.39,2.39,0,1,0,4.77,0,2.39,2.39,0,0,0,2.39,2.39Z"></path><polyline fill="none" stroke="var(--accent)" stroke-linecap="square" stroke-miterlimit="10" stroke-width="1.91" points="1.5 22.5 4.36 22.5 19.64 22.5 22.5 22.5"></polyline><rect fill="none" stroke="var(--accent)" stroke-linecap="square" stroke-miterlimit="10" stroke-width="1.91" x="6.27" y="1.5" width="11.45" height="4.77"></rect><rect fill="none" stroke="var(--accent)" stroke-linecap="square" stroke-miterlimit="10" stroke-width="1.91" x="8.18" y="17.73" width="7.64" height="4.77"></rect></g></svg></span>
@@ -99,27 +84,26 @@ function renderSidebar() {
         </div>
       </div>
 
-      <!-- Collections -->
       <div class="sidebar-section" id="sectionCollections">
         <div class="sidebar-section-header" onclick="toggleSection('sectionCollections')">
           <span class="sec-icon"><svg width="18" height="18" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="shop-box"><path d="M7 1H4L1 6V15H15V6L12 1H9V6H7V1Z" fill="var(--accent)"></path></g></svg></span>
           <span class="sec-title" data-i18n="collections">Collections</span>
           <span class="sec-arrow">▼</span>
         </div>
-        <div class="sidebar-section-content menu-set-list" id="setList"></div>
+        <div class="sidebar-section-content">
+          <div class="menu-set-list" id="setList"></div>
+        </div>
       </div>
     </div>
   `;
 }
 
-// Format click handler from menu
 function handleMenuFormatClick(fmt, event) {
   if (event) event.preventDefault();
   closeSidebarDrawer();
   selectFormat(fmt, event);
 }
 
-// File selected indicator
 function handleFileSelected(event) {
   const input = event.target;
   if (input && input.files.length) {
@@ -129,9 +113,6 @@ function handleFileSelected(event) {
   }
 }
 
-// ===========================
-// FILE PROCESSING
-// ===========================
 async function processarArquivo() {
   const arquivoInput = document.getElementById('arquivoInput');
   if (!arquivoInput || !arquivoInput.files || !arquivoInput.files.length) {
@@ -173,11 +154,8 @@ async function processarArquivo() {
   }
 }
 
-// ===========================
-// SIDEBAR DRAWER TOGGLE (DESKTOP & MOBILE)
-// ===========================
 function initSidebar() {
-  // Listen for Escape key to close sidebar
+  
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       closeSidebarDrawer();
@@ -228,12 +206,10 @@ function closeSidebarDrawer() {
   document.body.style.overflow = '';
 }
 
-// Alias for hamburger toggle
 function toggleMenu() {
   toggleSidebar();
 }
 
-// Manual search from sidebar menu
 function buscarCartaManuellement() {
   const input = document.getElementById('pesquisaInput');
   if (!input) return;
@@ -251,17 +227,16 @@ function limparResultado() {
   if (input) input.value = '';
 }
 
-// ===========================
-// SIDEBAR SECTIONS
-// ===========================
 function toggleSection(sectionId) {
   const section = document.getElementById(sectionId);
-  if (section) section.classList.toggle('active');
+  if (section) {
+    section.classList.toggle('active');
+    if (sectionId === 'sectionCollections' && section.classList.contains('active') && (!allSetsData || allSetsData.length === 0)) {
+      loadSets();
+    }
+  }
 }
 
-// ===========================
-// FORMAT SELECTION
-// ===========================
 let currentFormat = 'all';
 function selectFormat(fmt, event) {
   event && event.preventDefault();
@@ -296,9 +271,6 @@ function selectFormat(fmt, event) {
   }
 }
 
-// ===========================
-// STORE INITIALIZATION
-// ===========================
 function initStores() {
   const saved = JSON.parse(localStorage.getItem("stores") || "[]");
   const container = document.getElementById("storeList");
@@ -326,10 +298,7 @@ function getSelected() {
   return selected;
 }
 
-// ===========================
-// SET (COLLECTION) LOADING
-// ===========================
-let allSetsData = []; // Global store for all sets
+let allSetsData = []; 
 
 async function loadSets() {
   const container = document.getElementById("setList");
@@ -341,7 +310,6 @@ async function loadSets() {
       .filter(set => set.icon_svg_uri)
       .sort((a, b) => new Date(b.released_at) - new Date(a.released_at));
 
-    // Show only the 8 most recent in sidebar
     const recentSets = allSetsData.slice(0, 8);
     container.innerHTML = '';
 
@@ -354,7 +322,6 @@ async function loadSets() {
       container.appendChild(div);
     });
 
-    // Add "View All" button
     const viewAllBtn = document.createElement("button");
     viewAllBtn.className = "btn-view-all-collections";
     viewAllBtn.setAttribute("data-i18n", "viewAllCollections");
@@ -367,10 +334,7 @@ async function loadSets() {
   }
 }
 
-// ===========================
-// COLLECTIONS MODAL
-// ===========================
-let collectionsModalSort = 'newest'; // 'newest', 'oldest', 'az', 'za'
+let collectionsModalSort = 'newest'; 
 
 function openCollectionsModal() {
   closeSidebarDrawer();
@@ -382,7 +346,6 @@ function openCollectionsModal() {
   overlay.classList.add('visible');
   document.body.style.overflow = 'hidden';
 
-  // Reset search & sort
   const searchInput = document.getElementById('collectionsSearchInput');
   if (searchInput) searchInput.value = '';
   collectionsModalSort = 'newest';
@@ -422,7 +385,6 @@ function filterAndRenderCollections() {
     );
   }
 
-  // Sort
   let sorted = [...filtered];
   switch (collectionsModalSort) {
     case 'newest':
@@ -478,9 +440,6 @@ function initCollectionsSearch() {
   });
 }
 
-// ===========================
-// HEADER SEARCH + AUTOCOMPLETE
-// ===========================
 let searchDebounceTimer = null;
 let currentAutocompleteQuery = '';
 
@@ -506,7 +465,6 @@ function initHeaderSearch() {
     }
   });
 
-  // Close on outside click
   document.addEventListener('click', (e) => {
     const container = document.querySelector('.header-search-container');
     if (container && !container.contains(e.target)) hideAutocomplete();
@@ -580,7 +538,6 @@ function showAutocomplete(cards) {
   dd.classList.add('visible');
 }
 
-// Close on autocomplete selection
 function hideAutocomplete() {
   const dd = document.getElementById('autocompleteDropdown');
   if (dd) dd.classList.remove('visible');
@@ -607,10 +564,6 @@ function clearHeaderSearch() {
   hideAutocomplete();
 }
 
-// ===========================
-// AUTH MODALS (Simulated)
-// ===========================
-// Open Login
 function openLoginModal() {
   closeAuthModals();
   closeSidebarDrawer();
@@ -620,7 +573,6 @@ function openLoginModal() {
   if (overlay) overlay.classList.add('visible');
 }
 
-// Open Sign Up
 function openSignupModal() {
   closeAuthModals();
   closeSidebarDrawer();
@@ -685,11 +637,7 @@ function logoutUser() {
   updateUserUI();
 }
 
-// ===========================
-// LANGUAGE SELECTOR
-// ===========================
 function initLangSelector() {
-  // Header lang selector
   const selector = document.querySelector('.lang-selector-select');
   if (selector) {
     selector.value = I18N.current;
@@ -699,7 +647,6 @@ function initLangSelector() {
     });
   }
 
-  // Sidebar lang selector (mobile)
   const sidebarSelector = document.querySelector('.sidebar-lang-select');
   if (sidebarSelector) {
     sidebarSelector.value = I18N.current;
@@ -710,9 +657,6 @@ function initLangSelector() {
   }
 }
 
-// ===========================
-// GLOBAL INITIALIZATION
-// ===========================
 document.addEventListener('DOMContentLoaded', () => {
   renderSidebar();
   initSidebar();

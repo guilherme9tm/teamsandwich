@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TEAM SANDWICH — MTG Card Fetcher, Événements & Communauté</title>
-  <meta name="description" content="TEAM SANDWICH — MTG Card Fetcher, Comparateur de prix, Collections & Tournois Magic: The Gathering">
+  <meta name="description"
+    content="TEAM SANDWICH — MTG Card Fetcher, Comparateur de prix, Collections & Tournois Magic: The Gathering">
   <meta property="og:title" content="TEAM SANDWICH — MTG Hub">
   <meta property="og:description" content="Recherche de cartes MTG, Événements & Communauté">
   <meta property="og:image" content="assets/images/IMG_6262.jpg">
@@ -12,201 +14,217 @@
   <link rel="icon" href="assets/icons/favicon.ico">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap"
+    rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
 </head>
 
 <body>
 
-<div class="app-container" id="appContainer">
+  <div class="app-container" id="appContainer">
 
-  <!-- ===== COLLAPSIBLE SIDEBAR ===== -->
-  <aside class="sidebar collapsed" id="sidebar"></aside>
+    <aside class="sidebar collapsed" id="sidebar"></aside>
 
-  <!-- Mobile overlay -->
-  <div class="menu-overlay" id="menuOverlay" onclick="toggleSidebarMobile()"></div>
+    <div class="menu-overlay" id="menuOverlay" onclick="toggleSidebarMobile()"></div>
 
-  <!-- ===== MAIN WRAPPER ===== -->
-  <div class="main-layout" id="mainLayout">
+    <div class="main-layout" id="mainLayout">
 
-    <!-- HEADER -->
-    <header class="header" id="header">
-      <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleSidebarMobile()" aria-label="Open menu">
-        <span></span><span></span><span></span>
-      </button>
+      <header class="header" id="header">
+        <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleSidebarMobile()" aria-label="Open menu">
+          <span></span><span></span><span></span>
+        </button>
 
-      <a href="index.html" class="logo-link-header">
-        <img src="assets/images/IMG_6262.jpg" alt="Team Sandwich Logo" class="header-logo">
-      </a>
+        <a href="index.html" class="logo-link-header">
+          <img src="assets/images/IMG_6262.jpg" alt="Team Sandwich Logo" class="header-logo">
+        </a>
 
-      <!-- Search Bar -->
-      <div class="header-search-container">
-        <div class="search-input-wrapper">
-          <input type="text" id="headerSearchInput" class="search-input" data-i18n="searchPlaceholder" placeholder="Rechercher une carte, collection, numéro...">
-          <button class="search-clear-btn" id="searchClearBtn" onclick="clearHeaderSearch()">&times;</button>
-          <button class="search-btn" id="searchSubmitBtn" onclick="submitHeaderSearch()">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-          </button>
-        </div>
-        <div class="autocomplete-dropdown" id="autocompleteDropdown"></div>
-      </div>
-
-      <div class="header-spacer"></div>
-
-      <!-- Language -->
-      <div class="lang-selector">
-        <select class="lang-selector-select" aria-label="Language">
-          <option value="fr">FR</option>
-          <option value="en">EN</option>
-        </select>
-      </div>
-
-      <!-- User Actions -->
-      <div class="user-actions" id="headerUserActions">
-        <button class="btn-login-header" onclick="openLoginModal()" data-i18n="login">Connexion</button>
-        <button class="btn-signup-header" onclick="openSignupModal()" data-i18n="signup">S'inscrire</button>
-      </div>
-    </header>
-
-    <!-- MAIN CONTENT -->
-    <main class="main-content">
-
-      <!-- HERO SECTION -->
-      <section class="hero-section" id="heroSection">
-        <div class="hero-backdrop"></div>
-        <div class="hero-content">
-          <div class="hero-badge">
-            <span class="hero-badge-dot"></span>
-            <span>MAGIC: THE GATHERING</span>
-          </div>
-          <h1 class="hero-title">
-            <span class="hero-title-team">TEAM</span>
-            <span class="hero-title-sandwich">SANDWICH</span>
-          </h1>
-          <p class="hero-subtitle" data-i18n="heroSubtitle">
-            Comparez les prix entre les meilleures boutiques de Magic, explorez les collections et suivez les tournois locaux.
-          </p>
-
-          <!-- Quick Action Buttons -->
-          <div class="hero-actions">
-            <button class="hero-btn hero-btn-primary" onclick="focusHeaderSearch()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-              <span data-i18n="searchCardCta">Rechercher une carte</span>
-            </button>
-            <button class="hero-btn hero-btn-secondary" onclick="openCollectionsModal()">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M7 1H4L1 6V15H15V6L12 1H9V6H7V1Z"/></svg>
-              <span data-i18n="browseSetsCta">Explorer les collections</span>
-            </button>
-            <button class="hero-btn hero-btn-outline" onclick="triggerImportFile()">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M0 1H5L8 3H13V5H3.7457L2.03141 11H4.11144L5.2543 7H16L14 14H0V1Z"/></svg>
-              <span data-i18n="importDeckCta">Importer un deck (.txt)</span>
+        <div class="header-search-container">
+          <div class="search-input-wrapper">
+            <input type="text" id="headerSearchInput" class="search-input" data-i18n="searchPlaceholder"
+              placeholder="Rechercher une carte, collection, numéro...">
+            <button class="search-clear-btn" id="searchClearBtn" onclick="clearHeaderSearch()">&times;</button>
+            <button class="search-btn" id="searchSubmitBtn" onclick="submitHeaderSearch()">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+              </svg>
             </button>
           </div>
+          <div class="autocomplete-dropdown" id="autocompleteDropdown"></div>
         </div>
-      </section>
 
-      <!-- POPULAR SETS QUICK ACCESS -->
-      <section class="popular-sets-section" id="popularSetsSection">
-        <div class="section-header">
-          <div class="section-header-info">
-            <h2 class="section-title" data-i18n="popularSetsTitle">Dernières Collections</h2>
-            <p class="section-desc">Accédez directement aux cartes des extensions récentes</p>
+        <div class="header-spacer"></div>
+
+        <div class="lang-selector">
+          <select class="lang-selector-select" aria-label="Language">
+            <option value="fr">FR</option>
+            <option value="en">EN</option>
+          </select>
+        </div>
+
+        <div class="user-actions" id="headerUserActions">
+          <button class="btn-login-header" onclick="openLoginModal()" data-i18n="login">Connexion</button>
+          <button class="btn-signup-header" onclick="openSignupModal()" data-i18n="signup">S'inscrire</button>
+        </div>
+      </header>
+
+      <main class="main-content">
+
+        <section class="hero-section" id="heroSection">
+          <div class="hero-backdrop"></div>
+          <div class="hero-content">
+            <div class="hero-badge">
+              <span>MAGIC: THE GATHERING</span>
+            </div>
+            <h1 class="hero-title">
+              <span class="hero-title-team">TEAM</span>
+              <span class="hero-title-sandwich">SANDWICH</span>
+            </h1>
+            <p class="hero-subtitle" data-i18n="heroSubtitle">
+              Comparez les prix entre les meilleures boutiques de Magic, explorez les collections et suivez les tournois
+              locaux.
+            </p>
+
+            <div class="hero-actions">
+              <button class="hero-btn hero-btn-primary" onclick="focusHeaderSearch()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <span data-i18n="searchCardCta">Rechercher une carte</span>
+              </button>
+              <button class="hero-btn hero-btn-secondary" onclick="openCollectionsModal()">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M7 1H4L1 6V15H15V6L12 1H9V6H7V1Z" />
+                </svg>
+                <span data-i18n="browseSetsCta">Explorer les collections</span>
+              </button>
+              <button class="hero-btn hero-btn-outline" onclick="triggerImportFile()">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M0 1H5L8 3H13V5H3.7457L2.03141 11H4.11144L5.2543 7H16L14 14H0V1Z" />
+                </svg>
+                <span data-i18n="importDeckCta">Importer un deck (.txt)</span>
+              </button>
+            </div>
           </div>
-          <button class="btn-text-action" onclick="openCollectionsModal()" data-i18n="viewAllCollections">
-            Voir toutes les collections →
-          </button>
-        </div>
+        </section>
 
-        <div class="popular-sets-grid">
-          <a href="card.html?set=dsk" class="popular-set-card">
-            <span class="popular-set-code">DSK</span>
-            <div class="popular-set-info">
-              <h4>Duskmourn: House of Horror</h4>
-              <p>2024 • Standard, Pioneer, Modern</p>
+        <section class="popular-sets-section" id="popularSetsSection">
+          <div class="section-header">
+            <div class="section-header-info">
+              <h2 class="section-title" data-i18n="popularSetsTitle">Dernières Collections</h2>
+              <p class="section-desc">Accédez directement aux cartes des extensions récentes</p>
             </div>
-            <span class="popular-set-arrow">→</span>
-          </a>
-          <a href="card.html?set=blb" class="popular-set-card">
-            <span class="popular-set-code">BLB</span>
-            <div class="popular-set-info">
-              <h4>Bloomburrow</h4>
-              <p>2024 • Standard, Pioneer, Modern</p>
-            </div>
-            <span class="popular-set-arrow">→</span>
-          </a>
-          <a href="card.html?set=mh3" class="popular-set-card">
-            <span class="popular-set-code">MH3</span>
-            <div class="popular-set-info">
-              <h4>Modern Horizons 3</h4>
-              <p>2024 • Modern, Commander, Legacy</p>
-            </div>
-            <span class="popular-set-arrow">→</span>
-          </a>
-          <a href="card.html?set=otj" class="popular-set-card">
-            <span class="popular-set-code">OTJ</span>
-            <div class="popular-set-info">
-              <h4>Outlaws of Thunder Junction</h4>
-              <p>2024 • Standard, Pioneer, Modern</p>
-            </div>
-            <span class="popular-set-arrow">→</span>
-          </a>
-        </div>
-      </section>
+            <button class="btn-text-action" onclick="openCollectionsModal()" data-i18n="viewAllCollections">
+              Voir toutes les collections →
+            </button>
+          </div>
 
-    </main>
-  </div>
-</div>
+          <div class="popular-sets-grid">
+            <a href="card.html?set=dsk" class="popular-set-card">
+              <span class="popular-set-code">DSK</span>
+              <div class="popular-set-info">
+                <h4>Duskmourn: House of Horror</h4>
+                <p>2024 • Standard, Pioneer, Modern</p>
+              </div>
+              <span class="popular-set-arrow">→</span>
+            </a>
+            <a href="card.html?set=blb" class="popular-set-card">
+              <span class="popular-set-code">BLB</span>
+              <div class="popular-set-info">
+                <h4>Bloomburrow</h4>
+                <p>2024 • Standard, Pioneer, Modern</p>
+              </div>
+              <span class="popular-set-arrow">→</span>
+            </a>
+            <a href="card.html?set=mh3" class="popular-set-card">
+              <span class="popular-set-code">MH3</span>
+              <div class="popular-set-info">
+                <h4>Modern Horizons 3</h4>
+                <p>2024 • Modern, Commander, Legacy</p>
+              </div>
+              <span class="popular-set-arrow">→</span>
+            </a>
+            <a href="card.html?set=otj" class="popular-set-card">
+              <span class="popular-set-code">OTJ</span>
+              <div class="popular-set-info">
+                <h4>Outlaws of Thunder Junction</h4>
+                <p>2024 • Standard, Pioneer, Modern</p>
+              </div>
+              <span class="popular-set-arrow">→</span>
+            </a>
+          </div>
+        </section>
 
-<!-- COLLECTIONS MODAL -->
-<div class="collections-modal-overlay" id="collectionsModalOverlay" onclick="closeCollectionsModal()"></div>
-<div class="collections-modal" id="collectionsModal">
-  <div class="collections-modal-header">
-    <h2 data-i18n="allCollections">Toutes les Collections</h2>
-    <button class="modal-close-btn" onclick="closeCollectionsModal()">&times;</button>
-  </div>
-  <div class="collections-modal-toolbar">
-    <div class="collections-search-wrapper">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-      <input type="text" id="collectionsSearchInput" class="collections-search-input" data-i18n="searchCollections" placeholder="Rechercher une collection...">
-    </div>
-    <div class="collections-sort-group">
-      <button class="collections-sort-btn active" data-sort="newest" onclick="setCollectionsSort('newest')" data-i18n="sortNewest">Plus récentes</button>
-      <button class="collections-sort-btn" data-sort="oldest" onclick="setCollectionsSort('oldest')" data-i18n="sortOldest">Plus anciennes</button>
-      <button class="collections-sort-btn" data-sort="az" onclick="setCollectionsSort('az')" data-i18n="sortAZ">A → Z</button>
-      <button class="collections-sort-btn" data-sort="za" onclick="setCollectionsSort('za')" data-i18n="sortZA">Z → A</button>
+      </main>
     </div>
   </div>
-  <div class="collections-modal-body">
-    <div class="collections-grid" id="collectionsGrid"></div>
+
+  <div class="collections-modal-overlay" id="collectionsModalOverlay" onclick="closeCollectionsModal()"></div>
+  <div class="collections-modal" id="collectionsModal">
+    <div class="collections-modal-header">
+      <h2 data-i18n="allCollections">Toutes les Collections</h2>
+      <button class="modal-close-btn" onclick="closeCollectionsModal()">&times;</button>
+    </div>
+    <div class="collections-modal-toolbar">
+      <div class="collections-search-wrapper">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="collectionsSearchInput" class="collections-search-input" data-i18n="searchCollections"
+          placeholder="Rechercher une collection...">
+      </div>
+      <div class="collections-sort-group">
+        <button class="collections-sort-btn active" data-sort="newest" onclick="setCollectionsSort('newest')"
+          data-i18n="sortNewest">Plus récentes</button>
+        <button class="collections-sort-btn" data-sort="oldest" onclick="setCollectionsSort('oldest')"
+          data-i18n="sortOldest">Plus anciennes</button>
+        <button class="collections-sort-btn" data-sort="az" onclick="setCollectionsSort('az')" data-i18n="sortAZ">A →
+          Z</button>
+        <button class="collections-sort-btn" data-sort="za" onclick="setCollectionsSort('za')" data-i18n="sortZA">Z →
+          A</button>
+      </div>
+    </div>
+    <div class="collections-modal-body">
+      <div class="collections-grid" id="collectionsGrid"></div>
+    </div>
   </div>
-</div>
 
-<!-- AUTH MODALS -->
-<div class="modal-overlay" id="authModalOverlay" onclick="closeAuthModals()"></div>
-<div class="auth-modal" id="loginModal">
-  <button class="modal-close-btn" onclick="closeAuthModals()">&times;</button>
-  <h2 data-i18n="modalLoginTitle">Connexion à votre compte</h2>
-  <form id="loginForm" onsubmit="handleLoginSubmit(event)">
-    <div class="input-group"><input type="email" id="loginEmail" required data-i18n="emailPlaceholder" placeholder="Adresse e-mail"></div>
-    <div class="input-group"><input type="password" id="loginPassword" required data-i18n="passwordPlaceholder" placeholder="Mot de passe"></div>
-    <button type="submit" class="btn-primary auth-submit-btn" data-i18n="modalLoginBtn">Se connecter</button>
-  </form>
-  <p class="auth-switch" onclick="switchToSignup(event)"><a href="#" data-i18n="dontHaveAccount">Pas encore de compte ? S'inscrire</a></p>
-</div>
-<div class="auth-modal" id="signupModal">
-  <button class="modal-close-btn" onclick="closeAuthModals()">&times;</button>
-  <h2 data-i18n="modalSignupTitle">Créer un compte</h2>
-  <form id="signupForm" onsubmit="handleSignupSubmit(event)">
-    <div class="input-group"><input type="text" id="signupUsername" required data-i18n="usernamePlaceholder" placeholder="Nom d'utilisateur"></div>
-    <div class="input-group"><input type="email" id="signupEmail" required data-i18n="emailPlaceholder" placeholder="Adresse e-mail"></div>
-    <div class="input-group"><input type="password" id="signupPassword" required data-i18n="passwordPlaceholder" placeholder="Mot de passe"></div>
-    <button type="submit" class="btn-primary auth-submit-btn" data-i18n="modalSignupBtn">S'inscrire</button>
-  </form>
-  <p class="auth-switch" onclick="switchToLogin(event)"><a href="#" data-i18n="alreadyHaveAccount">Vous avez déjà un compte ? Se connecter</a></p>
-</div>
+  <div class="modal-overlay" id="authModalOverlay" onclick="closeAuthModals()"></div>
+  <div class="auth-modal" id="loginModal">
+    <button class="modal-close-btn" onclick="closeAuthModals()">&times;</button>
+    <h2 data-i18n="modalLoginTitle">Connexion à votre compte</h2>
+    <form id="loginForm" onsubmit="handleLoginSubmit(event)">
+      <div class="input-group"><input type="email" id="loginEmail" required data-i18n="emailPlaceholder"
+          placeholder="Adresse e-mail"></div>
+      <div class="input-group"><input type="password" id="loginPassword" required data-i18n="passwordPlaceholder"
+          placeholder="Mot de passe"></div>
+      <button type="submit" class="btn-primary auth-submit-btn" data-i18n="modalLoginBtn">Se connecter</button>
+    </form>
+    <p class="auth-switch" onclick="switchToSignup(event)"><a href="#" data-i18n="dontHaveAccount">Pas encore de compte
+        ? S'inscrire</a></p>
+  </div>
+  <div class="auth-modal" id="signupModal">
+    <button class="modal-close-btn" onclick="closeAuthModals()">&times;</button>
+    <h2 data-i18n="modalSignupTitle">Créer un compte</h2>
+    <form id="signupForm" onsubmit="handleSignupSubmit(event)">
+      <div class="input-group"><input type="text" id="signupUsername" required data-i18n="usernamePlaceholder"
+          placeholder="Nom d'utilisateur"></div>
+      <div class="input-group"><input type="email" id="signupEmail" required data-i18n="emailPlaceholder"
+          placeholder="Adresse e-mail"></div>
+      <div class="input-group"><input type="password" id="signupPassword" required data-i18n="passwordPlaceholder"
+          placeholder="Mot de passe"></div>
+      <button type="submit" class="btn-primary auth-submit-btn" data-i18n="modalSignupBtn">S'inscrire</button>
+    </form>
+    <p class="auth-switch" onclick="switchToLogin(event)"><a href="#" data-i18n="alreadyHaveAccount">Vous avez déjà un
+        compte ? Se connecter</a></p>
+  </div>
 
-<script src="js/i18n.js"></script>
-<script src="js/common.js"></script>
-<script src="js/script.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/script.js"></script>
 </body>
+
 </html>

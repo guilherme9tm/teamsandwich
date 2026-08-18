@@ -17,16 +17,12 @@
 
 <div class="app-container" id="appContainer">
 
-  <!-- ===== COLLAPSIBLE SIDEBAR ===== -->
   <aside class="sidebar collapsed" id="sidebar"></aside>
 
-  <!-- Mobile overlay -->
   <div class="menu-overlay" id="menuOverlay" onclick="toggleSidebarMobile()"></div>
 
-  <!-- ===== MAIN WRAPPER ===== -->
   <div class="main-layout" id="mainLayout">
 
-    <!-- HEADER -->
     <header class="header" id="header">
       <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleSidebarMobile()" aria-label="Open menu">
         <span></span><span></span><span></span>
@@ -36,7 +32,6 @@
         <img src="assets/images/IMG_6262.jpg" alt="Team Sandwich Logo" class="header-logo">
       </a>
 
-      <!-- Search Bar -->
       <div class="header-search-container">
         <div class="search-input-wrapper">
           <input type="text" id="headerSearchInput" class="search-input" data-i18n="searchPlaceholder" placeholder="Rechercher une carte, collection, numéro...">
@@ -50,7 +45,6 @@
 
       <div class="header-spacer"></div>
 
-      <!-- Language -->
       <div class="lang-selector">
         <select class="lang-selector-select" aria-label="Language">
           <option value="fr">FR</option>
@@ -58,14 +52,12 @@
         </select>
       </div>
 
-      <!-- User Actions -->
       <div class="user-actions" id="headerUserActions">
         <button class="btn-login-header" onclick="openLoginModal()" data-i18n="login">Connexion</button>
         <button class="btn-signup-header" onclick="openSignupModal()" data-i18n="signup">S'inscrire</button>
       </div>
     </header>
 
-    <!-- SEARCH INFO -->
     <section class="search-info" id="searchInfo">
       <div class="search-info-header">
         <a href="index.html" class="back-btn" aria-label="Retour à l'accueil" title="Accueil">
@@ -78,11 +70,10 @@
       </div>
     </section>
 
-    <!-- FILTERS BAR -->
     <section class="card-filters-bar" id="cardFiltersBar">
-      <!-- Desktop filters (hidden on mobile) -->
+      
       <div class="filters-desktop">
-        <!-- Price sort -->
+        
         <div class="filter-dropdown" id="filterPrice">
           <button class="filter-dropdown-btn" onclick="toggleFilterDropdown('filterPrice')">
             <span data-i18n="sortByPrice">Trier par prix</span>
@@ -98,7 +89,6 @@
           </div>
         </div>
 
-        <!-- Rarity filter -->
         <div class="filter-dropdown" id="filterRarity">
           <button class="filter-dropdown-btn" onclick="toggleFilterDropdown('filterRarity')">
             <span data-i18n="filterByRarity">Rarité</span>
@@ -112,7 +102,6 @@
           </div>
         </div>
 
-        <!-- Color filter -->
         <div class="filter-dropdown" id="filterColor">
           <button class="filter-dropdown-btn" onclick="toggleFilterDropdown('filterColor')">
             <span data-i18n="filterByColor">Couleur</span>
@@ -129,7 +118,6 @@
           </div>
         </div>
 
-        <!-- Type filter -->
         <div class="filter-dropdown" id="filterType">
           <button class="filter-dropdown-btn" onclick="toggleFilterDropdown('filterType')">
             <span data-i18n="filterByType">Type</span>
@@ -147,21 +135,18 @@
           </div>
         </div>
 
-        <!-- Clear filters -->
         <button class="filter-clear-btn" id="filterClearBtn" onclick="clearAllFilters()" style="display:none;">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
           <span data-i18n="clearFilters">Effacer les filtres</span>
         </button>
       </div>
 
-      <!-- Mobile filter button (hidden on desktop) -->
       <button class="filters-mobile-btn" id="filtersMobileBtn" onclick="openFilterDrawer()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
         <span data-i18n="filters">Filtres</span>
         <span class="filter-badge" id="filterBadge" style="display:none;">0</span>
       </button>
 
-      <!-- Layout toggles -->
       <div class="layout-toggles">
         <button class="layout-toggle-btn active" data-layout="auto" onclick="setGridLayout('auto')" title="Auto">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="0" y="0" width="4.5" height="4.5" rx="1"/><rect x="5.75" y="0" width="4.5" height="4.5" rx="1"/><rect x="11.5" y="0" width="4.5" height="4.5" rx="1"/><rect x="0" y="5.75" width="4.5" height="4.5" rx="1"/><rect x="5.75" y="5.75" width="4.5" height="4.5" rx="1"/><rect x="11.5" y="5.75" width="4.5" height="4.5" rx="1"/><rect x="0" y="11.5" width="4.5" height="4.5" rx="1"/><rect x="5.75" y="11.5" width="4.5" height="4.5" rx="1"/><rect x="11.5" y="11.5" width="4.5" height="4.5" rx="1"/></svg>
@@ -175,13 +160,11 @@
       </div>
     </section>
 
-    <!-- Active filters indicator -->
     <div class="active-filters-strip" id="activeFiltersStrip" style="display:none;">
       <span class="active-filters-text" id="activeFiltersText"></span>
       <button class="active-filters-clear" onclick="clearAllFilters()">✕</button>
     </div>
 
-    <!-- PAGINATION BAR -->
     <section class="pagination-bar" id="paginationBar">
       <div class="per-page-selector">
         <label for="perPageSelect" data-i18n="cardsPerPage">Cartes par page :</label>
@@ -197,19 +180,16 @@
       <div class="page-nav" id="pageNav"></div>
     </section>
 
-    <!-- RESULTS GRID -->
     <section class="results-section">
       <div id="resultado" class="grid"></div>
     </section>
 
-    <!-- BOTTOM PAGINATION -->
     <section class="pagination-bar pagination-bottom" id="paginationBarBottom">
       <div class="page-nav" id="pageNavBottom"></div>
     </section>
   </div>
 </div>
 
-<!-- FILTER DRAWER (mobile) -->
 <div class="filter-drawer-overlay" id="filterDrawerOverlay" onclick="closeFilterDrawer()"></div>
 <div class="filter-drawer" id="filterDrawer">
   <div class="filter-drawer-header">
@@ -217,7 +197,7 @@
     <button class="filter-drawer-close" onclick="closeFilterDrawer()">&times;</button>
   </div>
   <div class="filter-drawer-body">
-    <!-- Price sort -->
+    
     <div class="filter-drawer-section">
       <h4 data-i18n="sortByPrice">Trier par prix</h4>
       <div class="filter-drawer-options">
@@ -229,7 +209,7 @@
         </button>
       </div>
     </div>
-    <!-- Rarity -->
+    
     <div class="filter-drawer-section">
       <h4 data-i18n="filterByRarity">Rarité</h4>
       <div class="filter-drawer-options">
@@ -239,7 +219,7 @@
         <label class="filter-checkbox"><input type="checkbox" value="mythic" onchange="updateFilters()"><span data-i18n="rarityMythic">Mythic Rare</span></label>
       </div>
     </div>
-    <!-- Color -->
+    
     <div class="filter-drawer-section">
       <h4 data-i18n="filterByColor">Couleur</h4>
       <div class="filter-drawer-options">
@@ -252,7 +232,7 @@
         <label class="filter-checkbox"><input type="checkbox" value="M" onchange="updateFilters()"><span data-i18n="colorMulticolor">Multicolore</span></label>
       </div>
     </div>
-    <!-- Type -->
+    
     <div class="filter-drawer-section">
       <h4 data-i18n="filterByType">Type</h4>
       <div class="filter-drawer-options">
@@ -273,7 +253,6 @@
   </div>
 </div>
 
-<!-- COLLECTIONS MODAL -->
 <div class="collections-modal-overlay" id="collectionsModalOverlay" onclick="closeCollectionsModal()"></div>
 <div class="collections-modal" id="collectionsModal">
   <div class="collections-modal-header">
@@ -297,7 +276,6 @@
   </div>
 </div>
 
-<!-- AUTH MODALS -->
 <div class="modal-overlay" id="authModalOverlay" onclick="closeAuthModals()"></div>
 <div class="auth-modal" id="loginModal">
   <button class="modal-close-btn" onclick="closeAuthModals()">&times;</button>

@@ -1,8 +1,4 @@
-// ===========================
-// SCRIPT.JS — INDEX PAGE LOGIC
-// ===========================
 
-// Mock events data with standard formats
 const mockEvents = [
   {
     id: 1,
@@ -80,23 +76,17 @@ const mockEvents = [
 
 let currentHomeFormat = "all";
 
-// ===========================
-// FORMAT FILTERING
-// ===========================
 function selectFormatFromHome(fmt) {
   currentHomeFormat = fmt;
 
-  // Update pills active state
   document.querySelectorAll(".format-pill").forEach(pill => {
     pill.classList.toggle("active", pill.dataset.format === fmt);
   });
 
-  // Update sidebar active link
   document.querySelectorAll(".format-links li").forEach(li => {
     li.classList.toggle("active", li.dataset.format === fmt);
   });
 
-  // Update URL without full refresh
   const url = new URL(window.location);
   if (fmt === "all") {
     url.searchParams.delete("format");
@@ -108,7 +98,6 @@ function selectFormatFromHome(fmt) {
   renderHomepageEvents(fmt);
 }
 
-// Override common selectFormat for index.html
 function selectFormat(fmt, e) {
   if (e) e.stopPropagation();
   selectFormatFromHome(fmt);
@@ -120,9 +109,6 @@ function selectFormat(fmt, e) {
   }
 }
 
-// ===========================
-// RENDER HOMEPAGE EVENTS
-// ===========================
 function renderHomepageEvents(fmt) {
   const grid = document.getElementById("eventsGrid");
   const badge = document.getElementById("eventsCountBadge");
@@ -180,9 +166,6 @@ function renderHomepageEvents(fmt) {
   if (typeof I18N !== 'undefined') I18N.updateDOM();
 }
 
-// ===========================
-// RENDER PARTNER STORES
-// ===========================
 function renderHomeStores() {
   const container = document.getElementById("homeStoresGrid");
   if (!container || typeof sites === "undefined") return;
@@ -205,9 +188,6 @@ function searchCardForStore(storeId) {
   }
 }
 
-// ===========================
-// HERO ACTIONS
-// ===========================
 function focusHeaderSearch() {
   const input = document.getElementById("headerSearchInput");
   if (input) {
@@ -231,16 +211,12 @@ function triggerImportFile() {
   }
 }
 
-// ===========================
-// INIT
-// ===========================
 document.addEventListener("DOMContentLoaded", () => {
   const params = new URLSearchParams(window.location.search);
   const format = params.get("format") || "all";
 
   currentHomeFormat = format;
 
-  // Sync format pills
   document.querySelectorAll(".format-pill").forEach(pill => {
     pill.classList.toggle("active", pill.dataset.format === format);
   });

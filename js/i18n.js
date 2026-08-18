@@ -1,12 +1,10 @@
-// ===========================
-// i18n — TRANSLATION ENGINE
-// ===========================
+
 const I18N = {
   current: localStorage.getItem('lang') || 'fr',
 
   dict: {
     fr: {
-      // Sidebar
+      
       formats: 'Formats de jeu',
       all: 'Toutes',
       importTitle: 'Importer un fichier',
@@ -22,10 +20,8 @@ const I18N = {
       sortZA: 'Z → A',
       noCollectionsFound: 'Aucune collection trouvée',
 
-      // Header search
       searchPlaceholder: 'Rechercher une carte, collection, numéro...',
 
-      // Auth
       login: 'Connexion',
       signup: "S'inscrire",
       modalLoginTitle: 'Connexion à votre compte',
@@ -39,7 +35,6 @@ const I18N = {
       dontHaveAccount: "Pas encore de compte ? S'inscrire",
       alreadyHaveAccount: 'Vous avez déjà un compte ? Se connecter',
 
-      // Home panels & Hero
       heroTagline: 'Recherche de cartes MTG, Événements & Communauté',
       heroSubtitle: 'Comparez les prix entre les meilleures boutiques de Magic, explorez les collections et suivez les tournois locaux.',
       searchCardCta: 'Rechercher une carte',
@@ -64,7 +59,6 @@ const I18N = {
       viewAllEvents: 'Voir tous les événements',
       backToHome: 'Retour à l\'accueil',
 
-      // Card page
       searchTitle: 'Résultats',
       prices: 'Prix',
       buyAt: 'Acheter chez',
@@ -76,7 +70,6 @@ const I18N = {
       enterName: 'Entrez un nom',
       clear: 'Effacer',
 
-      // Filters
       filters: 'Filtres',
       clearFilters: 'Effacer les filtres',
       sortByPrice: 'Trier par prix',
@@ -99,13 +92,12 @@ const I18N = {
       noFilterResults: 'Aucune carte ne correspond aux filtres sélectionnés.',
       activeFilters: 'filtres actifs',
 
-      // Layout
       layoutGrid: 'Grille',
       layoutList: 'Liste',
       cardsPerPage: 'Cartes par page :',
     },
     en: {
-      // Sidebar
+      
       formats: 'Game Formats',
       all: 'All',
       importTitle: 'Import a file',
@@ -121,10 +113,8 @@ const I18N = {
       sortZA: 'Z → A',
       noCollectionsFound: 'No collections found',
 
-      // Header search
       searchPlaceholder: 'Search for a card, collection, number...',
 
-      // Auth
       login: 'Login',
       signup: 'Sign up',
       modalLoginTitle: 'Log in to your account',
@@ -138,7 +128,6 @@ const I18N = {
       dontHaveAccount: "Don't have an account? Sign up",
       alreadyHaveAccount: 'Already have an account? Log in',
 
-      // Home panels & Hero
       heroTagline: 'MTG Card Search, Events & Community Hub',
       heroSubtitle: 'Compare card prices across top Canadian & international stores, explore sets and follow local tournaments.',
       searchCardCta: 'Search Cards',
@@ -163,7 +152,6 @@ const I18N = {
       viewAllEvents: 'View all events',
       backToHome: 'Back to Home',
 
-      // Card page
       searchTitle: 'Results',
       prices: 'Prices',
       buyAt: 'Buy at',
@@ -175,7 +163,6 @@ const I18N = {
       enterName: 'Enter a name',
       clear: 'Clear',
 
-      // Filters
       filters: 'Filters',
       clearFilters: 'Clear filters',
       sortByPrice: 'Sort by price',
@@ -198,7 +185,6 @@ const I18N = {
       noFilterResults: 'No cards match the selected filters.',
       activeFilters: 'active filters',
 
-      // Layout
       layoutGrid: 'Grid',
       layoutList: 'List',
       cardsPerPage: 'Cards per page:',
@@ -216,7 +202,7 @@ const I18N = {
   },
 
   updateDOM() {
-    // Text content
+    
     document.querySelectorAll('[data-i18n]').forEach(el => {
       const key = el.getAttribute('data-i18n');
       const translated = this.t(key);
@@ -227,14 +213,11 @@ const I18N = {
       }
     });
 
-    // Update lang attribute
     document.documentElement.lang = this.current;
 
-    // Sync dropdown
     const selector = document.querySelector('.lang-selector-select');
     if (selector) selector.value = this.current;
 
-    // Sync sidebar lang selector too
     const sidebarSelector = document.querySelector('.sidebar-lang-select');
     if (sidebarSelector) sidebarSelector.value = this.current;
   }

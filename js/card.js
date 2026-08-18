@@ -1,11 +1,4 @@
-// ===========================
-// CARD.JS — Results page logic
-// Depends on common.js (sites, getSelected, etc.)
-// ===========================
 
-// ===========================
-// TOGGLE CARD DETAILS
-// ===========================
 function toggleCard(btn) {
   const card = btn.closest(".card");
   if (!card) return;
@@ -21,9 +14,6 @@ function toggleCard(btn) {
   }
 }
 
-// ===========================
-// FETCH & RENDER A SINGLE CARD
-// ===========================
 function renderCardElement(cardData) {
   const n = encodeURIComponent(cardData.name);
 
@@ -93,25 +83,16 @@ async function fetchCardData(nome) {
   return await res.json();
 }
 
-// ===========================
-// PAGINATION STATE
-// ===========================
 let allCards = [];
 let filteredCards = [];
 let currentPage = 1;
 let perPage = 15;
 
-// ===========================
-// FILTER STATE
-// ===========================
-let activeSort = null; // null, 'price-asc', 'price-desc'
+let activeSort = null; 
 let activeRarityFilters = [];
 let activeColorFilters = [];
 let activeTypeFilters = [];
 
-// ===========================
-// LAYOUT STATE
-// ===========================
 let currentLayout = localStorage.getItem('gridLayout') || 'auto';
 
 function changePerPage(value) {
@@ -172,7 +153,6 @@ function renderPagination() {
   const paginationBar = document.getElementById("paginationBar");
   const paginationBarBottom = document.getElementById("paginationBarBottom");
 
-  // Hide pagination if only 1 page
   if (totalPages <= 1) {
     if (paginationBarBottom) paginationBarBottom.style.display = "none";
     if (navTop) navTop.innerHTML = `<span class="page-info">${filteredCards.length} carte(s)</span>`;
@@ -185,7 +165,6 @@ function renderPagination() {
     if (!navEl) return;
     navEl.innerHTML = "";
 
-    // Prev button
     const prevBtn = document.createElement("button");
     prevBtn.className = "page-btn arrow-btn";
     prevBtn.textContent = "‹";
@@ -193,7 +172,6 @@ function renderPagination() {
     prevBtn.onclick = () => goToPage(currentPage - 1);
     navEl.appendChild(prevBtn);
 
-    // Page numbers with ellipsis
     const maxVisible = 7;
     let pages = [];
 
@@ -226,7 +204,6 @@ function renderPagination() {
       }
     });
 
-    // Next button
     const nextBtn = document.createElement("button");
     nextBtn.className = "page-btn arrow-btn";
     nextBtn.textContent = "›";
@@ -234,7 +211,6 @@ function renderPagination() {
     nextBtn.onclick = () => goToPage(currentPage + 1);
     navEl.appendChild(nextBtn);
 
-    // Page info
     const info = document.createElement("span");
     info.className = "page-info";
     const from = (currentPage - 1) * perPage + 1;
@@ -246,10 +222,6 @@ function renderPagination() {
   buildNav(navTop);
   buildNav(navBottom);
 }
-
-// ===========================
-// FILTER SYSTEM
-// ===========================
 
 function getCardPrice(card) {
   return parseFloat(card.prices?.usd) || parseFloat(card.prices?.usd_foil) || 0;
@@ -275,40 +247,33 @@ function applyFilters() {
   let result = [...allCards].filter(c => !c._notFound);
   const notFound = allCards.filter(c => c._notFound);
 
-  // Filter by rarity
   if (activeRarityFilters.length > 0) {
     result = result.filter(card => activeRarityFilters.includes(card.rarity));
   }
 
-  // Filter by color
   if (activeColorFilters.length > 0) {
     result = result.filter(card => {
       const cardColors = getCardColors(card);
 
-      // Check for colorless
       if (activeColorFilters.includes('C')) {
         if (cardColors.length === 0) return true;
       }
 
-      // Check for multicolor
       if (activeColorFilters.includes('M')) {
         if (cardColors.length > 1) return true;
       }
 
-      // Check for specific colors (W, U, B, R, G)
       const specificColors = activeColorFilters.filter(c => !['C', 'M'].includes(c));
       if (specificColors.length > 0) {
         if (specificColors.some(c => cardColors.includes(c))) return true;
       }
 
-      // If only C or M was selected and card didn't match, exclude
       if (specificColors.length === 0) return false;
 
       return false;
     });
   }
 
-  // Filter by type
   if (activeTypeFilters.length > 0) {
     result = result.filter(card => {
       const typeLine = getCardTypeLine(card).toLowerCase();
@@ -316,7 +281,6 @@ function applyFilters() {
     });
   }
 
-  // Sort by price
   if (activeSort === 'price-asc') {
     result.sort((a, b) => getCardPrice(a) - getCardPrice(b));
   } else if (activeSort === 'price-desc') {
@@ -331,22 +295,19 @@ function applyFilters() {
 }
 
 function updateFilters() {
-  // Read from all checkboxes (desktop + drawer)
+  
   activeRarityFilters = [];
   activeColorFilters = [];
   activeTypeFilters = [];
 
-  // Rarity checkboxes
   document.querySelectorAll('#filterRarity .filter-checkbox input:checked, #filterDrawer .filter-drawer-section:nth-child(2) .filter-checkbox input:checked').forEach(cb => {
     if (!activeRarityFilters.includes(cb.value)) activeRarityFilters.push(cb.value);
   });
 
-  // Color checkboxes
   document.querySelectorAll('#filterColor .filter-checkbox input:checked, #filterDrawer .filter-drawer-section:nth-child(3) .filter-checkbox input:checked').forEach(cb => {
     if (!activeColorFilters.includes(cb.value)) activeColorFilters.push(cb.value);
   });
 
-  // Type checkboxes
   document.querySelectorAll('#filterType .filter-checkbox input:checked, #filterDrawer .filter-drawer-section:nth-child(4) .filter-checkbox input:checked').forEach(cb => {
     if (!activeTypeFilters.includes(cb.value)) activeTypeFilters.push(cb.value);
   });
@@ -361,12 +322,10 @@ function setFilterSort(sortType) {
     activeSort = sortType;
   }
 
-  // Update desktop sort option active states
   document.querySelectorAll('#filterPrice .filter-option').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.value === activeSort);
   });
 
-  // Update drawer sort chip active states
   document.querySelectorAll('#filterDrawer .filter-drawer-chip').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.value === activeSort);
   });
@@ -380,12 +339,10 @@ function clearAllFilters() {
   activeColorFilters = [];
   activeTypeFilters = [];
 
-  // Uncheck all filter checkboxes
   document.querySelectorAll('.filter-checkbox input[type="checkbox"]').forEach(cb => {
     cb.checked = false;
   });
 
-  // Remove active from sort options
   document.querySelectorAll('.filter-option, .filter-drawer-chip').forEach(btn => {
     btn.classList.remove('active');
   });
@@ -396,18 +353,15 @@ function clearAllFilters() {
 function updateFilterUI() {
   const totalActive = activeRarityFilters.length + activeColorFilters.length + activeTypeFilters.length + (activeSort ? 1 : 0);
 
-  // Clear button visibility
   const clearBtn = document.getElementById('filterClearBtn');
   if (clearBtn) clearBtn.style.display = totalActive > 0 ? 'flex' : 'none';
 
-  // Badge on mobile button
   const badge = document.getElementById('filterBadge');
   if (badge) {
     badge.style.display = totalActive > 0 ? 'inline-flex' : 'none';
     badge.textContent = totalActive;
   }
 
-  // Active filter strip
   const strip = document.getElementById('activeFiltersStrip');
   const text = document.getElementById('activeFiltersText');
   if (strip && text) {
@@ -419,23 +373,18 @@ function updateFilterUI() {
     }
   }
 
-  // Update dropdown button active states
   document.querySelectorAll('.filter-dropdown').forEach(dd => {
     const hasActive = dd.querySelector('.filter-checkbox input:checked') || dd.querySelector('.filter-option.active');
     dd.querySelector('.filter-dropdown-btn').classList.toggle('has-active', !!hasActive);
   });
 }
 
-// ===========================
-// FILTER DROPDOWN TOGGLE
-// ===========================
 function toggleFilterDropdown(id) {
   const dropdown = document.getElementById(id);
   if (!dropdown) return;
 
   const wasOpen = dropdown.classList.contains('open');
 
-  // Close all others
   document.querySelectorAll('.filter-dropdown.open').forEach(dd => {
     dd.classList.remove('open');
   });
@@ -445,7 +394,6 @@ function toggleFilterDropdown(id) {
   }
 }
 
-// Close dropdowns on outside click
 document.addEventListener('click', (e) => {
   if (!e.target.closest('.filter-dropdown')) {
     document.querySelectorAll('.filter-dropdown.open').forEach(dd => {
@@ -454,9 +402,6 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// ===========================
-// FILTER DRAWER (MOBILE)
-// ===========================
 function openFilterDrawer() {
   const drawer = document.getElementById('filterDrawer');
   const overlay = document.getElementById('filterDrawerOverlay');
@@ -473,9 +418,6 @@ function closeFilterDrawer() {
   document.body.style.overflow = '';
 }
 
-// ===========================
-// LAYOUT TOGGLE
-// ===========================
 function setGridLayout(layout) {
   currentLayout = layout;
   localStorage.setItem('gridLayout', layout);
@@ -483,15 +425,12 @@ function setGridLayout(layout) {
   const grid = document.getElementById('resultado');
   if (!grid) return;
 
-  // Remove all layout classes
   grid.classList.remove('grid-2', 'grid-list');
 
-  // Add the selected layout class (if not 'auto')
   if (layout !== 'auto') {
     grid.classList.add(layout);
   }
 
-  // Update toggle button active states
   document.querySelectorAll('.layout-toggle-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.layout === layout);
   });
@@ -501,9 +440,6 @@ function initLayout() {
   setGridLayout(currentLayout);
 }
 
-// ===========================
-// PAGE INIT — READ URL PARAMS
-// ===========================
 async function init() {
   const params = new URLSearchParams(window.location.search);
   const container = document.getElementById("resultado");
@@ -524,7 +460,6 @@ async function init() {
     if (loader) loader.remove();
   };
 
-  // Single card search: ?name=CardName
   if (params.has("name")) {
     const nome = params.get("name");
     titleEl.textContent = nome;
@@ -562,7 +497,6 @@ async function init() {
     subtitleEl.textContent = `${allCards.filter(c => !c._notFound).length} carte(s) trouvée(s)`;
   }
 
-  // File import: ?source=file
   else if (params.get("source") === "file") {
     const cartas = JSON.parse(sessionStorage.getItem("fileCards") || "[]");
     titleEl.textContent = `📂 Importation de fichier`;
@@ -585,7 +519,6 @@ async function init() {
     subtitleEl.textContent = `${cartas.length} carte(s) chargée(s)`;
   }
 
-  // Collection: ?set=CODE
   else if (params.has("set")) {
     const code = params.get("set");
     titleEl.textContent = `📦 Collection : ${code.toUpperCase()}`;
@@ -615,13 +548,11 @@ async function init() {
     subtitleEl.textContent = `${loaded} carte(s) chargée(s)`;
   }
 
-  // No params
   else {
     titleEl.textContent = "Aucune recherche";
     subtitleEl.textContent = "Retournez à la page d'accueil pour effectuer une recherche.";
   }
 
-  // Initialize layout from saved preference
   initLayout();
 }
 

@@ -1,40 +1,32 @@
-/* ===========================
-   CSS CUSTOM PROPERTIES — TEAM SANDWICH LOGO PALETTE
-   =========================== */
+
 :root {
-  /* Backgrounds: Warm stone & deep olive charcoal */
+  
   --bg-primary: #121413;
   --bg-secondary: #191c1a;
   --bg-card: #202421;
   --bg-elevated: #282e2a;
   --bg-glass: rgba(143, 170, 154, 0.06);
 
-  /* Borders */
   --border-subtle: rgba(143, 170, 154, 0.12);
   --border-medium: rgba(143, 170, 154, 0.22);
   --border-strong: rgba(143, 170, 154, 0.35);
 
-  /* Typography Colors */
-  --text-primary: #f5f2eb;   /* Ivory cream from "SANDWICH" */
-  --text-secondary: #b4bdb5; /* Soft weathered stone */
-  --text-muted: #737c74;     /* Subdued moss */
+  --text-primary: #f5f2eb;   
+  --text-secondary: #b4bdb5; 
+  --text-muted: #737c74;     
 
-  /* Brand Accents: Sage green from "TEAM" */
   --accent: #7ea48f;
   --accent-glow: rgba(126, 164, 143, 0.28);
   --accent-hover: #96baa3;
   --accent-dark: #597d6a;
 
-  /* Gold / Trophy / Highlight Accent */
   --gold: #c9aa6d;
   --gold-glow: rgba(201, 170, 109, 0.28);
 
-  /* Feedback Colors */
   --success: #67b889;
   --warning: #d9a04f;
   --danger: #d96262;
 
-  /* Radii & Shadows */
   --radius-sm: 8px;
   --radius-md: 14px;
   --radius-lg: 22px;
@@ -49,9 +41,6 @@
   --font-serif: 'Playfair Display', 'Cinzel', Georgia, serif;
 }
 
-/* ===========================
-   BASE / RESET
-   =========================== */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -84,9 +73,6 @@ img {
   display: block;
 }
 
-/* ===========================
-   HEADER / NAVBAR — FULL WIDTH & RESPONSIVE
-   =========================== */
 .header {
   position: sticky;
   top: 0;
@@ -103,7 +89,6 @@ img {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
-/* Hamburger button in header */
 .hamburger-btn {
   display: flex;
   width: 40px;
@@ -169,7 +154,6 @@ img {
   transform: scale(1.03);
 }
 
-/* Search container in header */
 .header-search-container {
   position: relative;
   flex: 1;
@@ -264,7 +248,6 @@ img {
   display: none;
 }
 
-/* Header actions right */
 .header-actions-right {
   display: flex;
   align-items: center;
@@ -272,7 +255,6 @@ img {
   flex-shrink: 0;
 }
 
-/* Autocomplete dropdown */
 .autocomplete-dropdown {
   position: absolute;
   top: calc(100% + 6px);
@@ -328,9 +310,6 @@ img {
   text-overflow: ellipsis;
 }
 
-/* ===========================
-   LANGUAGE SELECTOR
-   =========================== */
 .lang-selector {
   flex-shrink: 0;
 }
@@ -359,9 +338,6 @@ img {
   color: var(--text-primary);
 }
 
-/* ===========================
-   USER ACTIONS
-   =========================== */
 .user-actions {
   display: flex;
   align-items: center;
@@ -433,9 +409,6 @@ img {
   border-color: var(--danger);
 }
 
-/* ===========================
-   COLLAPSIBLE SIDEBAR
-   =========================== */
 .app-container {
   display: flex;
   min-height: 100vh;
@@ -451,9 +424,6 @@ img {
   transition: margin-left var(--transition);
 }
 
-/* ===========================
-   OFF-CANVAS SIDEBAR / DRAWER
-   =========================== */
 .sidebar {
   position: fixed;
   top: 0;
@@ -470,12 +440,12 @@ img {
   transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 0 50px rgba(0, 0, 0, 0.7);
   overflow-y: auto;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none; 
+  -ms-overflow-style: none; 
 }
 
 .sidebar::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Opera */
+  display: none; 
 }
 
 .sidebar.open,
@@ -783,7 +753,6 @@ img {
   color: #121413;
 }
 
-/* Common button classes */
 .btn-primary {
   padding: 10px 18px;
   background: linear-gradient(135deg, var(--accent), var(--accent-dark));
@@ -823,9 +792,6 @@ img {
   border-color: var(--accent);
 }
 
-/* ===========================
-   MAIN CONTENT AREA
-   =========================== */
 .main-content {
   display: flex;
   flex-direction: column;
@@ -836,9 +802,6 @@ img {
   margin: 0 auto;
 }
 
-/* ===========================
-   HERO SECTION — REFORMULATED
-   =========================== */
 .hero-section {
   position: relative;
   background: linear-gradient(135deg, #1b201d 0%, #242b26 50%, #1c221e 100%);
@@ -982,9 +945,6 @@ img {
   transform: translateY(-2px);
 }
 
-/* ===========================
-   FORMATS SHOWCASE SECTION
-   =========================== */
 .section-header {
   display: flex;
   align-items: flex-end;
@@ -1128,9 +1088,6 @@ img {
   transform: translateX(4px);
 }
 
-/* ===========================
-   TWO-COLUMN HOME GRID LAYOUT
-   =========================== */
 .home-grid-layout {
   display: grid;
   grid-template-columns: 1.6fr 1fr;
@@ -1138,7 +1095,6 @@ img {
   align-items: start;
 }
 
-/* Panel */
 .panel {
   background: var(--bg-card);
   border: 1px solid var(--border-medium);
@@ -1198,9 +1154,6 @@ img {
   padding: 20px 24px;
 }
 
-/* ===========================
-   EVENTS LIST IN HOME
-   =========================== */
 .events-list-grid {
   display: flex;
   flex-direction: column;
@@ -1325,9 +1278,6 @@ img {
   font-size: 1.8rem;
 }
 
-/* ===========================
-   RANKING & LEADERBOARD
-   =========================== */
 .ranking-list {
   display: flex;
   flex-direction: column;
@@ -1410,7 +1360,6 @@ img {
   color: var(--accent);
 }
 
-/* Next highlight card */
 .next-highlight-box {
   background: linear-gradient(135deg, rgba(126, 164, 143, 0.12) 0%, rgba(201, 170, 109, 0.08) 100%);
   border: 1px solid rgba(126, 164, 143, 0.25);
@@ -1472,9 +1421,6 @@ img {
   color: var(--text-secondary);
 }
 
-/* ===========================
-   POPULAR SETS QUICK ACCESS
-   =========================== */
 .popular-sets-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -1559,9 +1505,6 @@ img {
   text-decoration: underline;
 }
 
-/* ===========================
-   PARTNER STORES SECTION
-   =========================== */
 .stores-pills-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
@@ -1605,9 +1548,6 @@ img {
   color: var(--text-muted);
 }
 
-/* ===========================
-   CARD PAGE & GRID STYLES
-   =========================== */
 .results-section {
   padding: 0 24px 40px;
   max-width: 1400px;
@@ -1743,9 +1683,6 @@ img {
   width: 44px;
 }
 
-/* ===========================
-   COLLECTIONS MODAL
-   =========================== */
 .collections-modal-overlay {
   position: fixed;
   inset: 0;
@@ -1978,9 +1915,6 @@ img {
   color: var(--text-muted);
 }
 
-/* ===========================
-   AUTH MODALS
-   =========================== */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -2069,9 +2003,6 @@ img {
   font-weight: 600;
 }
 
-/* ===========================
-   MENU OVERLAY
-   =========================== */
 .menu-overlay {
   position: fixed;
   inset: 0;
@@ -2088,9 +2019,6 @@ img {
   pointer-events: auto;
 }
 
-/* ===========================
-   RESPONSIVE BREAKPOINTS
-   =========================== */
 @media (max-width: 1024px) {
   .formats-cards-grid {
     grid-template-columns: repeat(2, 1fr);
