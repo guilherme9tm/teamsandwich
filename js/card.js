@@ -22,9 +22,10 @@ function toggleCard(btn) {
 function renderCardElement(cardData) {
   const n = encodeURIComponent(cardData.name);
   const cardDetailUrl = `card-detail.html?id=${encodeURIComponent(cardData.id || '')}&name=${n}`;
+  const cardIdAttr = cardData.id || cardData.name;
 
-  let img = cardData.image_uris?.normal || cardData.card_faces?.[0]?.image_uris?.normal || cardData.image_uris?.small || cardData.card_faces?.[0]?.image_uris?.small;
-  if (img) img = img.split('?')[0];
+  const currentLang = typeof I18N !== 'undefined' ? I18N.current : 'fr';
+  let img = getCardImageUrl(cardData, currentLang);
 
   const usd = parseFloat(cardData.prices?.usd) || parseFloat(cardData.prices?.usd_foil) || 0;
   const cad = usd ? `CAD ${(usd * 1.38).toFixed(2)}` : I18N.t('priceUnavailable');
@@ -35,7 +36,7 @@ function renderCardElement(cardData) {
   card.className = "card";
 
   if (img) {
-    card.innerHTML += `<a href="${cardDetailUrl}" class="card-img-link" title="${cardData.name}"><img src="${img}" alt="${cardData.name}"></a>`;
+    card.innerHTML += `<a href="${cardDetailUrl}" class="card-img-link" title="${cardData.name}"><img src="${img}" alt="${cardData.name}" data-card-id="${cardIdAttr}"></a>`;
   }
 
   card.innerHTML += `
@@ -86,6 +87,75 @@ function renderCardElement(cardData) {
 const SCRYFALL_HEADERS = {
   'Accept': 'application/json;q=0.9,*/*;q=0.8'
 };
+
+const localizedCardCache = new Map();
+
+async function fetchLocalizedCardData(card, lang) {
+  if (!card || card._notFound || !lang || lang === 'en') return null;
+
+  const key = `${card.id || card.name}_${lang}`;
+  if (localizedCardCache.has(key)) {
+    return localizedCardCache.get(key);
+  }
+
+  let locCard = null;
+
+  if (card.set && card.collector_number) {
+    try {
+      const res = await fetch(`https://api.scryfall.com/cards/${card.set}/${card.collector_number}/${lang}`, {
+        headers: SCRYFALL_HEADERS
+      });
+      if (res.ok) {
+        locCard = await res.json();
+      }
+    } catch (e) {}
+  }
+
+  if (!locCard && card.oracle_id) {
+    try {
+      const res = await fetch(`https://api.scryfall.com/cards/search?q=oracleid:${card.oracle_id}+lang:${lang}`, {
+        headers: SCRYFALL_HEADERS
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.data && data.data.length > 0) {
+          locCard = data.data[0];
+        }
+      }
+    } catch (e) {}
+  }
+
+  if (!locCard && card.name) {
+    try {
+      const res = await fetch(`https://api.scryfall.com/cards/named?exact=${encodeURIComponent(card.name)}&lang=${lang}`, {
+        headers: SCRYFALL_HEADERS
+      });
+      if (res.ok) {
+        locCard = await res.json();
+      }
+    } catch (e) {}
+  }
+
+  localizedCardCache.set(key, locCard);
+  return locCard;
+}
+
+function getCardImageUrl(cardData, lang) {
+  if (!cardData || cardData._notFound) return '';
+
+  if (lang && lang !== 'en') {
+    const key = `${cardData.id || cardData.name}_${lang}`;
+    const locCard = localizedCardCache.get(key);
+    if (locCard) {
+      let locImg = locCard.image_uris?.normal || locCard.card_faces?.[0]?.image_uris?.normal || locCard.image_uris?.small || locCard.card_faces?.[0]?.image_uris?.small;
+      if (locImg) return locImg.split('?')[0];
+    }
+  }
+
+  let img = cardData.image_uris?.normal || cardData.card_faces?.[0]?.image_uris?.normal || cardData.image_uris?.small || cardData.card_faces?.[0]?.image_uris?.small;
+  if (img) img = img.split('?')[0];
+  return img || '';
+}
 
 async function fetchCardData(nome) {
   const n = encodeURIComponent(nome);
@@ -163,6 +233,38 @@ function renderPage() {
       container.appendChild(renderCardElement(cardData));
     }
   });
+
+  loadLocalizedImagesForPage(pageCards);
+}
+
+async function loadLocalizedImagesForPage(pageCards) {
+  const currentLang = typeof I18N !== 'undefined' ? I18N.current : 'fr';
+  if (!currentLang || currentLang === 'en') return;
+
+  for (const cardData of pageCards) {
+    if (!cardData || cardData._notFound) continue;
+
+    const cardIdAttr = cardData.id || cardData.name;
+    const key = `${cardIdAttr}_${currentLang}`;
+
+    if (!localizedCardCache.has(key)) {
+      const locCard = await fetchLocalizedCardData(cardData, currentLang);
+
+      const activeLang = typeof I18N !== 'undefined' ? I18N.current : 'fr';
+      if (activeLang === currentLang) {
+        const locImg = getCardImageUrl(cardData, activeLang);
+        if (locImg) {
+          const imgEls = document.querySelectorAll('img[data-card-id]');
+          imgEls.forEach(imgEl => {
+            if (imgEl.getAttribute('data-card-id') === cardIdAttr) {
+              imgEl.src = locImg;
+            }
+          });
+        }
+      }
+      await new Promise(r => setTimeout(r, 50));
+    }
+  }
 }
 
 function renderPagination() {
