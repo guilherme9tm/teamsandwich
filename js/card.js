@@ -1,4 +1,7 @@
 
+const CHEVRON_DOWN_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
+const CHEVRON_UP_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"></polyline></svg>`;
+
 function toggleCard(btn) {
   const card = btn.closest(".card");
   if (!card) return;
@@ -7,10 +10,12 @@ function toggleCard(btn) {
 
   if (extra.style.display === "block") {
     extra.style.display = "none";
-    btn.textContent = "Afficher plus";
+    btn.classList.remove("active");
+    btn.innerHTML = CHEVRON_DOWN_SVG;
   } else {
     extra.style.display = "block";
-    btn.textContent = "Masquer";
+    btn.classList.add("active");
+    btn.innerHTML = CHEVRON_UP_SVG;
   }
 }
 
@@ -22,7 +27,7 @@ function renderCardElement(cardData) {
   if (img) img = img.split('?')[0];
 
   const usd = parseFloat(cardData.prices?.usd) || parseFloat(cardData.prices?.usd_foil) || 0;
-  const cad = usd ? `CAD ${(usd * 1.38).toFixed(2)}` : "Prix indisponible";
+  const cad = usd ? `CAD ${(usd * 1.38).toFixed(2)}` : I18N.t('priceUnavailable');
 
   const selected = getSelected();
 
@@ -30,7 +35,7 @@ function renderCardElement(cardData) {
   card.className = "card";
 
   if (img) {
-    card.innerHTML += `<a href="${cardDetailUrl}" class="card-img-link" title="Voir les détails de ${cardData.name}"><img src="${img}" alt="${cardData.name}"></a>`;
+    card.innerHTML += `<a href="${cardDetailUrl}" class="card-img-link" title="${cardData.name}"><img src="${img}" alt="${cardData.name}"></a>`;
   }
 
   card.innerHTML += `
@@ -39,10 +44,10 @@ function renderCardElement(cardData) {
     <div class="card-actions-row">
       <a href="${cardDetailUrl}" class="btn-card-detail">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-        Détails & Magasins
+        ${I18N.t('cardDetailsBtn')}
       </a>
-      <button class="toggle-btn" onclick="toggleCard(this)" title="Aperçu rapide des magasins">
-        ⚡
+      <button class="toggle-btn" onclick="toggleCard(this)" title="${I18N.t('quickPreviewTooltip')}">
+        ${CHEVRON_DOWN_SVG}
       </button>
     </div>
   `;
@@ -152,7 +157,7 @@ function renderPage() {
     if (cardData._notFound) {
       const errDiv = document.createElement("div");
       errDiv.className = "card card-not-found";
-      errDiv.innerHTML = `<p>Carte non trouvée : ${cardData.name}</p>`;
+      errDiv.innerHTML = `<p>${I18N.t('cardNotFound')} ${cardData.name}</p>`;
       container.appendChild(errDiv);
     } else {
       container.appendChild(renderCardElement(cardData));
@@ -169,7 +174,7 @@ function renderPagination() {
 
   if (totalPages <= 1) {
     if (paginationBarBottom) paginationBarBottom.style.display = "none";
-    if (navTop) navTop.innerHTML = `<span class="page-info">${filteredCards.length} carte(s)</span>`;
+    if (navTop) navTop.innerHTML = `<span class="page-info">${filteredCards.length} ${I18N.t('cardsFoundCount')}</span>`;
     return;
   }
 
@@ -229,7 +234,7 @@ function renderPagination() {
     info.className = "page-info";
     const from = (currentPage - 1) * perPage + 1;
     const to = Math.min(currentPage * perPage, filteredCards.length);
-    info.textContent = `${from}–${to} de ${filteredCards.length}`;
+    info.textContent = `${from}–${to} ${I18N.t('pageFromTo')} ${filteredCards.length}`;
     navEl.appendChild(info);
   };
 
@@ -454,6 +459,30 @@ function initLayout() {
   setGridLayout(currentLayout);
 }
 
+function updateSearchTitles() {
+  const params = new URLSearchParams(window.location.search);
+  const titleEl = document.getElementById("searchTitle");
+  const subtitleEl = document.getElementById("searchSubtitle");
+  if (!titleEl || !subtitleEl) return;
+
+  const validCards = allCards.filter(c => !c._notFound);
+
+  if (params.has("name")) {
+    titleEl.textContent = params.get("name");
+    subtitleEl.textContent = `${validCards.length} ${I18N.t('cardsFoundCount')}`;
+  } else if (params.get("source") === "file") {
+    titleEl.textContent = I18N.t('fileImportTitle');
+    subtitleEl.textContent = `${validCards.length} ${I18N.t('cardsLoadedCount')}`;
+  } else if (params.has("set")) {
+    const code = params.get("set");
+    titleEl.textContent = `${I18N.t('setCollectionTitle')} ${code.toUpperCase()}`;
+    subtitleEl.textContent = `${validCards.length} ${I18N.t('cardsLoadedCount')}`;
+  } else {
+    titleEl.textContent = I18N.t('noSearchTitle');
+    subtitleEl.textContent = I18N.t('noSearchSubtitle');
+  }
+}
+
 async function init() {
   const params = new URLSearchParams(window.location.search);
   const container = document.getElementById("resultado");
@@ -477,8 +506,8 @@ async function init() {
   if (params.has("name")) {
     const nome = params.get("name");
     titleEl.textContent = nome;
-    subtitleEl.textContent = "Recherche de cartes...";
-    showLoader("Chargement...");
+    subtitleEl.textContent = I18N.t('loading');
+    showLoader(I18N.t('loading'));
 
     try {
       let url = `https://api.scryfall.com/cards/search?q=${encodeURIComponent(nome)}&unique=cards&order=name`;
@@ -493,7 +522,7 @@ async function init() {
           allCards.push(card);
           loaded++;
         }
-        subtitleEl.textContent = `${loaded} carte(s) trouvée(s)...`;
+        subtitleEl.textContent = `${loaded} ${I18N.t('cardsFoundCount')}...`;
         if (data.has_more && data.next_page) {
           await new Promise(r => setTimeout(r, 100));
           url = data.next_page;
@@ -513,14 +542,14 @@ async function init() {
     filteredCards = [...allCards];
     renderPage();
     renderPagination();
-    subtitleEl.textContent = `${allCards.filter(c => !c._notFound).length} carte(s) trouvée(s)`;
+    updateSearchTitles();
   }
 
   else if (params.get("source") === "file") {
     const cartas = JSON.parse(sessionStorage.getItem("fileCards") || "[]");
-    titleEl.textContent = `Importation de fichier`;
-    subtitleEl.textContent = `${cartas.length} carte(s) à charger...`;
-    showLoader(`Chargement de ${cartas.length} carte(s)...`);
+    titleEl.textContent = I18N.t('fileImportTitle');
+    subtitleEl.textContent = `${cartas.length} ${I18N.t('cardsLoadingCount')}`;
+    showLoader(`${cartas.length} ${I18N.t('cardsLoadingCount')}`);
 
     let loaded = 0;
     for (let nome of cartas) {
@@ -528,21 +557,21 @@ async function init() {
       allCards.push(data);
       await new Promise(r => setTimeout(r, 100));
       loaded++;
-      subtitleEl.textContent = `${loaded} / ${cartas.length} carte(s) chargée(s)`;
+      subtitleEl.textContent = `${loaded} / ${cartas.length} ${I18N.t('cardsLoadedCount')}`;
     }
 
     removeLoader();
     filteredCards = [...allCards];
     renderPage();
     renderPagination();
-    subtitleEl.textContent = `${cartas.length} carte(s) chargée(s)`;
+    updateSearchTitles();
   }
 
   else if (params.has("set")) {
     const code = params.get("set");
-    titleEl.textContent = `Collection : ${code.toUpperCase()}`;
-    subtitleEl.textContent = "Chargement de la collection...";
-    showLoader(`Chargement de la collection ${code.toUpperCase()}...`);
+    titleEl.textContent = `${I18N.t('setCollectionTitle')} ${code.toUpperCase()}`;
+    subtitleEl.textContent = I18N.t('loadingCollection');
+    showLoader(I18N.t('loadingCollection'));
 
     let url = `https://api.scryfall.com/cards/search?q=set:${code}`;
     let loaded = 0;
@@ -556,7 +585,7 @@ async function init() {
         for (let card of data.data) {
           allCards.push(card);
           loaded++;
-          subtitleEl.textContent = `${loaded} carte(s) chargée(s)...`;
+          subtitleEl.textContent = `${loaded} ${I18N.t('cardsLoadedCount')}...`;
         }
 
         if (data.has_more && data.next_page) {
@@ -574,15 +603,23 @@ async function init() {
     filteredCards = [...allCards];
     renderPage();
     renderPagination();
-    subtitleEl.textContent = `${loaded} carte(s) chargée(s)`;
+    updateSearchTitles();
   }
 
   else {
-    titleEl.textContent = "Aucune recherche";
-    subtitleEl.textContent = "Retournez à la page d'accueil pour effectuer une recherche.";
+    titleEl.textContent = I18N.t('noSearchTitle');
+    subtitleEl.textContent = I18N.t('noSearchSubtitle');
   }
 
   initLayout();
 }
 
+window.addEventListener('languageChanged', () => {
+  renderPage();
+  renderPagination();
+  updateFilterUI();
+  updateSearchTitles();
+});
+
 init();
+

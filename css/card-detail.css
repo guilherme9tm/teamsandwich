@@ -462,10 +462,15 @@
 }
 
 .detail-store-logo {
-  height: 24px;
-  max-width: 90px;
+  height: 28px;
+  max-width: 100px;
   object-fit: contain;
   flex-shrink: 0;
+  background: #333d37;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  padding: 3px 6px;
+  border-radius: 6px;
+  filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.7)) drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
 }
 
 .detail-store-name {

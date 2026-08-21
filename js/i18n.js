@@ -4,7 +4,7 @@ const I18N = {
 
   dict: {
     fr: {
-      
+      languageLabel: 'Langue / Language',
       formats: 'Formats de jeu',
       all: 'Toutes',
       importTitle: 'Importer un fichier',
@@ -46,6 +46,7 @@ const I18N = {
       communityRanking: 'Classement des Joueurs',
       partnerStores: 'Boutiques Partenaires',
       popularSetsTitle: 'Dernières Collections',
+      popularSetsDesc: 'Accédez directement aux cartes des extensions récentes',
       eventsPhotos: 'Événements & Photos',
       noEvents: 'Aucun événement pour le moment',
       selectFormatPrompt: 'Sélectionnez un format',
@@ -57,7 +58,7 @@ const I18N = {
       formatConfirm: 'Format & lieu à confirmer',
       ranking: 'Ranking',
       viewAllEvents: 'Voir tous les événements',
-      backToHome: 'Retour à l\'accueil',
+      backToHome: "Retour à l'accueil",
 
       searchTitle: 'Résultats',
       prices: 'Prix',
@@ -89,15 +90,84 @@ const I18N = {
       colorGreen: 'Vert',
       colorColorless: 'Incolore',
       colorMulticolor: 'Multicolore',
+
+      typeCreature: 'Creature',
+      typeInstant: 'Instant',
+      typeSorcery: 'Sorcery',
+      typeArtifact: 'Artifact',
+      typeEnchantment: 'Enchantment',
+      typePlaneswalker: 'Planeswalker',
+      typeLand: 'Land',
+      typeBattle: 'Battle',
+
       noFilterResults: 'Aucune carte ne correspond aux filtres sélectionnés.',
       activeFilters: 'filtres actifs',
 
       layoutGrid: 'Grille',
       layoutList: 'Liste',
       cardsPerPage: 'Cartes par page :',
+
+      cardDetailsBtn: 'Détails & Magasins',
+      showMore: 'Afficher plus',
+      hide: 'Masquer',
+      priceUnavailable: 'Prix indisponible',
+      cardNotFound: 'Carte non trouvée :',
+      quickPreviewTooltip: 'Aperçu rapide des magasins',
+      cardsFoundCount: 'carte(s) trouvée(s)',
+      cardsLoadingCount: 'carte(s) à charger...',
+      cardsLoadedCount: 'carte(s) chargée(s)',
+      fileImportTitle: 'Importation de fichier',
+      setCollectionTitle: 'Collection :',
+      loadingCollection: 'Chargement de la collection...',
+      noSearchTitle: 'Aucune recherche',
+      noSearchSubtitle: "Retournez à la page d'accueil pour effectuer une recherche.",
+      pageFromTo: 'de',
+
+      backToCards: 'Retour aux cartes',
+      home: 'Accueil',
+      cardBreadcrumb: 'Carte',
+      loadingCardInfo: 'Chargement des informations de la carte...',
+      noCardSpecifiedTitle: 'Aucune carte spécifiée',
+      noCardSpecifiedDesc: "Veuillez rechercher une carte depuis l'accueil.",
+      cardNotFoundTitle: 'Carte introuvable',
+      cardNotFoundDesc: "Nous n'avons pas pu charger les données de cette carte.",
+      backBtn: 'Retour',
+
+      flipCardBack: 'Tourner la carte (Face verso)',
+      flipCardFront: 'Tourner la carte (Face recto)',
+      formatLegalities: 'Légalité dans les formats',
+      legal: 'Légal',
+      banned: 'Banni',
+      restricted: 'Restreint',
+      notLegal: 'Non légal',
+
+      powerToughness: 'Force / Endurance :',
+      startingLoyalty: 'Loyauté de départ :',
+      defense: 'Défense :',
+
+      oracleTextTitle: 'Effet de la carte / Texte Oracle',
+      noOracleText: 'Aucun texte de règle supplémentaire.',
+
+      estimatedPriceReg: 'Prix Estimé (Normal)',
+      estimatedPriceFoil: 'Prix Estimé (Foil)',
+      averagePrice: 'Prix moyen',
+      unavailable: 'Indisponible',
+
+      storesSectionTitle: 'Disponibilité en Magasin & Comparateur',
+      storesSectionDesc: 'Comparez les stocks et prix en temps réel sur les boutiques partenaires',
+      viewPrice: 'Voir le prix',
+      searchAtStore: 'Rechercher chez',
+
+      illustrator: 'Illustrateur :',
+      unknownArtist: 'Inconnu',
+      dataProvidedBy: 'Données fournies via l\'API Scryfall.',
+
+      eventCountSingular: 'événement',
+      eventCountPlural: 'événements',
+      eventsHeaderPrefix: 'Événements — ',
     },
     en: {
-      
+      languageLabel: 'Language / Langue',
       formats: 'Game Formats',
       all: 'All',
       importTitle: 'Import a file',
@@ -139,6 +209,7 @@ const I18N = {
       communityRanking: 'Player Rankings',
       partnerStores: 'Partner Stores',
       popularSetsTitle: 'Latest Collections',
+      popularSetsDesc: 'Directly access cards from recent expansions',
       eventsPhotos: 'Events & Photos',
       noEvents: 'No events at this time',
       selectFormatPrompt: 'Select a format',
@@ -182,12 +253,81 @@ const I18N = {
       colorGreen: 'Green',
       colorColorless: 'Colorless',
       colorMulticolor: 'Multicolor',
+
+      typeCreature: 'Creature',
+      typeInstant: 'Instant',
+      typeSorcery: 'Sorcery',
+      typeArtifact: 'Artifact',
+      typeEnchantment: 'Enchantment',
+      typePlaneswalker: 'Planeswalker',
+      typeLand: 'Land',
+      typeBattle: 'Battle',
+
       noFilterResults: 'No cards match the selected filters.',
       activeFilters: 'active filters',
 
       layoutGrid: 'Grid',
       layoutList: 'List',
       cardsPerPage: 'Cards per page:',
+
+      cardDetailsBtn: 'Details & Stores',
+      showMore: 'Show more',
+      hide: 'Hide',
+      priceUnavailable: 'Price unavailable',
+      cardNotFound: 'Card not found:',
+      quickPreviewTooltip: 'Quick store preview',
+      cardsFoundCount: 'card(s) found',
+      cardsLoadingCount: 'card(s) to load...',
+      cardsLoadedCount: 'card(s) loaded',
+      fileImportTitle: 'File Import',
+      setCollectionTitle: 'Set:',
+      loadingCollection: 'Loading collection...',
+      noSearchTitle: 'No search',
+      noSearchSubtitle: 'Return to the home page to perform a search.',
+      pageFromTo: 'of',
+
+      backToCards: 'Back to cards',
+      home: 'Home',
+      cardBreadcrumb: 'Card',
+      loadingCardInfo: 'Loading card information...',
+      noCardSpecifiedTitle: 'No card specified',
+      noCardSpecifiedDesc: 'Please search for a card from the home page.',
+      cardNotFoundTitle: 'Card not found',
+      cardNotFoundDesc: 'Could not load data for this card.',
+      backBtn: 'Back',
+
+      flipCardBack: 'Flip card (Back face)',
+      flipCardFront: 'Flip card (Front face)',
+      formatLegalities: 'Legality in formats',
+      legal: 'Legal',
+      banned: 'Banned',
+      restricted: 'Restricted',
+      notLegal: 'Not legal',
+
+      powerToughness: 'Power / Toughness:',
+      startingLoyalty: 'Starting Loyalty:',
+      defense: 'Defense:',
+
+      oracleTextTitle: 'Card Effect / Oracle Text',
+      noOracleText: 'No additional rule text.',
+
+      estimatedPriceReg: 'Estimated Price (Regular)',
+      estimatedPriceFoil: 'Estimated Price (Foil)',
+      averagePrice: 'Average price',
+      unavailable: 'Unavailable',
+
+      storesSectionTitle: 'Store Availability & Comparison',
+      storesSectionDesc: 'Compare real-time stocks and prices across partner stores',
+      viewPrice: 'View price',
+      searchAtStore: 'Search at',
+
+      illustrator: 'Artist:',
+      unknownArtist: 'Unknown',
+      dataProvidedBy: 'Data provided via Scryfall API.',
+
+      eventCountSingular: 'event',
+      eventCountPlural: 'events',
+      eventsHeaderPrefix: 'Events — ',
     }
   },
 
@@ -199,10 +339,10 @@ const I18N = {
     this.current = lang;
     localStorage.setItem('lang', lang);
     this.updateDOM();
+    window.dispatchEvent(new CustomEvent('languageChanged', { detail: { lang } }));
   },
 
   updateDOM() {
-    
     document.querySelectorAll('[data-i18n]').forEach(el => {
       const key = el.getAttribute('data-i18n');
       const translated = this.t(key);
@@ -222,3 +362,4 @@ const I18N = {
     if (sidebarSelector) sidebarSelector.value = this.current;
   }
 };
+

@@ -10,8 +10,10 @@ const mockEvents = [
     time: "18:30",
     location: "Boutique Sandwich",
     img: "assets/images/mtg_standard_event.png",
-    details: "Tournoi amical Standard. Venez tester vos nouveaux decks et gagner des boosters promos !",
-    entry: "10$",
+    detailsFr: "Tournoi amical Standard. Venez tester vos nouveaux decks et gagner des boosters promos !",
+    detailsEn: "Casual Standard tournament. Come test your new decks and win promo boosters!",
+    entryFr: "10$",
+    entryEn: "$10",
     ranking: [
       { pos: 1, name: "Guillaume", pts: "15 pts" },
       { pos: 2, name: "Alexandre", pts: "12 pts" },
@@ -28,8 +30,10 @@ const mockEvents = [
     time: "14:00",
     location: "L'Abyss MTG",
     img: "assets/images/mtg_pioneer_event.png",
-    details: "Entrée: 10$. Boosters de participation et dotation en cartes promos aux vainqueurs.",
-    entry: "10$",
+    detailsFr: "Entrée: 10$. Boosters de participation et dotation en cartes promos aux vainqueurs.",
+    detailsEn: "Entry: $10. Participation boosters and promo cards awarded to winners.",
+    entryFr: "10$",
+    entryEn: "$10",
     ranking: [
       { pos: 1, name: "Maxime", pts: "18 pts" },
       { pos: 2, name: "Lucas", pts: "15 pts" },
@@ -46,8 +50,10 @@ const mockEvents = [
     time: "11:00",
     location: "Face to Face Games",
     img: "assets/images/mtg_modern_event.png",
-    details: "Format Modern compétitif. Decklist requise. Qualificatif pour le tournoi régional.",
-    entry: "25$",
+    detailsFr: "Format Modern compétitif. Decklist requise. Qualificatif pour le tournoi régional.",
+    detailsEn: "Competitive Modern format. Decklist required. Regional tournament qualifier.",
+    entryFr: "25$",
+    entryEn: "$25",
     ranking: [
       { pos: 1, name: "Julien", pts: "24 pts" },
       { pos: 2, name: "Thomas", pts: "21 pts" },
@@ -64,8 +70,10 @@ const mockEvents = [
     time: "17:00",
     location: "Chez Geeks",
     img: "assets/images/mtg_commander_event.png",
-    details: "Venez jouer en Commander (EDH) multijoueur. Tables libres et ambiance conviviale !",
-    entry: "Gratuit",
+    detailsFr: "Venez jouer en Commander (EDH) multijoueur. Tables libres et ambiance conviviale !",
+    detailsEn: "Come play multiplayer Commander (EDH). Open tables and friendly atmosphere!",
+    entryFr: "Gratuit",
+    entryEn: "Free",
     ranking: [
       { pos: 1, name: "Arthur", pts: "9 pts" },
       { pos: 2, name: "Nicolas", pts: "6 pts" },
@@ -119,13 +127,16 @@ function renderHomepageEvents(fmt) {
     ? mockEvents 
     : mockEvents.filter(e => e.format === fmt);
 
+  const isEn = typeof I18N !== 'undefined' && I18N.current === 'en';
+
   if (badge) {
-    badge.textContent = `${filtered.length} événement${filtered.length > 1 ? 's' : ''}`;
+    const noun = I18N.t(filtered.length > 1 ? 'eventCountPlural' : 'eventCountSingular');
+    badge.textContent = `${filtered.length} ${noun}`;
   }
 
   if (title) {
     if (fmt && fmt !== "all") {
-      title.textContent = `Événements — ${fmt.charAt(0).toUpperCase() + fmt.slice(1)}`;
+      title.textContent = `${I18N.t('eventsHeaderPrefix')}${fmt.charAt(0).toUpperCase() + fmt.slice(1)}`;
     } else {
       title.textContent = I18N.t("featuredEvents");
     }
@@ -142,23 +153,27 @@ function renderHomepageEvents(fmt) {
   } else {
     grid.innerHTML = `
       <div class="events-list-grid">
-        ${filtered.map(event => `
-          <div class="event-card">
-            <div class="event-card-media">
-              <img src="${event.img}" alt="${event.name}" class="event-img" onerror="this.src='assets/images/IMG_6262.jpg'">
-              <span class="event-format-chip">${event.format.toUpperCase()}</span>
-            </div>
-            <div class="event-info">
-              <div class="event-meta-row">
-                <span class="event-date-badge">${event.date} • ${event.time || '18:00'}</span>
-                <span class="event-entry-badge">${event.entry || 'Entrée'}</span>
+        ${filtered.map(event => {
+          const details = isEn ? (event.detailsEn || event.detailsFr) : (event.detailsFr || event.detailsEn);
+          const entry = isEn ? (event.entryEn || event.entryFr) : (event.entryFr || event.entryEn);
+          return `
+            <div class="event-card">
+              <div class="event-card-media">
+                <img src="${event.img}" alt="${event.name}" class="event-img" onerror="this.src='assets/images/IMG_6262.jpg'">
+                <span class="event-format-chip">${event.format.toUpperCase()}</span>
               </div>
-              <h3 class="event-name-title">${event.name}</h3>
-              <p class="event-location-text">${event.location}</p>
-              <p class="event-desc-text">${event.details}</p>
+              <div class="event-info">
+                <div class="event-meta-row">
+                  <span class="event-date-badge">${event.date} • ${event.time || '18:00'}</span>
+                  <span class="event-entry-badge">${entry}</span>
+                </div>
+                <h3 class="event-name-title">${event.name}</h3>
+                <p class="event-location-text">${event.location}</p>
+                <p class="event-desc-text">${details}</p>
+              </div>
             </div>
-          </div>
-        `).join('')}
+          `;
+        }).join('')}
       </div>
     `;
   }
@@ -170,8 +185,11 @@ function renderHomeStores() {
   const container = document.getElementById("homeStoresGrid");
   if (!container || typeof sites === "undefined") return;
 
+  const isEn = typeof I18N !== 'undefined' && I18N.current === 'en';
+  const titlePrefix = isEn ? 'Buy at' : 'Acheter chez';
+
   container.innerHTML = sites.map(site => `
-    <a href="card.html?name=Sol%20Ring" class="home-store-chip" title="Acheter chez ${site.nome}" target="_blank" onclick="event.preventDefault(); searchCardForStore('${site.id}');">
+    <a href="card.html?name=Sol%20Ring" class="home-store-chip" title="${titlePrefix} ${site.nome}" target="_blank" onclick="event.preventDefault(); searchCardForStore('${site.id}');">
       ${site.logo ? `<img src="${site.logo}" alt="${site.nome}" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">` : ''}
       <span class="home-store-name" style="${site.logo ? 'display:none;' : ''}">${site.nome}</span>
       <span class="home-store-ext-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg></span>
@@ -228,9 +246,14 @@ async function loadPopularSets() {
       .slice(0, 8);
 
     if (latestSets.length > 0) {
+      const isEn = typeof I18N !== 'undefined' && I18N.current === 'en';
       grid.innerHTML = latestSets.map(set => {
         const year = set.released_at ? new Date(set.released_at).getFullYear() : '';
-        const typeLabel = set.set_type === 'expansion' ? 'Standard, Pioneer, Modern' : (set.set_type === 'masters' ? 'Modern, Commander, Legacy' : 'Universes Beyond / Spécial');
+        const typeLabel = set.set_type === 'expansion' 
+          ? 'Standard, Pioneer, Modern' 
+          : (set.set_type === 'masters' 
+            ? 'Modern, Commander, Legacy' 
+            : (isEn ? 'Universes Beyond / Special' : 'Universes Beyond / Spécial'));
         return `
           <a href="card.html?set=${encodeURIComponent(set.code)}" class="popular-set-card">
             <span class="popular-set-code">${set.code.toUpperCase()}</span>
@@ -248,6 +271,12 @@ async function loadPopularSets() {
   }
 }
 
+window.addEventListener('languageChanged', () => {
+  renderHomepageEvents(currentHomeFormat);
+  renderHomeStores();
+  loadPopularSets();
+});
+
 document.addEventListener("DOMContentLoaded", () => {
   const params = new URLSearchParams(window.location.search);
   const format = params.get("format") || "all";
@@ -262,3 +291,4 @@ document.addEventListener("DOMContentLoaded", () => {
   renderHomeStores();
   loadPopularSets();
 });
+

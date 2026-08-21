@@ -1,6 +1,6 @@
 
 const sites = [
-  { id: 'facetoface', nome: 'Face to Face', link: n => `https://facetofacegames.com/search?q=${n}`, logo: 'https://facetofacegames.com/cdn/shop/files/F2F_Black_Logo_074ba862-2d20-45b5-85c5-99f407f34e31.png?v=1742222734' },
+  { id: 'facetoface', nome: 'Face to Face', link: n => `https://facetofacegames.com/search?q=${n}`, logo: 'https://facetofacegames.com/cdn/shop/files/wide-f2f-EN-white-logo.png?v=1784296074&width=255' },
   { id: 'levalet', nome: 'Levalet', link: n => `https://levalet.crystalcommerce.com/products/search?q=${n}&c=1`, logo: 'https://cc-client-assets.nyc3.cdn.digitaloceanspaces.com/store/levalet/13b0d4f01acb11e9a8aac9b93f52c525/large/logolevalet.png' },
   { id: 'secretdesk', nome: 'Secret Desk', link: n => `https://www.lesecretdeskorrigans.com/products/search?q=${n}`, logo: 'https://cc-client-assets.nyc3.cdn.digitaloceanspaces.com/store/lesecretdeskorrigans/d6c705a0588d40bcad29108b0f9fda1b/medium/logolesecretfavi.png' },
   { id: 'cardhoarder', nome: 'Cardhoarder', link: n => `https://www.cardhoarder.com/cards?cardname=${n}`, logo: 'https://cdn.shopify.com/s/files/1/1781/6359/files/nav-logo.png?height=628&pad_color=fff&v=1613525588&width=1200' },
@@ -9,10 +9,10 @@ const sites = [
   { id: 'tcgplayer', nome: 'TCGPlayer', link: n => `https://www.tcgplayer.com/search/magic/product?q=${n}`, logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRwc05VHb_4Y30nHRhc-thfIAdqVAN19LqSgQ&s' },
   { id: 'mtgtop8', nome: 'MTGTop8', link: n => `https://www.mtgtop8.com/search.php?cards=${n}`, logo: 'https://mtgtop8.com/graph/title.png' },
   { id: 'silvergoblin', nome: 'Silver Goblin', link: n => `https://silvergoblin.cards/search?q=${n}&options%5Bprefix%5D=last`, logo: 'https://silvergoblin.cards/cdn/shop/files/Homepage_logo_5f1b015e-ccda-4e73-8c97-9259e49ab786.png?v=1741746772&width=1500' },
-  { id: 'altf4', nome: 'Alt F4', link: n => `https://altf4online.com/search?options%5Bprefix%5D=last&q=${n}`, logo: '' },
+  { id: 'altf4', nome: 'Alt F4', link: n => `https://altf4online.com/search?options%5Bprefix%5D=last&q=${n}`, logo: 'https://altf4online.com/cdn/shop/files/altf4_altf4-logo-color-web.png?v=1734379537&width=270' },
   { id: 'threekings', nome: 'Three Kings Loot', link: n => `https://www.threekingsloot.com/products/search?q=${n}`, logo: 'https://bluedefault.crystalcommerce.com/themes/clients/threekingsloot/assets/img/logo.png?1415786210' },
   { id: 'mythicstore', nome: 'Boutique Mythic', link: n => `https://themythicstore.com/a/search?q=${n}`, logo: 'https://cdn.shopify.com/s/files/1/0360/6895/0061/files/Social_Media_Share_TMS.png?v=1714682307' },
-  { id: 'wizardtower', nome: 'Wizard Tower', link: n => `https://store.wizardtower.com/search?q=${n}&options%5Bprefix%5D=last`, logo: '' },
+  { id: 'wizardtower', nome: 'Wizard Tower', link: n => `https://store.wizardtower.com/search?q=${n}&options%5Bprefix%5D=last`, logo: 'https://store.wizardtower.com/cdn/shop/files/Long-Wt.png?v=1758040051&width=270' },
   { id: 'chezgeeks', nome: 'Chez Geeks', link: n => `https://www.chezgeeks.com/products/search?q=${n}`, logo: 'https://cc-client-assets.nyc3.cdn.digitaloceanspaces.com/photo/chezgeeks/file/30f1d741378c4f31909b23ade89a46ae/Chez%20Geeks%20LOGO%20scaled.png' }
 ];
 
@@ -32,7 +32,7 @@ function renderSidebar() {
 
     <div class="sidebar-mobile-actions">
       <div class="sidebar-mobile-lang">
-        <label class="sidebar-field-label">Langue / Language</label>
+        <label class="sidebar-field-label" data-i18n="languageLabel">Langue / Language</label>
         <select class="sidebar-lang-select" aria-label="Language" onchange="I18N.setLang(this.value)">
           <option value="fr">FR</option>
           <option value="en">EN</option>
@@ -155,7 +155,7 @@ async function processarArquivo() {
 }
 
 function initSidebar() {
-  
+
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       closeSidebarDrawer();
@@ -253,10 +253,10 @@ function selectFormat(fmt, event) {
     params.set('format', fmt);
   }
 
-  const isHomepage = window.location.pathname.includes('index.html') || 
-                     window.location.pathname === '/' || 
-                     window.location.pathname.endsWith('/teamsandwich/') ||
-                     window.location.pathname.endsWith('/teamsandwich/index.html');
+  const isHomepage = window.location.pathname.includes('index.html') ||
+    window.location.pathname === '/' ||
+    window.location.pathname.endsWith('/teamsandwich/') ||
+    window.location.pathname.endsWith('/teamsandwich/index.html');
 
   if (isHomepage) {
     const newUrl = params.toString() ? `?${params.toString()}` : window.location.pathname;
@@ -298,7 +298,7 @@ function getSelected() {
   return selected;
 }
 
-let allSetsData = []; 
+let allSetsData = [];
 
 const SCRYFALL_COMMON_HEADERS = {
   'Accept': 'application/json;q=0.9,*/*;q=0.8'
@@ -338,7 +338,7 @@ async function loadSets() {
   }
 }
 
-let collectionsModalSort = 'newest'; 
+let collectionsModalSort = 'newest';
 
 function openCollectionsModal() {
   closeSidebarDrawer();
@@ -664,6 +664,10 @@ function initLangSelector() {
     });
   }
 }
+
+window.addEventListener('languageChanged', () => {
+  updateUserUI();
+});
 
 document.addEventListener('DOMContentLoaded', () => {
   renderSidebar();
