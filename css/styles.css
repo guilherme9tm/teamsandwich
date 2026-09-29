@@ -2185,3 +2185,21 @@ img {
     grid-template-columns: 1fr;
   }
 }
+:where(button, a):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.search-load-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 14px 0;
+}
+
+.search-load-controls p { color: var(--text-secondary); flex-basis: 100%; }
+.search-load-controls .load-error { color: #ffb4ab; }
+.search-load-controls button:disabled, .arts-status button:disabled { opacity: 0.6; cursor: wait; }
+.deck-card-badge { display: block; color: var(--text-secondary); font-size: 0.8rem; margin: 8px 0; }
+button.ac-item { width: 100%; text-align: left; font: inherit; color: inherit; border: 0; background: transparent; }

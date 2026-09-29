@@ -1,6 +1,6 @@
 
 const I18N = {
-  current: localStorage.getItem('lang') || 'fr',
+  current: ['fr', 'en'].includes(AppStorage.local.getItem('lang')) ? AppStorage.local.getItem('lang') : 'fr',
 
   dict: {
     fr: {
@@ -336,8 +336,9 @@ const I18N = {
   },
 
   setLang(lang) {
+    if (!this.dict[lang]) return;
     this.current = lang;
-    localStorage.setItem('lang', lang);
+    AppStorage.local.setItem('lang', lang);
     this.updateDOM();
     window.dispatchEvent(new CustomEvent('languageChanged', { detail: { lang } }));
   },
@@ -362,4 +363,51 @@ const I18N = {
     if (sidebarSelector) sidebarSelector.value = this.current;
   }
 };
+
+Object.assign(I18N.dict.fr, {
+  retry: 'Réessayer', close: 'Fermer',
+  sourceUnavailable: 'La source de cartes est indisponible. Réessayez dans un instant.',
+  requestTimeout: 'La recherche a pris trop de temps. Réessayez.',
+  rateLimited: 'Trop de requêtes. Patientez avant de réessayer.',
+  sourceBusy: 'La recherche est occupée. Réessayez dans un instant.',
+  invalidResponse: 'La source a renvoyé des données invalides. Réessayez.',
+  invalidQuery: 'Vérifiez les termes de votre recherche.',
+  unsupportedGame: 'Ce jeu ne dispose pas encore de source de cartes.',
+  loadMoreResults: 'Charger plus de cartes',
+  filtersLoadedOnly: 'Les filtres portent sur les cartes chargées',
+  emptyResults: 'Aucune carte trouvée.',
+  sideboard: 'Sideboard', mainDeck: 'Deck principal', loadSideboard: 'Charger le Sideboard',
+  emptyImport: 'Le fichier ne contient aucune carte à charger.',
+  invalidImport: 'Impossible de lire cette liste. Importez à nouveau le fichier TXT.',
+  importTooLarge: 'Limite : 250 Ko, 1 000 entrées et 1 000 exemplaires par carte.',
+  importSkippedLines: 'Lignes invalides ignorées :',
+  importStorageUnavailable: 'Le navigateur bloque le stockage nécessaire à l’import. Autorisez le stockage du site puis réessayez.',
+  viewAlternateArts: 'Voir les arts et éditions', alternateArts: 'Arts et éditions',
+  artsLoaded: 'édition(s) chargée(s)', loadMoreArts: 'Charger plus d’éditions', noAlternateArts: 'Aucune autre édition disponible.',
+  serializedCard: 'Édition sérialisée', serialNumber: 'Numéro de série :',
+  serialNumberUnavailable: 'Cette édition est sérialisée. Le numéro de l’exemplaire physique n’est pas fourni par la source.'
+});
+
+Object.assign(I18N.dict.en, {
+  retry: 'Retry', close: 'Close',
+  sourceUnavailable: 'The card source is unavailable. Please try again shortly.',
+  requestTimeout: 'The search took too long. Please retry.',
+  rateLimited: 'Too many requests. Please wait before retrying.',
+  sourceBusy: 'The search is busy. Please try again shortly.',
+  invalidResponse: 'The card source returned invalid data. Please retry.',
+  invalidQuery: 'Please check your search terms.',
+  unsupportedGame: 'This game does not have a card source yet.',
+  loadMoreResults: 'Load more cards', filtersLoadedOnly: 'Filters apply to loaded cards',
+  emptyResults: 'No cards found.',
+  sideboard: 'Sideboard', mainDeck: 'Main deck', loadSideboard: 'Load Sideboard',
+  emptyImport: 'The file has no cards to load.',
+  invalidImport: 'Could not read this list. Please import the TXT file again.',
+  importTooLarge: 'Limit: 250 KB, 1,000 entries and 1,000 copies per card.',
+  importSkippedLines: 'Invalid lines skipped:',
+  importStorageUnavailable: 'Your browser blocks the storage needed for imports. Allow site storage and retry.',
+  viewAlternateArts: 'View arts and editions', alternateArts: 'Arts and editions',
+  artsLoaded: 'edition(s) loaded', loadMoreArts: 'Load more editions', noAlternateArts: 'No other editions available.',
+  serializedCard: 'Serialized edition', serialNumber: 'Serial number:',
+  serialNumberUnavailable: 'This edition is serialized. The source does not provide the serial number of the physical copy.'
+});
 

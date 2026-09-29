@@ -12,14 +12,14 @@ function goBackOrHome() {
 }
 
 function formatManaSymbol(symbol) {
-  const clean = symbol.replace(/[{}]/g, '').replace('/', '');
-  return `<img src="https://svgs.scryfall.io/card-symbols/${clean}.svg" class="oracle-mana-img" alt="${symbol}">`;
+  const clean = symbol.replace(/[^a-z0-9]/gi, '');
+  return `<img src="https://svgs.scryfall.io/card-symbols/${clean}.svg" class="oracle-mana-img" alt="${escapeHTML(symbol)}">`;
 }
 
 function formatOracleText(text) {
   if (!text) return '';
   
-  let formatted = text.replace(/\{[^}]+\}/g, match => formatManaSymbol(match));
+  let formatted = escapeHTML(text).replace(/\{[^}]+\}/g, match => formatManaSymbol(match));
   
   formatted = formatted.replace(/\(([^)]+)\)/g, '<em>($1)</em>');
   
@@ -28,111 +28,50 @@ function formatOracleText(text) {
 
 function formatManaCost(manaCost) {
   if (!manaCost) return '';
-  return manaCost.replace(/\{[^}]+\}/g, match => formatManaSymbol(match));
+  return escapeHTML(manaCost).replace(/\{[^}]+\}/g, match => formatManaSymbol(match));
 }
 
-async function fetchFrenchCardData(card) {
-  if (!card) return null;
+let frenchRequest = null;
+let frenchLoaded = false;
 
-  if (card.set && card.collector_number) {
+async function loadFrenchDetails() {
+  if (!currentCardData || I18N.current !== 'fr' || frenchLoaded) return;
+  if (frenchRequest) return frenchRequest;
+  frenchRequest = (async () => {
     try {
-      const res = await fetch(`https://api.scryfall.com/cards/${card.set}/${card.collector_number}/fr`, {
-        headers: { 'Accept': 'application/json;q=0.9,*/*;q=0.8' }
-      });
-      if (res.ok) {
-        return await res.json();
-      }
-    } catch (e) {}
-  }
-
-  if (card.oracle_id) {
-    try {
-      const res = await fetch(`https://api.scryfall.com/cards/search?q=oracleid:${card.oracle_id}+lang:fr`, {
-        headers: { 'Accept': 'application/json;q=0.9,*/*;q=0.8' }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.data && data.data.length > 0) {
-          return data.data[0];
-        }
-      }
-    } catch (e) {}
-  }
-
-  if (card.name) {
-    try {
-      const res = await fetch(`https://api.scryfall.com/cards/named?exact=${encodeURIComponent(card.name)}&lang=fr`, {
-        headers: { 'Accept': 'application/json;q=0.9,*/*;q=0.8' }
-      });
-      if (res.ok) {
-        return await res.json();
-      }
-    } catch (e) {}
-  }
-
-  return null;
+      const localized = await CardData.provider().localized(currentCardData, 'fr');
+      currentFrenchCardData = localized ? CardData.toView(localized) : null;
+      frenchLoaded = true;
+      if (I18N.current === 'fr') renderCardDetailView(currentCardData);
+    } catch (error) {
+      // The primary card remains usable when translation is unavailable.
+    } finally { frenchRequest = null; }
+  })();
+  return frenchRequest;
 }
 
 async function loadCardDetails() {
   const params = new URLSearchParams(window.location.search);
-  const container = document.getElementById("detailContainer");
-  const breadcrumb = document.getElementById("breadcrumbCurrent");
-
-  if (!params.has("id") && !params.has("name")) {
-    if (container) {
-      container.innerHTML = `
-        <div class="detail-loading-state">
-          <h3>${I18N.t('noCardSpecifiedTitle')}</h3>
-          <p>${I18N.t('noCardSpecifiedDesc')}</p>
-          <a href="index.html" class="btn-primary" style="margin-top:10px;">${I18N.t('backToHome')}</a>
-        </div>
-      `;
-    }
+  const container = document.getElementById('detailContainer');
+  const breadcrumb = document.getElementById('breadcrumbCurrent');
+  if (!params.get('id') && !params.get('name')) {
+    container.innerHTML = `<div class="detail-loading-state"><h3>${I18N.t('noCardSpecifiedTitle')}</h3><p>${I18N.t('noCardSpecifiedDesc')}</p><a href="index.html" class="btn-primary">${I18N.t('backToHome')}</a></div>`;
     return;
   }
-
-  let apiUrl = '';
-  if (params.has("id")) {
-    apiUrl = `https://api.scryfall.com/cards/${encodeURIComponent(params.get("id"))}`;
-  } else if (params.has("name")) {
-    apiUrl = `https://api.scryfall.com/cards/named?exact=${encodeURIComponent(params.get("name"))}`;
-  }
-
+  container.innerHTML = `<div class="detail-loading-state"><div class="spinner"></div><p>${I18N.t('loadingCardInfo')}</p></div>`;
   try {
-    let res = await fetch(apiUrl, {
-      headers: { 'Accept': 'application/json;q=0.9,*/*;q=0.8' }
-    });
-
-    if (!res.ok && params.has("name")) {
-      res = await fetch(`https://api.scryfall.com/cards/named?fuzzy=${encodeURIComponent(params.get("name"))}`, {
-        headers: { 'Accept': 'application/json;q=0.9,*/*;q=0.8' }
-      });
-    }
-
-    if (!res.ok) {
-      throw new Error("Carte non trouvée");
-    }
-
-    currentCardData = await res.json();
+    const provider = CardData.provider();
+    let result;
+    if (params.get('id')) {
+      result = await provider.get(params.get('id'));
+    } else result = await provider.named(params.get('name'));
+    currentCardData = CardData.toView(result);
     document.title = `${currentCardData.name} — TEAM SANDWICH`;
     if (breadcrumb) breadcrumb.textContent = currentCardData.name;
-
-    if (I18N.current === 'fr') {
-      currentFrenchCardData = await fetchFrenchCardData(currentCardData);
-    }
-
     renderCardDetailView(currentCardData);
-  } catch (err) {
-    console.error("Card detail error:", err);
-    if (container) {
-      container.innerHTML = `
-        <div class="detail-loading-state">
-          <h3>${I18N.t('cardNotFoundTitle')}</h3>
-          <p>${I18N.t('cardNotFoundDesc')}</p>
-          <button onclick="goBackOrHome()" class="btn-primary" style="margin-top:10px;">${I18N.t('backBtn')}</button>
-        </div>
-      `;
-    }
+    void loadFrenchDetails();
+  } catch (error) {
+    container.innerHTML = `<div class="detail-loading-state"><h3>${I18N.t(error.code || 'sourceUnavailable')}</h3><button type="button" onclick="loadCardDetails()" class="btn-primary">${I18N.t('retry')}</button><button type="button" onclick="goBackOrHome()" class="btn-secondary">${I18N.t('backBtn')}</button></div>`;
   }
 }
 
@@ -179,11 +118,11 @@ function renderCardDetailView(card) {
   }
   const oracleHtml = formatOracleText(rawOracleText);
 
-  let nameDisplay = activeFace.name || card.name;
+  let nameDisplay = escapeHTML(activeFace.name || card.name);
   if (isFrench && frActiveFace) {
     const frName = frActiveFace.printed_name || frActiveFace.name || frCard.printed_name || frCard.name;
     if (frName && frName !== nameDisplay) {
-      nameDisplay = `${frName} <span style="font-size:0.7em; opacity:0.8; font-weight:normal; margin-left:6px;">(${activeFace.name || card.name})</span>`;
+      nameDisplay = `${escapeHTML(frName)} <span style="font-size:0.7em; opacity:0.8; font-weight:normal; margin-left:6px;">(${escapeHTML(activeFace.name || card.name)})</span>`;
     }
   }
 
@@ -203,16 +142,17 @@ function renderCardDetailView(card) {
   const cadFoil = usdFoil ? `CAD ${(usdFoil * 1.38).toFixed(2)}` : I18N.t('unavailable');
 
   const statsHtml = (activeFace.power !== undefined && activeFace.toughness !== undefined)
-    ? `<div class="detail-stat-pill">${I18N.t('powerToughness')} ${activeFace.power} / ${activeFace.toughness}</div>`
+    ? `<div class="detail-stat-pill">${I18N.t('powerToughness')} ${escapeHTML(activeFace.power)} / ${escapeHTML(activeFace.toughness)}</div>`
     : (activeFace.loyalty !== undefined
-      ? `<div class="detail-stat-pill">${I18N.t('startingLoyalty')} ${activeFace.loyalty}</div>`
+      ? `<div class="detail-stat-pill">${I18N.t('startingLoyalty')} ${escapeHTML(activeFace.loyalty)}</div>`
       : (activeFace.defense !== undefined
-        ? `<div class="detail-stat-pill">${I18N.t('defense')} ${activeFace.defense}</div>`
+        ? `<div class="detail-stat-pill">${I18N.t('defense')} ${escapeHTML(activeFace.defense)}</div>`
         : ''));
 
   const majorFormats = ['standard', 'pioneer', 'modern', 'commander', 'legacy', 'pauper'];
   const legalitiesHtml = majorFormats.map(fmt => {
-    const status = card.legalities?.[fmt] || 'not_legal';
+    const rawStatus = card.legalities?.[fmt];
+    const status = ['legal', 'banned', 'restricted'].includes(rawStatus) ? rawStatus : 'not_legal';
     const statusLabel = status === 'legal' ? I18N.t('legal') : (status === 'banned' ? I18N.t('banned') : (status === 'restricted' ? I18N.t('restricted') : I18N.t('notLegal')));
     return `
       <div class="legality-item">
@@ -239,17 +179,17 @@ function renderCardDetailView(card) {
     `;
   }).join('');
 
-  const rarityClass = card.rarity || 'common';
+  const rarityClass = ['common', 'uncommon', 'rare', 'mythic', 'special', 'bonus'].includes(card.rarity) ? card.rarity : 'common';
   const rarityKey = `rarity${rarityClass.charAt(0).toUpperCase() + rarityClass.slice(1)}`;
   const rarityName = I18N.dict.fr[rarityKey] ? I18N.t(rarityKey) : (rarityClass.charAt(0).toUpperCase() + rarityClass.slice(1));
-  const setSvgUri = card.set_uri ? `https://svgs.scryfall.io/sets/${card.set}.svg` : '';
+  const setSvgUri = card.set_uri ? `https://svgs.scryfall.io/sets/${encodeURIComponent(card.set)}.svg` : '';
 
   container.innerHTML = `
     <div class="detail-grid">
       
       <div class="detail-left-col">
         <div class="detail-card-frame">
-          <img src="${imgUrl}" alt="${activeFace.name || card.name}" class="detail-card-img" onerror="this.src='assets/images/IMG_6262.jpg'">
+          <img src="${escapeHTML(imgUrl)}" alt="${escapeHTML(activeFace.name || card.name)}" decoding="async" class="detail-card-img" onerror="this.src='assets/images/IMG_6262.jpg'">
         </div>
 
         ${isDoubleFaced ? `
@@ -259,6 +199,7 @@ function renderCardDetailView(card) {
           </button>
         ` : ''}
 
+        <button type="button" id="viewArtsButton" class="detail-flip-btn" onclick="openArtsGallery()" aria-haspopup="dialog">${I18N.t('viewAlternateArts')}</button>
         <div class="detail-legalities-box">
           <div class="detail-legalities-title">${I18N.t('formatLegalities')}</div>
           <div class="legalities-grid">
@@ -276,15 +217,16 @@ function renderCardDetailView(card) {
           </div>
 
           <div class="detail-type-row">
-            <span class="detail-type-line">${typeLineDisplay}</span>
+            <span class="detail-type-line">${escapeHTML(typeLineDisplay)}</span>
             <span class="detail-rarity-chip ${rarityClass}">${rarityName}</span>
             <span class="detail-set-badge">
-              ${setSvgUri ? `<img src="${setSvgUri}" alt="${card.set_name}" onerror="this.style.display='none'">` : ''}
-              <span>${card.set_name} (#${card.collector_number})</span>
+              ${setSvgUri ? `<img src="${setSvgUri}" alt="${escapeHTML(card.set_name)}" onerror="this.style.display='none'">` : ''}
+              <span>${escapeHTML(card.set_name)} (#${escapeHTML(card.collector_number)})</span>
             </span>
           </div>
         </div>
 
+        ${card.serialization?.isSerialized ? `<div class="detail-serial-box"><strong>${I18N.t('serializedCard')}</strong><p>${card.serialization.number != null ? `${I18N.t('serialNumber')} ${escapeHTML(card.serialization.number)}${card.serialization.total != null ? ` / ${escapeHTML(card.serialization.total)}` : ''}` : I18N.t('serialNumberUnavailable')}</p></div>` : ''}
         <div class="detail-oracle-box">
           <div class="detail-section-title">${I18N.t('oracleTextTitle')}</div>
           
@@ -292,7 +234,7 @@ function renderCardDetailView(card) {
 
           ${flavorText ? `
             <div class="detail-flavor-box">
-              "${flavorText}"
+              "${escapeHTML(flavorText)}"
             </div>
           ` : ''}
 
@@ -330,7 +272,7 @@ function renderCardDetailView(card) {
         </div>
 
         <div class="detail-card-meta-footer">
-          ${I18N.t('illustrator')} <strong>${activeFace.artist || card.artist || I18N.t('unknownArtist')}</strong> • © Wizards of the Coast • ${I18N.t('dataProvidedBy')}
+          ${I18N.t('illustrator')} <strong>${escapeHTML(activeFace.artist || card.artist || I18N.t('unknownArtist'))}</strong> • © Wizards of the Coast • ${I18N.t('dataProvidedBy')}
         </div>
 
       </div>
@@ -339,17 +281,12 @@ function renderCardDetailView(card) {
   `;
 }
 
-window.addEventListener('languageChanged', async () => {
+window.addEventListener('languageChanged', () => {
   if (currentCardData) {
-    if (I18N.current === 'fr' && !currentFrenchCardData) {
-      currentFrenchCardData = await fetchFrenchCardData(currentCardData);
-    }
     renderCardDetailView(currentCardData);
+    void loadFrenchDetails();
   }
+  renderArtsGallery();
 });
 
-document.addEventListener("DOMContentLoaded", () => {
-  loadCardDetails();
-});
-
-
+document.addEventListener('DOMContentLoaded', loadCardDetails);

@@ -233,14 +233,10 @@ async function loadPopularSets() {
   const grid = document.getElementById("popularSetsGrid");
   if (!grid) return;
   try {
-    const res = await fetch("https://api.scryfall.com/sets", {
-      headers: { 'Accept': 'application/json;q=0.9,*/*;q=0.8' }
-    });
-    if (!res.ok) return;
-    const data = await res.json();
+    const sets = await CardData.provider().sets();
     const relevantTypes = ['expansion', 'core', 'masters', 'draft_innovation'];
     
-    const latestSets = data.data
+    const latestSets = sets
       .filter(s => relevantTypes.includes(s.set_type) && !s.digital && s.card_count > 20)
       .sort((a, b) => new Date(b.released_at) - new Date(a.released_at))
       .slice(0, 8);

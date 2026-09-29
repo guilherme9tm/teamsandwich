@@ -1,4 +1,8 @@
 
+function escapeHTML(value) {
+  return String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+}
+
 const sites = [
   { id: 'facetoface', nome: 'Face to Face', link: n => `https://facetofacegames.com/search?q=${n}`, logo: 'https://facetofacegames.com/cdn/shop/files/wide-f2f-EN-white-logo.png?v=1784296074&width=255' },
   { id: 'levalet', nome: 'Levalet', link: n => `https://levalet.crystalcommerce.com/products/search?q=${n}&c=1`, logo: 'https://cc-client-assets.nyc3.cdn.digitaloceanspaces.com/store/levalet/13b0d4f01acb11e9a8aac9b93f52c525/large/logolevalet.png' },
@@ -122,35 +126,22 @@ async function processarArquivo() {
 
   try {
     const file = arquivoInput.files[0];
-    const texto = await file.text();
-    const linhas = texto.split(/\r?\n/);
-    const cartas = [];
-
-    linhas.forEach(linha => {
-      const l = linha.trim();
-      if (!l || l.startsWith('//') || l.startsWith('#')) return;
-
-      const match = l.match(/^(\d+)\s+(.+)$/);
-      if (match) {
-        const qtd = parseInt(match[1], 10);
-        const nome = match[2].trim();
-        for (let i = 0; i < qtd; i++) cartas.push(nome);
-      } else {
-        cartas.push(l);
-      }
-    });
-
-    if (cartas.length === 0) {
-      alert("Le fichier est vide ou ne contient aucun nom de carte valide.");
+    if (file.size > 256000) throw new Error('importTooLarge');
+    const deck = DeckImport.parse(await file.text());
+    if (deck.entries.length === 0) {
+      alert(I18N.t('emptyImport'));
       return;
     }
-
-    sessionStorage.setItem("fileCards", JSON.stringify(cartas));
+    if (!AppStorage.session.setItem('fileCards', JSON.stringify(deck))) {
+      alert(I18N.t('importStorageUnavailable'));
+      return;
+    }
+    if (deck.warnings.length) alert(`${I18N.t('importSkippedLines')} ${deck.warnings.join(', ')}`);
     closeSidebarDrawer();
     window.location.href = "card.html?source=file";
   } catch (err) {
     console.error("Erreur lors de la lecture du fichier:", err);
-    alert("Erreur lors de la lecture du fichier TXT.");
+    alert(I18N.t(err.message === 'importTooLarge' ? 'importTooLarge' : 'invalidImport'));
   }
 }
 
@@ -272,7 +263,8 @@ function selectFormat(fmt, event) {
 }
 
 function initStores() {
-  const saved = JSON.parse(localStorage.getItem("stores") || "[]");
+  const stored = AppStorage.local.readJSON("stores", []);
+  const saved = Array.isArray(stored) ? stored : [];
   const container = document.getElementById("storeList");
   if (!container) return;
 
@@ -290,27 +282,21 @@ function initStores() {
   });
 }
 
-function getSelected() {
+function getSelected(persist = true) {
   const boxes = document.querySelectorAll("#storeList input");
   const selected = [];
   boxes.forEach(b => { if (b.checked) selected.push(b.value); });
-  localStorage.setItem("stores", JSON.stringify(selected));
+  if (persist) AppStorage.local.setItem("stores", JSON.stringify(selected));
   return selected;
 }
 
 let allSetsData = [];
 
-const SCRYFALL_COMMON_HEADERS = {
-  'Accept': 'application/json;q=0.9,*/*;q=0.8'
-};
-
 async function loadSets() {
   const container = document.getElementById("setList");
   if (!container) return;
   try {
-    const res = await fetch("https://api.scryfall.com/sets", { headers: SCRYFALL_COMMON_HEADERS });
-    const data = await res.json();
-    allSetsData = data.data
+    allSetsData = (await CardData.provider().sets())
       .filter(set => set.icon_svg_uri)
       .sort((a, b) => new Date(b.released_at) - new Date(a.released_at));
 
@@ -446,6 +432,7 @@ function initCollectionsSearch() {
 
 let searchDebounceTimer = null;
 let currentAutocompleteQuery = '';
+let autocompleteController = null;
 
 function initHeaderSearch() {
   const input = document.getElementById('headerSearchInput');
@@ -453,7 +440,9 @@ function initHeaderSearch() {
 
   input.addEventListener('input', () => {
     clearTimeout(searchDebounceTimer);
+    autocompleteController?.abort();
     const q = input.value.trim();
+    currentAutocompleteQuery = q;
     if (q.length < 2) {
       hideAutocomplete();
       currentAutocompleteQuery = '';
@@ -477,50 +466,26 @@ function initHeaderSearch() {
 
 async function fetchAutocomplete(query) {
   currentAutocompleteQuery = query;
+  autocompleteController?.abort();
+  const controller = new AbortController();
+  autocompleteController = controller;
   try {
-    const res = await fetch(`https://api.scryfall.com/cards/autocomplete?q=${encodeURIComponent(query)}`, { headers: SCRYFALL_COMMON_HEADERS });
-    if (currentAutocompleteQuery !== query) return;
-    const data = await res.json();
-    if (currentAutocompleteQuery !== query) return;
-
-    const names = data.data || [];
+    const names = await CardData.provider().autocomplete(query, { signal: controller.signal });
+    if (controller.signal.aborted || currentAutocompleteQuery !== query) return;
     if (!names.length) {
       hideAutocomplete();
       return;
     }
 
-    const sliceNames = names.slice(0, 8);
-    const collectionRes = await fetch('https://api.scryfall.com/cards/collection', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json;q=0.9,*/*;q=0.8'
-      },
-      body: JSON.stringify({
-        identifiers: sliceNames.map(name => ({ name }))
-      })
-    });
-    if (currentAutocompleteQuery !== query) return;
-    const collectionData = await collectionRes.json();
-    if (currentAutocompleteQuery !== query) return;
-
-    const cards = (collectionData.data || []).map(card => {
-      let image = '';
-      if (card.image_uris && card.image_uris.small) {
-        image = card.image_uris.small;
-      } else if (card.card_faces && card.card_faces[0] && card.card_faces[0].image_uris && card.card_faces[0].image_uris.small) {
-        image = card.card_faces[0].image_uris.small;
-      }
-      return {
-        id: card.id,
-        name: card.name,
-        image: image
-      };
-    });
-
-    showAutocomplete(cards);
+    // Names are useful immediately; thumbnails are optional background enrichment.
+    showAutocomplete(names.map(name => ({ name })));
+    try {
+      const cards = await CardData.provider().collection(names.map(name => ({ name })), { signal: controller.signal, background: true });
+      if (controller.signal.aborted || currentAutocompleteQuery !== query) return;
+      showAutocomplete(names.map((name, index) => ({ name, id: cards[index]?.id, image: cards[index]?.images.small })));
+    } catch (error) { /* Keep names when optional thumbnails are unavailable. */ }
   } catch (e) {
-    if (currentAutocompleteQuery === query) {
+    if (!CardData.isAbort(e) && currentAutocompleteQuery === query) {
       hideAutocomplete();
     }
   }
@@ -531,20 +496,27 @@ function showAutocomplete(cards) {
   if (!dd) return;
   if (!cards.length) { hideAutocomplete(); return; }
 
-  dd.innerHTML = cards.map(card => {
-    const escapedName = card.name.replace(/'/g, "\\'");
-    const imgHtml = card.image
-      ? `<img src="${card.image}" class="ac-thumbnail" alt="${card.name}" loading="lazy">`
-      : `<div class="ac-thumbnail-placeholder"></div>`;
-    return `<div class="ac-item" onclick="selectAutocomplete('${escapedName}', '${card.id || ''}')">
-      ${imgHtml}
-      <span class="ac-name">${card.name}</span>
-    </div>`;
-  }).join('');
+  dd.replaceChildren();
+  cards.forEach(card => {
+    const item = document.createElement('button');
+    item.type = 'button';
+    item.className = 'ac-item';
+    item.onclick = () => selectAutocomplete(card.name, card.id);
+    const thumbnail = document.createElement(card.image ? 'img' : 'span');
+    thumbnail.className = card.image ? 'ac-thumbnail' : 'ac-thumbnail-placeholder';
+    if (card.image) { thumbnail.src = card.image; thumbnail.alt = ''; thumbnail.loading = 'lazy'; }
+    const name = document.createElement('span');
+    name.className = 'ac-name';
+    name.textContent = card.name;
+    item.append(thumbnail, name);
+    dd.appendChild(item);
+  });
   dd.classList.add('visible');
 }
 
 function hideAutocomplete() {
+  clearTimeout(searchDebounceTimer);
+  autocompleteController?.abort();
   const dd = document.getElementById('autocompleteDropdown');
   if (dd) dd.classList.remove('visible');
 }
@@ -600,9 +572,11 @@ function switchToSignup(e) { e && e.preventDefault(); closeAuthModals(); openSig
 function switchToLogin(e) { e && e.preventDefault(); closeAuthModals(); openLoginModal(); }
 
 function handleLoginSubmit(e) {
+  // Existing demo account only. Real password validation requires the deferred backend.
   e.preventDefault();
   const email = document.getElementById('loginEmail').value;
-  localStorage.setItem('user', JSON.stringify({ email, username: email.split('@')[0] }));
+  AppStorage.local.setItem('user', JSON.stringify({ email, username: email.split('@')[0] }));
+  document.getElementById('loginPassword').value = '';
   closeAuthModals();
   updateUserUI();
 }
@@ -611,7 +585,8 @@ function handleSignupSubmit(e) {
   e.preventDefault();
   const username = document.getElementById('signupUsername').value;
   const email = document.getElementById('signupEmail').value;
-  localStorage.setItem('user', JSON.stringify({ email, username }));
+  AppStorage.local.setItem('user', JSON.stringify({ email, username }));
+  document.getElementById('signupPassword').value = '';
   closeAuthModals();
   updateUserUI();
 }
@@ -619,13 +594,14 @@ function handleSignupSubmit(e) {
 function updateUserUI() {
   const userActions = document.getElementById('headerUserActions');
   const sidebarActions = document.getElementById('sidebarUserActions');
-  const user = JSON.parse(localStorage.getItem('user') || 'null');
+  const storedUser = AppStorage.local.readJSON('user', null);
+  const user = typeof storedUser?.username === 'string' && typeof storedUser?.email === 'string' ? storedUser : null;
 
   const renderAuth = (container) => {
     if (!container) return;
     if (user) {
       container.innerHTML = `
-        <span class="user-greeting">${user.username}</span>
+        <span class="user-greeting">${escapeHTML(user.username)}</span>
         <button class="btn-logout-header" onclick="logoutUser()" data-i18n="logout">${I18N.t('logout')}</button>
       `;
     } else {
@@ -641,7 +617,7 @@ function updateUserUI() {
 }
 
 function logoutUser() {
-  localStorage.removeItem('user');
+  AppStorage.local.removeItem('user');
   updateUserUI();
 }
 
@@ -667,6 +643,14 @@ function initLangSelector() {
 
 window.addEventListener('languageChanged', () => {
   updateUserUI();
+});
+
+window.addEventListener('pageshow', updateUserUI);
+window.addEventListener('storage', event => {
+  if (event.key === 'user' || event.key === null) updateUserUI();
+});
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') updateUserUI();
 });
 
 document.addEventListener('DOMContentLoaded', () => {

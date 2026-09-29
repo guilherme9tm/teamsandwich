@@ -230,9 +230,9 @@
     <button class="modal-close-btn" onclick="closeAuthModals()">&times;</button>
     <h2 data-i18n="modalLoginTitle">Connexion à votre compte</h2>
     <form id="loginForm" onsubmit="handleLoginSubmit(event)">
-      <div class="input-group"><input type="email" id="loginEmail" required data-i18n="emailPlaceholder"
+      <div class="input-group"><input type="email" id="loginEmail" autocomplete="email" required data-i18n="emailPlaceholder"
           placeholder="Adresse e-mail"></div>
-      <div class="input-group"><input type="password" id="loginPassword" required data-i18n="passwordPlaceholder"
+      <div class="input-group"><input type="password" id="loginPassword" autocomplete="current-password" required data-i18n="passwordPlaceholder"
           placeholder="Mot de passe"></div>
       <button type="submit" class="btn-primary auth-submit-btn" data-i18n="modalLoginBtn">Se connecter</button>
     </form>
@@ -243,11 +243,11 @@
     <button class="modal-close-btn" onclick="closeAuthModals()">&times;</button>
     <h2 data-i18n="modalSignupTitle">Créer un compte</h2>
     <form id="signupForm" onsubmit="handleSignupSubmit(event)">
-      <div class="input-group"><input type="text" id="signupUsername" required data-i18n="usernamePlaceholder"
+      <div class="input-group"><input type="text" id="signupUsername" autocomplete="nickname" required data-i18n="usernamePlaceholder"
           placeholder="Nom d'utilisateur"></div>
-      <div class="input-group"><input type="email" id="signupEmail" required data-i18n="emailPlaceholder"
+      <div class="input-group"><input type="email" id="signupEmail" autocomplete="email" required data-i18n="emailPlaceholder"
           placeholder="Adresse e-mail"></div>
-      <div class="input-group"><input type="password" id="signupPassword" required data-i18n="passwordPlaceholder"
+      <div class="input-group"><input type="password" id="signupPassword" autocomplete="new-password" required data-i18n="passwordPlaceholder"
           placeholder="Mot de passe"></div>
       <button type="submit" class="btn-primary auth-submit-btn" data-i18n="modalSignupBtn">S'inscrire</button>
     </form>
@@ -255,6 +255,9 @@
         compte ? Se connecter</a></p>
   </div>
 
+  <script src="js/storage.js"></script>
+  <script src="js/card-data.js"></script>
+  <script src="js/deck-import.js"></script>
   <script src="js/i18n.js"></script>
   <script src="js/common.js"></script>
   <script src="js/script.js"></script>

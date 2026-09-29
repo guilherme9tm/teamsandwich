@@ -19,7 +19,7 @@ function toggleCard(btn) {
   }
 }
 
-function renderCardElement(cardData) {
+function renderCardElement(cardData, selected = getSelected(false)) {
   const n = encodeURIComponent(cardData.name);
   const cardDetailUrl = `card-detail.html?id=${encodeURIComponent(cardData.id || '')}&name=${n}`;
   const cardIdAttr = cardData.id || cardData.name;
@@ -30,17 +30,16 @@ function renderCardElement(cardData) {
   const usd = parseFloat(cardData.prices?.usd) || parseFloat(cardData.prices?.usd_foil) || 0;
   const cad = usd ? `CAD ${(usd * 1.38).toFixed(2)}` : I18N.t('priceUnavailable');
 
-  const selected = getSelected();
-
   const card = document.createElement("div");
   card.className = "card";
 
   if (img) {
-    card.innerHTML += `<a href="${cardDetailUrl}" class="card-img-link" title="${cardData.name}"><img src="${img}" alt="${cardData.name}" data-card-id="${cardIdAttr}"></a>`;
+    card.innerHTML += `<a href="${cardDetailUrl}" class="card-img-link" title="${escapeHTML(cardData.name)}"><img src="${escapeHTML(img)}" alt="${escapeHTML(cardData.name)}" data-card-id="${escapeHTML(cardIdAttr)}" loading="lazy" decoding="async"></a>`;
   }
 
   card.innerHTML += `
-    <a href="${cardDetailUrl}" class="card-title-link"><strong>${cardData.name}</strong></a><br>
+    <a href="${cardDetailUrl}" class="card-title-link"><strong>${escapeHTML(cardData.name)}</strong></a><br>
+    ${cardData._deck ? `<span class="deck-card-badge">${cardData._deck.quantity} × · ${I18N.t(cardData._deck.section === 'sideboard' ? 'sideboard' : 'mainDeck')}</span>` : ''}
     <em>${cad}</em>
     <div class="card-actions-row">
       <a href="${cardDetailUrl}" class="btn-card-detail">
@@ -69,8 +68,10 @@ function renderCardElement(cardData) {
     const a = document.createElement("a");
     a.href = site.link(n);
     a.target = "_blank";
+    a.rel = 'noopener noreferrer';
     const im = document.createElement("img");
     im.src = site.logo;
+    im.loading = 'lazy';
     im.onerror = function() { this.style.display = 'none'; };
     a.appendChild(im);
     (i++ % 2 === 0 ? c1 : c2).appendChild(a);
@@ -84,60 +85,16 @@ function renderCardElement(cardData) {
   return card;
 }
 
-const SCRYFALL_HEADERS = {
-  'Accept': 'application/json;q=0.9,*/*;q=0.8'
-};
-
 const localizedCardCache = new Map();
+let localizationController = null;
 
-async function fetchLocalizedCardData(card, lang) {
-  if (!card || card._notFound || !lang || lang === 'en') return null;
-
-  const key = `${card.id || card.name}_${lang}`;
-  if (localizedCardCache.has(key)) {
-    return localizedCardCache.get(key);
-  }
-
-  let locCard = null;
-
-  if (card.set && card.collector_number) {
-    try {
-      const res = await fetch(`https://api.scryfall.com/cards/${card.set}/${card.collector_number}/${lang}`, {
-        headers: SCRYFALL_HEADERS
-      });
-      if (res.ok) {
-        locCard = await res.json();
-      }
-    } catch (e) {}
-  }
-
-  if (!locCard && card.oracle_id) {
-    try {
-      const res = await fetch(`https://api.scryfall.com/cards/search?q=oracleid:${card.oracle_id}+lang:${lang}`, {
-        headers: SCRYFALL_HEADERS
-      });
-      if (res.ok) {
-        const data = await res.json();
-        if (data.data && data.data.length > 0) {
-          locCard = data.data[0];
-        }
-      }
-    } catch (e) {}
-  }
-
-  if (!locCard && card.name) {
-    try {
-      const res = await fetch(`https://api.scryfall.com/cards/named?exact=${encodeURIComponent(card.name)}&lang=${lang}`, {
-        headers: SCRYFALL_HEADERS
-      });
-      if (res.ok) {
-        locCard = await res.json();
-      }
-    } catch (e) {}
-  }
-
-  localizedCardCache.set(key, locCard);
-  return locCard;
+async function fetchLocalizedCardData(card, lang, signal) {
+  const key = `${card.id}_${lang}`;
+  if (localizedCardCache.has(key)) return localizedCardCache.get(key);
+  const localized = await CardData.provider(card.game).localized(card, lang, { signal });
+  const view = localized ? CardData.toView(localized) : null;
+  localizedCardCache.set(key, view);
+  return view;
 }
 
 function getCardImageUrl(cardData, lang) {
@@ -157,21 +114,6 @@ function getCardImageUrl(cardData, lang) {
   return img || '';
 }
 
-async function fetchCardData(nome) {
-  const n = encodeURIComponent(nome);
-
-  let res = await fetch(`https://api.scryfall.com/cards/named?exact=${n}`, { headers: SCRYFALL_HEADERS });
-  if (!res.ok) {
-    await new Promise(r => setTimeout(r, 100));
-    res = await fetch(`https://api.scryfall.com/cards/named?fuzzy=${n}`, { headers: SCRYFALL_HEADERS });
-  }
-  if (!res.ok) {
-    return { _notFound: true, name: nome };
-  }
-
-  return await res.json();
-}
-
 let allCards = [];
 let filteredCards = [];
 let currentPage = 1;
@@ -182,7 +124,7 @@ let activeRarityFilters = [];
 let activeColorFilters = [];
 let activeTypeFilters = [];
 
-let currentLayout = localStorage.getItem('gridLayout') || 'auto';
+let currentLayout = ['auto', 'grid-2', 'grid-list'].includes(AppStorage.local.getItem('gridLayout')) ? AppStorage.local.getItem('gridLayout') : 'auto';
 
 function changePerPage(value) {
   if (value === 'all') {
@@ -206,6 +148,7 @@ function goToPage(page) {
 }
 
 function renderPage() {
+  localizationController?.abort();
   const container = document.getElementById("resultado");
   container.innerHTML = "";
 
@@ -222,15 +165,16 @@ function renderPage() {
   const start = (currentPage - 1) * perPage;
   const end = Math.min(start + perPage, filteredCards.length);
   const pageCards = filteredCards.slice(start, end);
+  const selected = getSelected(false);
 
   pageCards.forEach(cardData => {
     if (cardData._notFound) {
       const errDiv = document.createElement("div");
       errDiv.className = "card card-not-found";
-      errDiv.innerHTML = `<p>${I18N.t('cardNotFound')} ${cardData.name}</p>`;
+      errDiv.innerHTML = `<p>${I18N.t('cardNotFound')} ${escapeHTML(cardData.name)}</p>${cardData._deck ? `<span class="deck-card-badge">${cardData._deck.quantity} × · ${I18N.t(cardData._deck.section === 'sideboard' ? 'sideboard' : 'mainDeck')}</span>` : ''}`;
       container.appendChild(errDiv);
     } else {
-      container.appendChild(renderCardElement(cardData));
+      container.appendChild(renderCardElement(cardData, selected));
     }
   });
 
@@ -238,33 +182,31 @@ function renderPage() {
 }
 
 async function loadLocalizedImagesForPage(pageCards) {
-  const currentLang = typeof I18N !== 'undefined' ? I18N.current : 'fr';
-  if (!currentLang || currentLang === 'en') return;
-
-  for (const cardData of pageCards) {
-    if (!cardData || cardData._notFound) continue;
-
-    const cardIdAttr = cardData.id || cardData.name;
-    const key = `${cardIdAttr}_${currentLang}`;
-
-    if (!localizedCardCache.has(key)) {
-      const locCard = await fetchLocalizedCardData(cardData, currentLang);
-
-      const activeLang = typeof I18N !== 'undefined' ? I18N.current : 'fr';
-      if (activeLang === currentLang) {
-        const locImg = getCardImageUrl(cardData, activeLang);
-        if (locImg) {
-          const imgEls = document.querySelectorAll('img[data-card-id]');
-          imgEls.forEach(imgEl => {
-            if (imgEl.getAttribute('data-card-id') === cardIdAttr) {
-              imgEl.src = locImg;
-            }
-          });
-        }
+  const lang = I18N.current;
+  if (lang === 'en') return;
+  const controller = new AbortController();
+  localizationController = controller;
+  // Let essential results paint before starting optional language requests.
+  await new Promise(resolve => setTimeout(resolve, 150));
+  const entries = pageCards.filter(card => card && !card._notFound);
+  let next = 0;
+  async function worker() {
+    while (!controller.signal.aborted && next < entries.length) {
+      const card = entries[next++];
+      try {
+        await fetchLocalizedCardData(card, lang, controller.signal);
+        if (controller.signal.aborted || I18N.current !== lang) return;
+        const url = getCardImageUrl(card, lang);
+        document.querySelectorAll('img[data-card-id]').forEach(image => {
+          if (image.dataset.cardId === card.id && url) image.src = url;
+        });
+      } catch (error) {
+        // An optional translation must never hide the card or keep an obsolete page loading.
+        if (CardData.isAbort(error) || error.status === 429) return;
       }
-      await new Promise(r => setTimeout(r, 50));
     }
   }
+  await Promise.all([worker(), worker()]);
 }
 
 function renderPagination() {
@@ -364,7 +306,7 @@ function getCardTypeLine(card) {
   return card.type_line || (card.card_faces && card.card_faces[0] ? card.card_faces[0].type_line : '') || '';
 }
 
-function applyFilters() {
+function applyFilters(resetPage = true) {
   let result = [...allCards].filter(c => !c._notFound);
   const notFound = allCards.filter(c => c._notFound);
 
@@ -409,7 +351,9 @@ function applyFilters() {
   }
 
   filteredCards = [...result, ...notFound];
-  currentPage = 1;
+  if (resetPage) currentPage = 1;
+  if (document.getElementById('perPageSelect')?.value === 'all') perPage = filteredCards.length || 15;
+  currentPage = Math.min(currentPage, Math.max(1, Math.ceil(filteredCards.length / perPage)));
   renderPage();
   renderPagination();
   updateFilterUI();
@@ -541,7 +485,7 @@ function closeFilterDrawer() {
 
 function setGridLayout(layout) {
   currentLayout = layout;
-  localStorage.setItem('gridLayout', layout);
+  AppStorage.local.setItem('gridLayout', layout);
 
   const grid = document.getElementById('resultado');
   if (!grid) return;
@@ -585,143 +529,10 @@ function updateSearchTitles() {
   }
 }
 
-async function init() {
-  const params = new URLSearchParams(window.location.search);
-  const container = document.getElementById("resultado");
-  const titleEl = document.getElementById("searchTitle");
-  const subtitleEl = document.getElementById("searchSubtitle");
-
-  const showLoader = (msg) => {
-    container.innerHTML = `
-      <div class="loading-indicator">
-        <div class="spinner"></div>
-        <span class="loading-text">${msg}</span>
-      </div>
-    `;
-  };
-
-  const removeLoader = () => {
-    const loader = container.querySelector('.loading-indicator');
-    if (loader) loader.remove();
-  };
-
-  if (params.has("name")) {
-    const nome = params.get("name");
-    titleEl.textContent = nome;
-    subtitleEl.textContent = I18N.t('loading');
-    showLoader(I18N.t('loading'));
-
-    try {
-      let url = `https://api.scryfall.com/cards/search?q=${encodeURIComponent(nome)}&unique=cards&order=name`;
-      let loaded = 0;
-
-      while (url) {
-        const res = await fetch(url, { headers: SCRYFALL_HEADERS });
-        if (!res.ok) break;
-        const data = await res.json();
-
-        for (let card of data.data) {
-          allCards.push(card);
-          loaded++;
-        }
-        subtitleEl.textContent = `${loaded} ${I18N.t('cardsFoundCount')}...`;
-        if (data.has_more && data.next_page) {
-          await new Promise(r => setTimeout(r, 100));
-          url = data.next_page;
-        } else {
-          url = null;
-        }
-      }
-    } catch (e) {
-      console.warn('Search error:', e);
-    }
-
-    if (allCards.length === 0) {
-      allCards.push({ _notFound: true, name: nome });
-    }
-
-    removeLoader();
-    filteredCards = [...allCards];
-    renderPage();
-    renderPagination();
-    updateSearchTitles();
-  }
-
-  else if (params.get("source") === "file") {
-    const cartas = JSON.parse(sessionStorage.getItem("fileCards") || "[]");
-    titleEl.textContent = I18N.t('fileImportTitle');
-    subtitleEl.textContent = `${cartas.length} ${I18N.t('cardsLoadingCount')}`;
-    showLoader(`${cartas.length} ${I18N.t('cardsLoadingCount')}`);
-
-    let loaded = 0;
-    for (let nome of cartas) {
-      const data = await fetchCardData(nome);
-      allCards.push(data);
-      await new Promise(r => setTimeout(r, 100));
-      loaded++;
-      subtitleEl.textContent = `${loaded} / ${cartas.length} ${I18N.t('cardsLoadedCount')}`;
-    }
-
-    removeLoader();
-    filteredCards = [...allCards];
-    renderPage();
-    renderPagination();
-    updateSearchTitles();
-  }
-
-  else if (params.has("set")) {
-    const code = params.get("set");
-    titleEl.textContent = `${I18N.t('setCollectionTitle')} ${code.toUpperCase()}`;
-    subtitleEl.textContent = I18N.t('loadingCollection');
-    showLoader(I18N.t('loadingCollection'));
-
-    let url = `https://api.scryfall.com/cards/search?q=set:${code}`;
-    let loaded = 0;
-
-    try {
-      while (url) {
-        const res = await fetch(url, { headers: SCRYFALL_HEADERS });
-        if (!res.ok) break;
-        const data = await res.json();
-
-        for (let card of data.data) {
-          allCards.push(card);
-          loaded++;
-          subtitleEl.textContent = `${loaded} ${I18N.t('cardsLoadedCount')}...`;
-        }
-
-        if (data.has_more && data.next_page) {
-          await new Promise(r => setTimeout(r, 100));
-          url = data.next_page;
-        } else {
-          url = null;
-        }
-      }
-    } catch (e) {
-      console.warn('Set loading error:', e);
-    }
-
-    removeLoader();
-    filteredCards = [...allCards];
-    renderPage();
-    renderPagination();
-    updateSearchTitles();
-  }
-
-  else {
-    titleEl.textContent = I18N.t('noSearchTitle');
-    subtitleEl.textContent = I18N.t('noSearchSubtitle');
-  }
-
-  initLayout();
-}
-
 window.addEventListener('languageChanged', () => {
   renderPage();
   renderPagination();
   updateFilterUI();
   updateSearchTitles();
+  renderLoadControls();
 });
-
-init();
-

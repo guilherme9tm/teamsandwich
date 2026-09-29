@@ -47,3 +47,13 @@ teamsandwich/
 1. Cloner ou télécharger ce dépôt dans le répertoire de votre choix.
 2. Lancez un serveur de développement local (par exemple avec l'extension **Live Server** sur VS Code, ou avec `python -m http.server 5500` dans votre terminal).
 3. Ouvrez votre navigateur à l'adresse `http://localhost:5500` pour accéder à l'application.
+
+## Améliorations du frontend
+
+Le site reste entièrement statique, sans backend ni installation de dépendances. Les résultats apparaissent dès la première page et les pages suivantes sont chargées sur demande. Les imports regroupent les quantités et chargent le Sideboard séparément. Les détails proposent une galerie d'arts/éditions ainsi que les informations de sérialisation disponibles.
+
+`js/card-data.js` centralise les appels Scryfall, le cache, les limites de concurrence et la normalisation. `js/deck-import.js` analyse les listes; `js/card-search.js` gère le chargement progressif; `js/card-arts.js` gère la galerie. Les libellés sont disponibles en français et en anglais.
+
+Le compte utilisateur actuel reste une démonstration locale : il ne valide pas les mots de passe. L'authentification réelle et le renouvellement sécurisé des sessions sont reportés avec le backend.
+
+La [couverture des exigences](docs/melhorias.md) ainsi que la [recherche de sources pour les autres TCGs](docs/fontes-tcg.md) sont documentées en portugais.
