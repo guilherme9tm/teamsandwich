@@ -19,13 +19,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
   box-shadow: none; backdrop-filter: none;
 }
 .logo-link-header { gap: 10px; order: 1; }
-.brand-mark {
-  display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 40px;
-  border: 1px solid var(--accent); border-radius: 9px; color: var(--accent);
-  font-size: 13px; font-weight: 800; letter-spacing: -.06em; background: rgba(126, 164, 143, 0.031); flex-shrink: 0;
-}
-.brand-wordmark { font-size: 10px; letter-spacing: .22em; color: var(--text-muted); line-height: 1.4; font-weight: 600; }
-.brand-wordmark > span { display: block; font-size: 12px; letter-spacing: .06em; color: var(--text-primary); font-weight: 750; }
+.header-logo { display: block; width: auto; height: 44px; object-fit: contain; }
 .hamburger-btn { order: 0; width: 34px; height: 36px; border-color: var(--border-subtle); background: transparent; }
 .header-search-container { order: 3; margin: 0; min-width: 120px; max-width: 620px; flex: 1 1 240px; }
 .search-input-wrapper { height: 42px; background: var(--bg-primary); border: 1px solid var(--border-medium); border-radius: 9px; box-shadow: none; padding-left: 14px; }
@@ -230,7 +224,6 @@ dialog::backdrop { background: rgba(10, 14, 11, .85); backdrop-filter: blur(3px)
 .frequency-row progress::-webkit-progress-value { background: var(--accent); }
 .demo-notice { padding: 12px 18px; border-left: 2px solid var(--accent); background: var(--bg-card); color: var(--text-muted); font-size: 12px; }
 @media (max-width: 1240px) {
-  .brand-wordmark { display: none; }
   .header { gap: 14px; padding-inline: 24px; }
   .header .user-actions { display: none; }
 }
@@ -248,6 +241,7 @@ dialog::backdrop { background: rgba(10, 14, 11, .85); backdrop-filter: blur(3px)
   .workspace-tabs { gap: 20px; }
   .workspace-tabs button { font-size: 12px; }
   .header { flex-wrap: wrap; gap: 10px; padding: 12px 18px; min-height: 0; }
+  .header-logo { height: 36px; }
   .header-search-container { order: 6; flex: 1 1 100%; max-width: none; margin: 0; }
   .game-selector { margin-left: auto; }
   .game-selector button { font-size: 11px; padding: 8px 9px; }

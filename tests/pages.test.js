@@ -57,6 +57,21 @@ function page(file, query = '', { failure = false, pokemonFailure = false, disab
   }
   return { dom, errors, requests, allowSearch: () => { rejectSearch = false; } };
 }
+test('all page headers display the original Team Sandwich logo', () => {
+  for (const file of ['index.html', 'card.html', 'card-detail.html', 'competitive.html']) {
+    const dom = new JSDOM(fs.readFileSync(file, 'utf8'));
+    try {
+      const document = dom.window.document;
+      const logo = document.querySelector('.logo-link-header .header-logo');
+      assert.ok(logo, `${file}: header logo`);
+      assert.equal(logo.getAttribute('src'), 'assets/images/IMG_6262.jpg');
+      assert.equal(logo.alt, 'Team Sandwich');
+      assert.ok(fs.existsSync(path.resolve(logo.getAttribute('src'))));
+      assert.equal(document.querySelector('.brand-mark'), null);
+    } finally { dom.window.close(); }
+  }
+});
+
 test('catalog loads automatically, preserves imports/actions and applies exclusive game state', async () => {
   const { dom, requests, errors } = page('card.html');
   try {
