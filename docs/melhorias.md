@@ -1,5 +1,7 @@
 # Melhorias aplicadas no frontend
 
+> Documento histórico da implementação anterior. O estado atual inclui servidor opcional para TopDeck e está descrito em [Changes.md](Changes.md), [Architecture.md](Architecture.md) e [Setup.md](Setup.md).
+
 O projeto continua sendo um site estático. Por solicitação do usuário, nenhum backend, banco de dados ou serviço de autenticação foi adicionado.
 
 ## Cobertura dos requisitos

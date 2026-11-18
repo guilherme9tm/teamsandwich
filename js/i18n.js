@@ -1,6 +1,6 @@
 
 const I18N = {
-  current: ['fr', 'en'].includes(AppStorage.local.getItem('lang')) ? AppStorage.local.getItem('lang') : 'fr',
+  current: ['fr', 'en', 'pt', 'es', 'de'].includes(AppStorage.local.getItem('lang')) ? AppStorage.local.getItem('lang') : 'en',
 
   dict: {
     fr: {
@@ -332,7 +332,7 @@ const I18N = {
   },
 
   t(key) {
-    return (this.dict[this.current] && this.dict[this.current][key]) || key;
+    return this.dict[this.current]?.[key] || this.dict.en[key] || key;
   },
 
   setLang(lang) {
@@ -344,6 +344,9 @@ const I18N = {
   },
 
   updateDOM() {
+    document.querySelectorAll('[data-i18n-aria]').forEach(element => {
+      element.setAttribute('aria-label', this.t(element.getAttribute('data-i18n-aria')));
+    });
     document.querySelectorAll('[data-i18n]').forEach(el => {
       const key = el.getAttribute('data-i18n');
       const translated = this.t(key);

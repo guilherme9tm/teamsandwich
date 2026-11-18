@@ -1,4 +1,53 @@
 
+const requestedGame = new URLSearchParams(window.location.search).get('game') || 'mtg';
+try { CardData.selectGame(requestedGame); } catch { CardData.selectGame('mtg'); }
+
+function gameUrl(path, params = {}) {
+  const url = new URL(path, window.location.href);
+  url.searchParams.set('game', CardData.game);
+  for (const [key, value] of Object.entries(params)) url.searchParams.set(key, value);
+  return url.href;
+}
+
+function initGameNavigation() {
+  const header = document.querySelector('.header');
+  if (!header) return;
+  const group = document.createElement('div');
+  group.className = 'game-selector';
+  group.setAttribute('role', 'group');
+  group.setAttribute('aria-label', I18N.t('game'));
+  for (const [game, label] of [['mtg', 'Magic: The Gathering'], ['pokemon', 'Pokémon TCG']]) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.textContent = label;
+    button.setAttribute('aria-pressed', String(CardData.game === game));
+    try { CardData.provider(game); } catch { button.disabled = true; button.title = I18N.t('unsupportedGame'); }
+    button.onclick = () => { window.location.href = `card.html?game=${game}`; };
+    group.append(button);
+  }
+  header.append(group);
+  const nav = document.createElement('nav');
+  nav.className = 'catalog-nav';
+  nav.setAttribute('aria-label', I18N.t('navigation'));
+  nav.innerHTML = `<div class="catalog-nav-links"><a href="${gameUrl('index.html')}" data-i18n="home"></a><a href="${gameUrl('card.html')}" data-i18n="catalog"></a>${CardData.game === 'mtg' ? '<a href="card.html?view=lands" data-i18n="lands">Lands</a>' : ''}<a href="${gameUrl('competitive.html')}" data-i18n="competitive"></a></div><span class="card-language-note" data-i18n="cardLanguage"></span>`;
+  const page = window.location.pathname.split('/').pop() || 'index.html';
+  const isLands = new URLSearchParams(window.location.search).get('view') === 'lands';
+  nav.querySelectorAll('a').forEach(link => {
+    const target = new URL(link.href);
+    const matches = page === 'card-detail.html' ? link.dataset.i18n === 'catalog'
+      : page === target.pathname.split('/').pop() && (isLands ? target.searchParams.get('view') === 'lands' : !target.searchParams.has('view'));
+    if (matches) link.setAttribute('aria-current', 'page');
+  });
+  header.after(nav);
+  document.querySelectorAll('.lang-selector-select, .sidebar-lang-select').forEach(select => {
+    select.innerHTML = '<option value="en">English</option><option value="pt">Português</option><option value="es">Español</option><option value="fr">Français</option><option value="de">Deutsch</option>';
+  });
+  if (CardData.game === 'pokemon') {
+    document.getElementById('sectionFormats')?.setAttribute('hidden', '');
+    document.querySelectorAll('.hero-badge span').forEach(label => { label.textContent = 'POKÉMON TCG'; });
+  }
+}
+
 function escapeHTML(value) {
   return String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
 }
@@ -10,7 +59,7 @@ const sites = [
   { id: 'cardhoarder', nome: 'Cardhoarder', link: n => `https://www.cardhoarder.com/cards?cardname=${n}`, logo: 'https://cdn.shopify.com/s/files/1/1781/6359/files/nav-logo.png?height=628&pad_color=fff&v=1613525588&width=1200' },
   { id: 'gamekeeper', nome: 'Gamekeeper', link: n => `https://www.gamekeeperonline.com/products/search?q=${n}`, logo: 'https://cc-client-assets.nyc3.cdn.digitaloceanspaces.com/photo/gamekeeperonline/file/768163/logo-2017.png?1508604932' },
   { id: 'expedition', nome: 'Expedition', link: n => `https://www.expeditionjeux.com/products/search?q=${n}`, logo: 'https://cc-client-assets.nyc3.cdn.digitaloceanspaces.com/store/expeditionjeux/26105d544a1449c7b3d28a192b99b961/large/expedition_logo_long.png' },
-  { id: 'tcgplayer', nome: 'TCGPlayer', link: n => `https://www.tcgplayer.com/search/magic/product?q=${n}`, logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRwc05VHb_4Y30nHRhc-thfIAdqVAN19LqSgQ&s' },
+  { id: 'tcgplayer', nome: 'TCGPlayer', link: n => `https://www.tcgplayer.com/search/${CardData.game === 'pokemon' ? 'pokemon' : 'magic'}/product?q=${n}`, logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRwc05VHb_4Y30nHRhc-thfIAdqVAN19LqSgQ&s' },
   { id: 'mtgtop8', nome: 'MTGTop8', link: n => `https://www.mtgtop8.com/search.php?cards=${n}`, logo: 'https://mtgtop8.com/graph/title.png' },
   { id: 'silvergoblin', nome: 'Silver Goblin', link: n => `https://silvergoblin.cards/search?q=${n}&options%5Bprefix%5D=last`, logo: 'https://silvergoblin.cards/cdn/shop/files/Homepage_logo_5f1b015e-ccda-4e73-8c97-9259e49ab786.png?v=1741746772&width=1500' },
   { id: 'altf4', nome: 'Alt F4', link: n => `https://altf4online.com/search?options%5Bprefix%5D=last&q=${n}`, logo: 'https://altf4online.com/cdn/shop/files/altf4_altf4-logo-color-web.png?v=1734379537&width=270' },
@@ -37,7 +86,7 @@ function renderSidebar() {
     <div class="sidebar-mobile-actions">
       <div class="sidebar-mobile-lang">
         <label class="sidebar-field-label" data-i18n="languageLabel">Langue / Language</label>
-        <select class="sidebar-lang-select" aria-label="Language" onchange="I18N.setLang(this.value)">
+        <select class="sidebar-lang-select" aria-label="Language">
           <option value="fr">FR</option>
           <option value="en">EN</option>
         </select>
@@ -113,7 +162,7 @@ function handleFileSelected(event) {
   if (input && input.files.length) {
     const fileName = input.files[0].name;
     const btn = input.nextElementSibling;
-    if (btn) btn.textContent = `Traiter "${fileName}"`;
+    if (btn) btn.textContent = `${I18N.t('processFile')} · ${fileName}`;
   }
 }
 
@@ -127,7 +176,7 @@ async function processarArquivo() {
   try {
     const file = arquivoInput.files[0];
     if (file.size > 256000) throw new Error('importTooLarge');
-    const deck = DeckImport.parse(await file.text());
+    const deck = DeckImport.parse(await file.text(), { game: CardData.game });
     if (deck.entries.length === 0) {
       alert(I18N.t('emptyImport'));
       return;
@@ -138,7 +187,7 @@ async function processarArquivo() {
     }
     if (deck.warnings.length) alert(`${I18N.t('importSkippedLines')} ${deck.warnings.join(', ')}`);
     closeSidebarDrawer();
-    window.location.href = "card.html?source=file";
+    window.location.href = gameUrl('card.html', { source: 'file' });
   } catch (err) {
     console.error("Erreur lors de la lecture du fichier:", err);
     alert(I18N.t(err.message === 'importTooLarge' ? 'importTooLarge' : 'invalidImport'));
@@ -210,7 +259,7 @@ function buscarCartaManuellement() {
     return;
   }
   closeSidebarDrawer();
-  window.location.href = `card.html?name=${encodeURIComponent(nome)}`;
+  window.location.href = gameUrl('card.html', { name: nome });
 }
 
 function limparResultado() {
@@ -297,18 +346,20 @@ async function loadSets() {
   if (!container) return;
   try {
     allSetsData = (await CardData.provider().sets())
-      .filter(set => set.icon_svg_uri)
+      .filter(set => set.code && set.name)
       .sort((a, b) => new Date(b.released_at) - new Date(a.released_at));
 
     const recentSets = allSetsData.slice(0, 8);
     container.innerHTML = '';
 
     recentSets.forEach(set => {
-      const div = document.createElement("div");
+      const div = document.createElement("button");
+      div.type = 'button';
       div.className = "store-item";
-      div.innerHTML = `<img src="${set.icon_svg_uri}" width="24"><span>${set.code.toUpperCase()} - ${set.name}</span>`;
+      if (set.icon_svg_uri) { const image = document.createElement('img'); image.src = set.icon_svg_uri; image.width = 24; image.alt = ''; div.append(image); }
+      const label = document.createElement('span'); label.textContent = `${set.code.toUpperCase()} - ${set.name}`; div.append(label);
       div.style.cursor = "pointer";
-      div.onclick = () => { window.location.href = `card.html?set=${encodeURIComponent(set.code)}`; };
+      div.onclick = () => { window.location.href = gameUrl('card.html', { set: set.code }); };
       container.appendChild(div);
     });
 
@@ -320,7 +371,10 @@ async function loadSets() {
     container.appendChild(viewAllBtn);
 
   } catch (e) {
-    console.warn('Could not load sets:', e);
+    container.replaceChildren();
+    const message = document.createElement('p'); message.textContent = I18N.t(e.code || 'sourceUnavailable');
+    const retry = document.createElement('button'); retry.type = 'button'; retry.className = 'btn-secondary'; retry.textContent = I18N.t('retry'); retry.onclick = loadSets;
+    container.append(message, retry);
   }
 }
 
@@ -406,16 +460,16 @@ function renderCollectionsGrid(sets) {
   grid.innerHTML = sets.map(set => {
     const year = set.released_at ? new Date(set.released_at).getFullYear() : '';
     return `
-      <div class="collection-card" onclick="window.location.href='card.html?set=${encodeURIComponent(set.code)}'">
+      <a class="collection-card" href="${gameUrl('card.html', { set: set.code })}">
         <div class="collection-card-icon">
-          <img src="${set.icon_svg_uri}" alt="${set.name}" width="32" height="32">
+          ${set.icon_svg_uri ? `<img src="${escapeHTML(set.icon_svg_uri)}" alt="" width="32" height="32">` : ''}
         </div>
         <div class="collection-card-info">
-          <span class="collection-card-code">${set.code.toUpperCase()}</span>
-          <span class="collection-card-name">${set.name}</span>
+          <span class="collection-card-code">${escapeHTML(set.code.toUpperCase())}</span>
+          <span class="collection-card-name">${escapeHTML(set.name)}</span>
           ${year ? `<span class="collection-card-year">${year}</span>` : ''}
         </div>
-      </div>
+      </a>
     `;
   }).join('');
 }
@@ -523,11 +577,7 @@ function hideAutocomplete() {
 
 function selectAutocomplete(name, cardId) {
   hideAutocomplete();
-  if (cardId) {
-    window.location.href = `card-detail.html?id=${encodeURIComponent(cardId)}&name=${encodeURIComponent(name)}`;
-  } else {
-    window.location.href = `card-detail.html?name=${encodeURIComponent(name)}`;
-  }
+  window.location.href = gameUrl('card-detail.html', { ...(cardId ? { id: cardId } : {}), name });
 }
 
 function submitHeaderSearch() {
@@ -535,7 +585,7 @@ function submitHeaderSearch() {
   if (!input) return;
   const q = input.value.trim();
   if (!q) return;
-  window.location.href = `card.html?name=${encodeURIComponent(q)}`;
+  window.location.href = gameUrl('card.html', { name: q });
 }
 
 function clearHeaderSearch() {
@@ -655,6 +705,16 @@ document.addEventListener('visibilitychange', () => {
 
 document.addEventListener('DOMContentLoaded', () => {
   renderSidebar();
+  initGameNavigation();
+  document.addEventListener('click', event => {
+    const anchor = event.target.closest('a[href]');
+    if (!anchor || anchor.origin !== location.origin) return;
+    const url = new URL(anchor.href);
+    if (/\/(?:index|card|card-detail|competitive)\.html$/.test(url.pathname) && !url.searchParams.has('game')) {
+      url.searchParams.set('game', CardData.game);
+      anchor.href = url.href;
+    }
+  });
   initSidebar();
   initStores();
   loadSets();

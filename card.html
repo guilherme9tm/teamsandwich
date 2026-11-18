@@ -11,6 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/card.css">
+  <link rel="stylesheet" href="css/expansion.css">
 </head>
 
 <body>
@@ -29,7 +30,7 @@
       </button>
 
       <a href="index.html" class="logo-link-header">
-        <img src="assets/images/IMG_6262.jpg" alt="Team Sandwich Logo" class="header-logo">
+        <span class="brand-mark" aria-hidden="true">TS</span><span class="brand-wordmark">TEAM<span>SANDWICH</span></span>
       </a>
 
       <div class="header-search-container">
@@ -180,10 +181,10 @@
       <div class="page-nav" id="pageNav"></div>
     </section>
 
-    <div id="searchLoadControls" class="search-load-controls" aria-live="polite"></div>
     <section class="results-section">
       <div id="resultado" class="grid"></div>
     </section>
+    <div id="searchLoadControls" class="search-load-controls" aria-live="polite"></div>
 
     <section class="pagination-bar pagination-bottom" id="paginationBarBottom">
       <div class="page-nav" id="pageNavBottom"></div>
@@ -301,11 +302,15 @@
 </div>
 
 <script src="js/storage.js"></script>
-<script src="js/card-data.js"></script>
+  <script src="js/card-data.js"></script>
+  <script src="js/pokemon-provider.js"></script>
+  <script src="js/prices.js"></script>
 <script src="js/deck-import.js"></script>
-<script src="js/i18n.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/locales.js"></script>
 <script src="js/common.js"></script>
 <script src="js/card.js"></script>
+<script src="js/lands.js"></script>
 <script src="js/card-search.js"></script>
 
 </body>

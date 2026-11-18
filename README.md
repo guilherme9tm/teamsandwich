@@ -1,5 +1,20 @@
 # Team Sandwich — MTG Card Fetcher
 
+## Atualização TCG — 18/11/2026
+
+O projeto mantém HTML/CSS/JavaScript puro e agora inclui catálogo automático Magic/Pokémon, preços identificados por impressão/moeda, cinco idiomas, 14 ciclos de terrenos e a página `competitive.html` com torneios, decklists e análise de frequência.
+
+```powershell
+npm ci
+npm start
+```
+
+Abra `http://127.0.0.1:5500`. Para torneios Magic, configure `TOPDECK_API_KEY` em `.env` usando `.env.example`; a chave permanece no servidor. Catálogos e torneios Pokémon públicos funcionam sem chave. Node 22.13+ (24 recomendado); sem banco e sem build.
+
+Validação: `npm run check`, `npm test` e, opcionalmente, `npm run test:live`. Os testes jsdom verificam comportamentos, sem substituir uma revisão visual real. A validação autenticada TopDeck e a revisão visual ficaram pendentes por falta de chave e bloqueio da automação do navegador.
+
+Documentação atual: [Arquitetura](docs/Architecture.md), [Fontes](docs/DataSources.md), [Funcionalidades](docs/Features.md), [Execução](docs/Setup.md) e [Alterações/limitações](docs/Changes.md). As seções originais abaixo são mantidas como histórico da versão anterior; os documentos novos descrevem o estado atual.
+
 Ce projet est une application web moderne et performante permettant de rechercher des cartes Magic: The Gathering (MTG), de charger des collections entières de sets ou d'importer des listes de cartes depuis un fichier texte, puis de comparer leurs prix et d'accéder directement aux liens de recherche de diverses boutiques de jeux spécialisées.
 
 ##  Fonctionnalités principales

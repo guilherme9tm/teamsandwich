@@ -21,26 +21,31 @@ function toggleCard(btn) {
 
 function renderCardElement(cardData, selected = getSelected(false)) {
   const n = encodeURIComponent(cardData.name);
-  const cardDetailUrl = `card-detail.html?id=${encodeURIComponent(cardData.id || '')}&name=${n}`;
+  const cardDetailUrl = gameUrl('card-detail.html', { id: cardData.id || '', name: cardData.name });
   const cardIdAttr = cardData.id || cardData.name;
 
-  const currentLang = typeof I18N !== 'undefined' ? I18N.current : 'fr';
+  const currentLang = 'en';
   let img = getCardImageUrl(cardData, currentLang);
 
-  const usd = parseFloat(cardData.prices?.usd) || parseFloat(cardData.prices?.usd_foil) || 0;
-  const cad = usd ? `CAD ${(usd * 1.38).toFixed(2)}` : I18N.t('priceUnavailable');
+  const price = CardPrices.main(cardData);
+  const cad = CardPrices.format(price, I18N.current) || I18N.t('priceUnavailable');
 
   const card = document.createElement("div");
   card.className = "card";
+  card.dataset.printingId = cardData.id;
 
   if (img) {
     card.innerHTML += `<a href="${cardDetailUrl}" class="card-img-link" title="${escapeHTML(cardData.name)}"><img src="${escapeHTML(img)}" alt="${escapeHTML(cardData.name)}" data-card-id="${escapeHTML(cardIdAttr)}" loading="lazy" decoding="async"></a>`;
+  } else {
+    card.innerHTML += `<a href="${cardDetailUrl}" class="card-img-link"><span class="card-image-placeholder">${I18N.t('imageUnavailable')}</span></a>`;
   }
 
   card.innerHTML += `
-    <a href="${cardDetailUrl}" class="card-title-link"><strong>${escapeHTML(cardData.name)}</strong></a><br>
+    <div class="card-copy">
+    <a href="${cardDetailUrl}" class="card-title-link" title="${escapeHTML(cardData.name)}"><strong>${escapeHTML(cardData.name)}</strong></a>
     ${cardData._deck ? `<span class="deck-card-badge">${cardData._deck.quantity} × · ${I18N.t(cardData._deck.section === 'sideboard' ? 'sideboard' : 'mainDeck')}</span>` : ''}
-    <em>${cad}</em>
+    <em class="card-price">${cad}</em>
+    <small class="card-edition" title="${escapeHTML(cardData.set_name || cardData.set || '')}">${escapeHTML(cardData.set_name || cardData.set || '')} · #${escapeHTML(cardData.collector_number || '')}</small>
     <div class="card-actions-row">
       <a href="${cardDetailUrl}" class="btn-card-detail">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
@@ -49,6 +54,7 @@ function renderCardElement(cardData, selected = getSelected(false)) {
       <button class="toggle-btn" onclick="toggleCard(this)" title="${I18N.t('quickPreviewTooltip')}">
         ${CHEVRON_DOWN_SVG}
       </button>
+    </div>
     </div>
   `;
 
@@ -63,7 +69,7 @@ function renderCardElement(cardData, selected = getSelected(false)) {
   c1.className = c2.className = "links-column";
 
   let i = 0;
-  sites.forEach(site => {
+  (CardData.game === 'mtg' ? sites : sites.filter(site => site.id === 'tcgplayer')).forEach(site => {
     if (!selected.includes(site.id)) return;
     const a = document.createElement("a");
     a.href = site.link(n);
@@ -87,6 +93,32 @@ function renderCardElement(cardData, selected = getSelected(false)) {
 
 const localizedCardCache = new Map();
 let localizationController = null;
+let priceController = null;
+
+async function enrichVisiblePrices(cards) {
+  priceController?.abort();
+  if (CardData.game !== 'pokemon') return;
+  const controller = new AbortController(); priceController = controller;
+  const pending = cards.filter(card => !card._notFound && !card.metadata?.detailed);
+  let next = 0;
+  async function worker() {
+    while (!controller.signal.aborted && next < pending.length) {
+      const card = pending[next++];
+      try {
+        const full = CardData.toView(await CardData.provider('pokemon').get(card.id, { signal: controller.signal }));
+        if (controller.signal.aborted) return;
+        full.metadata.detailed = true;
+        Object.assign(card, full);
+        document.querySelectorAll('.card[data-printing-id]').forEach(element => {
+          if (element.dataset.printingId !== card.id) return;
+          element.querySelector('.card-price').textContent = CardPrices.format(CardPrices.main(card), I18N.current) || I18N.t('priceUnavailable');
+          const edition = element.querySelector('.card-edition'); edition.textContent = `${card.set_name || card.set} · #${card.collector_number}`; edition.title = card.set_name || card.set;
+        });
+      } catch (error) { if (controller.signal.aborted || error.status === 429) return; }
+    }
+  }
+  await Promise.all([worker(), worker()]);
+}
 
 async function fetchLocalizedCardData(card, lang, signal) {
   const key = `${card.id}_${lang}`;
@@ -138,7 +170,11 @@ function changePerPage(value) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function goToPage(page) {
+async function goToPage(page) {
+  if (page > Math.ceil(filteredCards.length / perPage) && hasMoreMain()) {
+    if (isLoadingCards) return;
+    await loadNextCards();
+  }
   const totalPages = Math.ceil(filteredCards.length / perPage);
   if (page < 1 || page > totalPages) return;
   currentPage = page;
@@ -178,7 +214,8 @@ function renderPage() {
     }
   });
 
-  loadLocalizedImagesForPage(pageCards);
+  void enrichVisiblePrices(pageCards);
+
 }
 
 async function loadLocalizedImagesForPage(pageCards) {
@@ -211,14 +248,16 @@ async function loadLocalizedImagesForPage(pageCards) {
 
 function renderPagination() {
   const totalPages = Math.ceil(filteredCards.length / perPage);
+  const moreAvailable = hasMoreMain() && !pokemonSetDirectory;
   const navTop = document.getElementById("pageNav");
   const navBottom = document.getElementById("pageNavBottom");
   const paginationBar = document.getElementById("paginationBar");
   const paginationBarBottom = document.getElementById("paginationBarBottom");
 
-  if (totalPages <= 1) {
+  if (totalPages <= 1 && !moreAvailable) {
     if (paginationBarBottom) paginationBarBottom.style.display = "none";
     if (navTop) navTop.innerHTML = `<span class="page-info">${filteredCards.length} ${I18N.t('cardsFoundCount')}</span>`;
+    if (navBottom) navBottom.replaceChildren();
     return;
   }
 
@@ -270,7 +309,7 @@ function renderPagination() {
     const nextBtn = document.createElement("button");
     nextBtn.className = "page-btn arrow-btn";
     nextBtn.textContent = "›";
-    nextBtn.disabled = currentPage === totalPages;
+    nextBtn.disabled = currentPage >= totalPages && (!moreAvailable || isLoadingCards);
     nextBtn.onclick = () => goToPage(currentPage + 1);
     navEl.appendChild(nextBtn);
 
@@ -308,6 +347,7 @@ function getCardTypeLine(card) {
 
 function applyFilters(resetPage = true) {
   let result = [...allCards].filter(c => !c._notFound);
+  if (typeof Lands !== 'undefined') result = result.filter(Lands.matches);
   const notFound = allCards.filter(c => c._notFound);
 
   if (activeRarityFilters.length > 0) {
@@ -344,10 +384,12 @@ function applyFilters(resetPage = true) {
     });
   }
 
-  if (activeSort === 'price-asc') {
-    result.sort((a, b) => getCardPrice(a) - getCardPrice(b));
+  if (activeSort === 'alpha') {
+    result.sort((a, b) => a.name.localeCompare(b.name));
+  } else if (activeSort === 'price-asc') {
+    result.sort((a, b) => (CardPrices.main(a)?.value ?? Infinity) - (CardPrices.main(b)?.value ?? Infinity));
   } else if (activeSort === 'price-desc') {
-    result.sort((a, b) => getCardPrice(b) - getCardPrice(a));
+    result.sort((a, b) => (CardPrices.main(b)?.value ?? -Infinity) - (CardPrices.main(a)?.value ?? -Infinity));
   }
 
   filteredCards = [...result, ...notFound];
@@ -513,7 +555,10 @@ function updateSearchTitles() {
 
   const validCards = allCards.filter(c => !c._notFound);
 
-  if (params.has("name")) {
+  if (typeof pokemonSetDirectory !== 'undefined' && pokemonSetDirectory) {
+    titleEl.textContent = I18N.t('allCollections');
+    subtitleEl.textContent = I18N.t('browseSetsCta');
+  } else if (params.has("name")) {
     titleEl.textContent = params.get("name");
     subtitleEl.textContent = `${validCards.length} ${I18N.t('cardsFoundCount')}`;
   } else if (params.get("source") === "file") {
@@ -521,10 +566,11 @@ function updateSearchTitles() {
     subtitleEl.textContent = `${validCards.length} ${I18N.t('cardsLoadedCount')}`;
   } else if (params.has("set")) {
     const code = params.get("set");
-    titleEl.textContent = `${I18N.t('setCollectionTitle')} ${code.toUpperCase()}`;
+    const setName = document.getElementById('pokemonSetFilter')?.selectedOptions[0]?.dataset.name;
+    titleEl.textContent = `${I18N.t('setCollectionTitle')} ${setName || code.toUpperCase()}`;
     subtitleEl.textContent = `${validCards.length} ${I18N.t('cardsLoadedCount')}`;
   } else {
-    titleEl.textContent = I18N.t('noSearchTitle');
+    titleEl.textContent = typeof Lands !== 'undefined' && Lands.active ? I18N.t('lands') : I18N.t('noSearchTitle');
     subtitleEl.textContent = I18N.t('noSearchSubtitle');
   }
 }

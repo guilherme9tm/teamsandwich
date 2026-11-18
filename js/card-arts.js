@@ -54,6 +54,30 @@ async function loadAlternateArts() {
 }
 
 function renderArtsGallery() {
+  const prices = document.getElementById('printingPrices');
+  if (prices) {
+    prices.replaceChildren();
+    for (const printing of alternateArts) {
+      const row = document.createElement('a');
+      row.className = 'printing-price-row';
+      row.href = gameUrl('card-detail.html', { id: printing.id, name: printing.name });
+      row.setAttribute('aria-current', String(printing.id === currentCardData?.id));
+      const label = document.createElement('span');
+      label.textContent = `${printing.collection.name || printing.collection.id} #${printing.number} · ${printing.metadata.lang || 'en'}`;
+      const values = document.createElement('strong');
+      values.textContent = CardPrices.entries(printing).map(price => `${CardPrices.format(price, I18N.current)} (${price.variant})`).join(' · ') || I18N.t('priceUnavailable');
+      row.append(label, values);
+      prices.append(row);
+    }
+    const more = document.createElement('button');
+    more.type = 'button';
+    more.className = 'btn-secondary';
+    more.textContent = I18N.t(artsLoading ? 'loading' : artsError ? 'retry' : 'loadMoreArts');
+    more.disabled = artsLoading;
+    more.onclick = loadAlternateArts;
+    if (nextArtsPage || artsError) prices.append(more);
+    if (artsError) { const message = document.createElement('p'); message.textContent = I18N.t(artsError.code || 'sourceUnavailable'); prices.append(message); }
+  }
   const grid = document.getElementById('artsGrid');
   const status = document.getElementById('artsStatus');
   if (!grid || !status) return;
@@ -61,7 +85,7 @@ function renderArtsGallery() {
   alternateArts.forEach(card => {
     const figure = document.createElement('figure');
     const link = document.createElement('a');
-    link.href = `card-detail.html?id=${encodeURIComponent(card.id)}&name=${encodeURIComponent(card.name)}`;
+    link.href = gameUrl('card-detail.html', { id: card.id, name: card.name });
     const faces = card.metadata?.card_faces?.filter(face => face.image_uris) || [];
     const images = faces.length ? faces.map(face => ({ name: face.name, images: face.image_uris })) : [card];
     images.forEach(face => {

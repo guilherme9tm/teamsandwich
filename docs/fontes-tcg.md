@@ -1,5 +1,7 @@
 # Fontes de dados para expansão a outros TCGs
 
+> Documento histórico de 29/09/2026. Pokémon foi integrado posteriormente via TCGdex. Consulte [DataSources.md](DataSources.md) e [Changes.md](Changes.md) para o estado e as limitações atuais.
+
 Pesquisa documental em 29/09/2026. As fontes abaixo são candidatas para integrações futuras; nesta etapa apenas MTG está conectado. Disponibilidade, cobertura e condições de uso devem ser verificadas novamente antes de ativar cada integração.
 
 | Jogo / fonte | Identificação e catálogo | Imagens, artes e versões | Preços e dados específicos | Avaliação para integração |

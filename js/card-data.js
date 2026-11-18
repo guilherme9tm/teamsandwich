@@ -31,6 +31,14 @@ const CardData = (() => {
     let nextStart = 0;
     let cooldown = 0;
     let timer;
+    const persisted = typeof AppStorage !== 'undefined' ? AppStorage.session.readJSON('scryfallCache', []) : [];
+    if (Array.isArray(persisted)) for (const stored of persisted) {
+      if (!Array.isArray(stored) || stored.length !== 2) continue;
+      const [key, entry] = stored;
+      if (entry?.expires > now() && typeof entry.size === 'number' && entry.size > 0 && bytes + entry.size <= maxBytes && cache.size < maxEntries) {
+        cache.set(key, entry); bytes += entry.size;
+      }
+    }
 
     function pump() {
       clearTimeout(timer);
@@ -51,7 +59,7 @@ const CardData = (() => {
       try {
         const response = await fetchImpl(`https://api.scryfall.com${path}`, {
           method: body ? 'POST' : 'GET',
-          headers: { Accept: 'application/json', ...(body ? { 'Content-Type': 'application/json' } : {}) },
+          headers: { Accept: 'application/json', ...(typeof window === 'undefined' ? { 'User-Agent': 'TeamSandwich/1.1 (TCG catalog validation)' } : {}), ...(body ? { 'Content-Type': 'application/json' } : {}) },
           body: body ? JSON.stringify(body) : undefined,
           signal: controller.signal
         });
@@ -77,6 +85,9 @@ const CardData = (() => {
         if (/^\/cards\/(?:search|collection)(?:\?|$)/.test(path)
           && result.data.some(card => !card || typeof card.id !== 'string' || typeof card.name !== 'string')) throw new DataError('invalidResponse', 502);
         if (!listPath && (typeof result.id !== 'string' || typeof result.name !== 'string')) throw new DataError('invalidResponse', 502);
+        const retrievedAt = new Date(now()).toISOString();
+        if (Array.isArray(result.data)) result.data.forEach(card => { if (card && typeof card === 'object') card._retrievedAt = retrievedAt; });
+        else result._retrievedAt = retrievedAt;
         return result;
       } catch (error) {
         if (error instanceof DataError) throw error;
@@ -114,6 +125,7 @@ const CardData = (() => {
             while (cache.size >= maxEntries || bytes + size > maxBytes) remove(cache.keys().next().value);
             cache.set(key, { value, size, expires: now() + ttl });
             bytes += size;
+            if (typeof AppStorage !== 'undefined') AppStorage.session.setItem('scryfallCache', JSON.stringify([...cache]));
           }
           return value;
         }).finally(() => pending.delete(key));
@@ -137,6 +149,7 @@ const CardData = (() => {
       number: card.number ?? null, rarity: card.rarity ?? null,
       images: card.images || {}, prices: card.prices || {},
       serialization: card.serialization || { isSerialized: false, number: null, total: null },
+      fetchedAt: card.fetchedAt || null, priceUpdatedAt: card.priceUpdatedAt || null,
       metadata: card.metadata || {}
     };
   }
@@ -146,7 +159,7 @@ const CardData = (() => {
     return normalizeCard({
       id: card.id, game: 'mtg', source: 'scryfall', name: card.name,
       collection: { id: card.set || null, name: card.set_name || null },
-      number: card.collector_number || null, rarity: card.rarity,
+      number: card.collector_number || null, rarity: card.rarity, fetchedAt: card._retrievedAt || new Date().toISOString(),
       images: card.image_uris || card.card_faces?.[0]?.image_uris || {}, prices: card.prices,
       serialization: {
         isSerialized: !!card.promo_types?.includes('serialized') || card.serial_number != null,
@@ -172,7 +185,7 @@ const CardData = (() => {
   function createMtgProvider(client = createClient()) {
     const request = client.request;
     async function search({ query, set, page = 1, prints = false, signal } = {}) {
-      const q = set ? `set:${set}` : query;
+      const q = set ? `set:${set}` : (query || 'game:paper');
       const params = new URLSearchParams({ q, page: String(page), unique: prints ? 'prints' : 'cards', order: prints ? 'released' : 'name' });
       if (prints) {
         params.set('include_multilingual', 'false');
@@ -243,12 +256,14 @@ const CardData = (() => {
     }
     providers.set(provider.id, provider);
   }
-  function provider(game = 'mtg') {
+  let activeGame = 'mtg';
+  function provider(game = activeGame) {
     if (!providers.has(game)) throw new DataError('unsupportedGame', 400);
     return providers.get(game);
   }
   register(createMtgProvider());
-  return { provider, register, normalizeCard, normalizeMtg, toView, createClient, createMtgProvider, DataError, isAbort };
+  function selectGame(game) { provider(game); activeGame = game; }
+  return { provider, register, selectGame, get game() { return activeGame; }, normalizeCard, normalizeMtg, toView, createClient, createMtgProvider, DataError, isAbort };
 })();
 
 if (typeof module !== 'undefined') module.exports = CardData;

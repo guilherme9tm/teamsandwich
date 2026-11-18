@@ -18,6 +18,7 @@
     href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap"
     rel="stylesheet">
   <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/expansion.css">
 </head>
 
 <body>
@@ -36,7 +37,7 @@
         </button>
 
         <a href="index.html" class="logo-link-header">
-          <img src="assets/images/IMG_6262.jpg" alt="Team Sandwich Logo" class="header-logo">
+          <span class="brand-mark" aria-hidden="true">TS</span><span class="brand-wordmark">TEAM<span>SANDWICH</span></span>
         </a>
 
         <div class="header-search-container">
@@ -78,8 +79,8 @@
               <span>MAGIC: THE GATHERING</span>
             </div>
             <h1 class="hero-title">
-              <span class="hero-title-team">TEAM</span>
-              <span class="hero-title-sandwich">SANDWICH</span>
+              <span class="hero-title-team">Team</span>
+              <span class="hero-title-sandwich">Sandwich.</span>
             </h1>
             <p class="hero-subtitle" data-i18n="heroSubtitle">
               Comparez les prix entre les meilleures boutiques de Magic, explorez les collections et suivez les tournois
@@ -108,13 +109,14 @@
               </button>
             </div>
           </div>
+          <div class="hero-card-stack" aria-hidden="true"><div class="hero-card-back"><span>TS</span></div><div class="hero-card-back"><span>TS</span></div><div class="hero-card-back"><span>TS</span></div></div>
         </section>
 
         <section class="popular-sets-section" id="popularSetsSection">
           <div class="section-header">
             <div class="section-header-info">
               <h2 class="section-title" data-i18n="popularSetsTitle">Dernières Collections</h2>
-              <p class="section-desc">Accédez directement aux cartes des extensions récentes</p>
+              <p class="section-desc" data-i18n="popularSetsDesc">Directly access cards from recent expansions</p>
             </div>
             <button class="btn-text-action" onclick="openCollectionsModal()" data-i18n="viewAllCollections">
               Voir toutes les collections →
@@ -257,8 +259,11 @@
 
   <script src="js/storage.js"></script>
   <script src="js/card-data.js"></script>
+  <script src="js/pokemon-provider.js"></script>
+  <script src="js/prices.js"></script>
   <script src="js/deck-import.js"></script>
   <script src="js/i18n.js"></script>
+  <script src="js/locales.js"></script>
   <script src="js/common.js"></script>
   <script src="js/script.js"></script>
 </body>

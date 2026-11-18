@@ -35,7 +35,7 @@ let frenchRequest = null;
 let frenchLoaded = false;
 
 async function loadFrenchDetails() {
-  if (!currentCardData || I18N.current !== 'fr' || frenchLoaded) return;
+  if (!currentCardData || currentCardData.metadata?.cardLanguage !== 'fr' || frenchLoaded) return;
   if (frenchRequest) return frenchRequest;
   frenchRequest = (async () => {
     try {
@@ -69,7 +69,7 @@ async function loadCardDetails() {
     document.title = `${currentCardData.name} — TEAM SANDWICH`;
     if (breadcrumb) breadcrumb.textContent = currentCardData.name;
     renderCardDetailView(currentCardData);
-    void loadFrenchDetails();
+    void loadAlternateArts();
   } catch (error) {
     container.innerHTML = `<div class="detail-loading-state"><h3>${I18N.t(error.code || 'sourceUnavailable')}</h3><button type="button" onclick="loadCardDetails()" class="btn-primary">${I18N.t('retry')}</button><button type="button" onclick="goBackOrHome()" class="btn-secondary">${I18N.t('backBtn')}</button></div>`;
   }
@@ -92,7 +92,7 @@ function renderCardDetailView(card) {
   const container = document.getElementById("detailContainer");
   if (!container) return;
 
-  const isFrench = typeof I18N !== 'undefined' && I18N.current === 'fr';
+  const isFrench = false;
   const frCard = isFrench ? currentFrenchCardData : null;
 
   const isDoubleFaced = card.card_faces && card.card_faces.length > 1 && card.card_faces[0].image_uris;
@@ -136,10 +136,8 @@ function renderCardDetailView(card) {
     flavorText = frActiveFace.flavor_text || frCard.flavor_text || flavorText;
   }
 
-  const usd = parseFloat(card.prices?.usd) || 0;
-  const usdFoil = parseFloat(card.prices?.usd_foil) || 0;
-  const cadReg = usd ? `CAD ${(usd * 1.38).toFixed(2)}` : I18N.t('unavailable');
-  const cadFoil = usdFoil ? `CAD ${(usdFoil * 1.38).toFixed(2)}` : I18N.t('unavailable');
+  const priceRecords = CardPrices.entries(card);
+  const mainPrice = CardPrices.main(card);
 
   const statsHtml = (activeFace.power !== undefined && activeFace.toughness !== undefined)
     ? `<div class="detail-stat-pill">${I18N.t('powerToughness')} ${escapeHTML(activeFace.power)} / ${escapeHTML(activeFace.toughness)}</div>`
@@ -149,7 +147,7 @@ function renderCardDetailView(card) {
         ? `<div class="detail-stat-pill">${I18N.t('defense')} ${escapeHTML(activeFace.defense)}</div>`
         : ''));
 
-  const majorFormats = ['standard', 'pioneer', 'modern', 'commander', 'legacy', 'pauper'];
+  const majorFormats = card.game === 'pokemon' ? ['standard', 'expanded'] : ['standard', 'pioneer', 'modern', 'commander', 'legacy', 'pauper'];
   const legalitiesHtml = majorFormats.map(fmt => {
     const rawStatus = card.legalities?.[fmt];
     const status = ['legal', 'banned', 'restricted'].includes(rawStatus) ? rawStatus : 'not_legal';
@@ -163,7 +161,7 @@ function renderCardDetailView(card) {
   }).join('');
 
   const encodedCardName = encodeURIComponent(card.name);
-  const storesList = typeof sites !== 'undefined' ? sites : [];
+  const storesList = card.game === 'pokemon' ? sites.filter(site => site.id === 'tcgplayer') : sites;
   const storesHtml = storesList.map(site => {
     return `
       <a href="${site.link(encodedCardName)}" target="_blank" rel="noopener noreferrer" class="detail-store-item" title="${I18N.t('searchAtStore')} ${site.nome}">
@@ -181,7 +179,8 @@ function renderCardDetailView(card) {
 
   const rarityClass = ['common', 'uncommon', 'rare', 'mythic', 'special', 'bonus'].includes(card.rarity) ? card.rarity : 'common';
   const rarityKey = `rarity${rarityClass.charAt(0).toUpperCase() + rarityClass.slice(1)}`;
-  const rarityName = I18N.dict.fr[rarityKey] ? I18N.t(rarityKey) : (rarityClass.charAt(0).toUpperCase() + rarityClass.slice(1));
+  const rarityName = card.game === 'pokemon' ? escapeHTML(card.rarity || I18N.t('unavailable'))
+    : I18N.dict.fr[rarityKey] ? I18N.t(rarityKey) : (rarityClass.charAt(0).toUpperCase() + rarityClass.slice(1));
   const setSvgUri = card.set_uri ? `https://svgs.scryfall.io/sets/${encodeURIComponent(card.set)}.svg` : '';
 
   container.innerHTML = `
@@ -227,6 +226,15 @@ function renderCardDetailView(card) {
         </div>
 
         ${card.serialization?.isSerialized ? `<div class="detail-serial-box"><strong>${I18N.t('serializedCard')}</strong><p>${card.serialization.number != null ? `${I18N.t('serialNumber')} ${escapeHTML(card.serialization.number)}${card.serialization.total != null ? ` / ${escapeHTML(card.serialization.total)}` : ''}` : I18N.t('serialNumberUnavailable')}</p></div>` : ''}
+        <section class="primary-price-panel">
+          <span>${I18N.t('selectedPrinting')} · ${escapeHTML(card.set)} #${escapeHTML(card.collector_number)} · ${escapeHTML(card.lang || 'en')}</span>
+          <strong>${CardPrices.format(mainPrice, I18N.current) || I18N.t('priceUnavailable')}</strong>
+          <small>${I18N.t('normal')} · USD · ${escapeHTML(card.source)} / TCGplayer · ${mainPrice?.updatedAt ? `${I18N.t('updatedAt')}: ${escapeHTML(new Date(mainPrice.updatedAt).toLocaleString(I18N.current))}` : I18N.t('sourceUpdateUnknown')}</small>
+          <small>${I18N.t('retrievedAt')}: ${card.fetchedAt ? escapeHTML(new Date(card.fetchedAt).toLocaleString(I18N.current)) : '—'}</small>
+          <div class="variant-prices">${priceRecords.map(price => `<div><b>${CardPrices.format(price, I18N.current)}</b> · ${escapeHTML(price.variant)} · ${escapeHTML(price.market)}${price.updatedAt ? `<small>${I18N.t('updatedAt')}: ${escapeHTML(new Date(price.updatedAt).toLocaleString(I18N.current))}</small>` : ''}</div>`).join('')}</div>
+        </section>
+        ${card.game === 'pokemon' ? `<p class="sample-note">${I18N.t('pokemonPriceNotice')}</p>` : ''}
+        <section class="printing-prices"><h2>${I18N.t(card.game === 'pokemon' ? 'relatedPokemon' : 'printingPrices')}</h2><div id="printingPrices" aria-live="polite"></div></section>
         <div class="detail-oracle-box">
           <div class="detail-section-title">${I18N.t('oracleTextTitle')}</div>
           
@@ -245,19 +253,6 @@ function renderCardDetailView(card) {
           ` : ''}
         </div>
 
-        <div class="detail-prices-box">
-          <div class="detail-price-card">
-            <span class="detail-price-label">${I18N.t('estimatedPriceReg')}</span>
-            <span class="detail-price-val">${cadReg}</span>
-            <span class="detail-price-sub">${usd ? `~$${usd.toFixed(2)} USD` : I18N.t('averagePrice')}</span>
-          </div>
-          <div class="detail-price-card">
-            <span class="detail-price-label">${I18N.t('estimatedPriceFoil')}</span>
-            <span class="detail-price-val">${cadFoil}</span>
-            <span class="detail-price-sub">${usdFoil ? `~$${usdFoil.toFixed(2)} USD` : I18N.t('averagePrice')}</span>
-          </div>
-        </div>
-
         <div class="detail-stores-section">
           <div class="detail-stores-header">
             <div class="detail-stores-title-group">
@@ -272,7 +267,7 @@ function renderCardDetailView(card) {
         </div>
 
         <div class="detail-card-meta-footer">
-          ${I18N.t('illustrator')} <strong>${escapeHTML(activeFace.artist || card.artist || I18N.t('unknownArtist'))}</strong> • © Wizards of the Coast • ${I18N.t('dataProvidedBy')}
+          ${I18N.t('illustrator')} <strong>${escapeHTML(activeFace.artist || card.artist || I18N.t('unknownArtist'))}</strong> · ${escapeHTML(card.source)} · ${card.game === 'pokemon' ? '© Pokémon / Nintendo / Creatures / GAME FREAK' : '© Wizards of the Coast'}
         </div>
 
       </div>

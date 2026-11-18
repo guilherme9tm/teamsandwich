@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Competitive Meta — Team Sandwich</title>
+  <link rel="icon" href="assets/icons/favicon.ico">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/expansion.css">
+</head>
+<body>
+  <header class="header">
+    <a href="index.html" class="logo-link-header"><span class="brand-mark" aria-hidden="true">TS</span><span class="brand-wordmark">TEAM<span>SANDWICH</span></span></a>
+    <div class="header-search-container"><div class="search-input-wrapper"><input id="headerSearchInput" class="search-input" data-i18n="searchPlaceholder" aria-label="Card search"><button type="button" class="search-btn" onclick="submitHeaderSearch()" aria-label="Search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"></circle><path d="m16 16 4 4"></path></svg></button></div><div id="autocompleteDropdown" class="autocomplete-dropdown"></div></div>
+    <select class="lang-selector-select" aria-label="Language"></select>
+  </header>
+  <main class="workspace">
+    <div class="workspace-heading"><span class="section-eyebrow" data-i18n="tournament"></span><h1 data-i18n="competitive">Competitive Meta</h1><p data-i18n="competitiveIntro"></p></div>
+    <div class="workspace-tabs" role="tablist" data-i18n-aria="navigation">
+      <button type="button" id="resultsTab" role="tab" aria-selected="true" aria-controls="tournamentsPanel" data-i18n="resultsTab"></button>
+      <button type="button" id="analysisTab" role="tab" aria-selected="false" aria-controls="analysisPanel" tabindex="-1" data-i18n="analysis"></button>
+      <button type="button" id="deckToolsTab" role="tab" aria-selected="false" aria-controls="deckToolsPanel" tabindex="-1" data-i18n="deckTools"></button>
+    </div>
+    <section id="tournamentsPanel" role="tabpanel" aria-labelledby="resultsTab">
+    <form id="tournamentFilters" class="workspace-controls">
+      <label><span data-i18n="game"></span><select id="tournamentGame"><option value="mtg">Magic: The Gathering</option><option value="pokemon">Pokémon TCG</option></select></label>
+      <label><span data-i18n="formats"></span><select id="tournamentFormat"></select></label>
+      <label><span data-i18n="fromDate"></span><input type="date" id="tournamentStart"></label>
+      <label><span data-i18n="toDate"></span><input type="date" id="tournamentEnd"></label>
+      <label><span data-i18n="tournamentSearch"></span><input type="search" id="tournamentSearch"></label>
+      <label><span data-i18n="player"></span><input type="search" id="playerSearch"></label>
+      <label><span data-i18n="archetype"></span><input type="search" id="archetypeSearch"></label>
+      <button type="submit" class="btn-primary" data-i18n="apply"></button>
+    </form>
+    <p id="tournamentStatus" role="status" aria-live="polite"></p>
+    <button id="tournamentRetry" class="btn-secondary" data-i18n="retry" hidden></button>
+    <p class="sample-note" data-i18n="loadedSearchNote"></p>
+    <p id="tournamentSource"></p>
+    <div id="tournamentGrid" class="tournament-grid"></div>
+    <div class="workspace-controls"><button id="moreTournaments" class="btn-secondary" data-i18n="loadMoreResults" hidden></button><button id="loadStandings" class="btn-secondary" data-i18n="loadStandings"></button></div>
+    </section>
+    <section class="workspace-panel" id="analysisPanel" role="tabpanel" aria-labelledby="analysisTab" hidden>
+      <h2 data-i18n="analysis"></h2>
+      <form id="analysisFilters" class="workspace-controls">
+        <label><span data-i18n="tournament"></span><select id="analysisTournament"><option value="" data-i18n="all"></option></select></label>
+        <label><span data-i18n="archetype"></span><select id="analysisArchetype"><option value="" data-i18n="all"></option></select></label>
+        <label><span data-i18n="sample"></span><select id="analysisSample"><option value="8">Top 8</option><option value="16">Top 16</option><option value="0" data-i18n="allLists"></option></select></label>
+        <label><span data-i18n="section"></span><select id="analysisSection"><option value="main" data-i18n="mainDeck"></option><option value="sideboard" data-i18n="sideboard"></option><option value="all" data-i18n="all"></option></select></label>
+        <label><span data-i18n="coreThreshold"></span><input id="coreThreshold" type="number" min="1" max="100" value="70" required></label>
+        <label><span data-i18n="flexThreshold"></span><input id="flexThreshold" type="number" min="0" max="99" value="10" required></label>
+        <button type="submit" class="btn-primary" data-i18n="analyze"></button>
+      </form>
+      <p id="analysisStatus" class="sample-note" aria-live="polite"></p>
+      <button type="button" id="configureAnalysis" class="btn-secondary" data-i18n="prepareSample"></button>
+      <div id="frequencyRanking"></div>
+    </section>
+    <div id="deckToolsPanel" class="deck-tools-grid" role="tabpanel" aria-labelledby="deckToolsTab" hidden>
+    <section class="workspace-panel">
+      <h2 data-i18n="compareDecks"></h2>
+      <div class="workspace-controls"><label><span data-i18n="firstDeck"></span><select id="compareFirst"></select></label><label><span data-i18n="secondDeck"></span><select id="compareSecond"></select></label><button id="compareButton" data-i18n="compareDecks"></button></div>
+      <div id="comparison" aria-live="polite"></div>
+    </section>
+    <section class="workspace-panel">
+      <h2 data-i18n="importDeckCta"></h2>
+      <p data-i18n="localImportNotice"></p>
+      <form id="pasteDeckForm">
+        <div class="workspace-controls"><label><span data-i18n="deckName"></span><input id="importDeckName" maxlength="150"></label><label><span data-i18n="formats"></span><input id="importDeckFormat" maxlength="50"></label></div>
+        <label for="pasteDeck" data-i18n="pasteDeck"></label><textarea id="pasteDeck" maxlength="256000" required></textarea>
+        <button type="submit" class="btn-primary" data-i18n="openDeck"></button>
+      </form>
+      <p id="importStatus" role="status"></p>
+    </section>
+    </div>
+    <dialog id="deckDialog" aria-labelledby="deckTitle">
+      <div class="workspace-controls"><button type="button" id="closeDeck" data-i18n="close"></button><button type="button" id="copyDeck" data-i18n="copyDeck"></button><button type="button" id="printDeck" data-i18n="printDeck"></button></div>
+      <h2 id="deckTitle"></h2><p id="deckMetadata"></p><p id="deckOrigin"></p><p id="deckPrice" aria-live="polite"></p><p id="deckCopyStatus" role="status"></p>
+      <pre id="deckText"></pre><div id="deckImages" class="deck-grid"></div>
+    </dialog>
+  </main>
+  <script src="js/storage.js"></script>
+  <script src="js/card-data.js"></script>
+  <script src="js/pokemon-provider.js"></script>
+  <script src="js/prices.js"></script>
+  <script src="js/deck-import.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/locales.js"></script>
+  <script src="js/common.js"></script>
+  <script src="js/tournament-data.js"></script>
+  <script src="js/meta-analysis.js"></script>
+  <script src="js/competitive.js"></script>
+</body>
+</html>

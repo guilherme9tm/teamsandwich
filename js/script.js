@@ -127,7 +127,7 @@ function renderHomepageEvents(fmt) {
     ? mockEvents 
     : mockEvents.filter(e => e.format === fmt);
 
-  const isEn = typeof I18N !== 'undefined' && I18N.current === 'en';
+  const isEn = I18N.current !== 'fr';
 
   if (badge) {
     const noun = I18N.t(filtered.length > 1 ? 'eventCountPlural' : 'eventCountSingular');
@@ -179,14 +179,14 @@ function renderHomepageEvents(fmt) {
   }
 
   if (typeof I18N !== 'undefined') I18N.updateDOM();
+  const notice = document.createElement('p'); notice.className = 'demo-notice'; notice.textContent = I18N.t('demoNotice'); grid.prepend(notice);
 }
 
 function renderHomeStores() {
   const container = document.getElementById("homeStoresGrid");
   if (!container || typeof sites === "undefined") return;
 
-  const isEn = typeof I18N !== 'undefined' && I18N.current === 'en';
-  const titlePrefix = isEn ? 'Buy at' : 'Acheter chez';
+  const titlePrefix = I18N.t('buyAt');
 
   container.innerHTML = sites.map(site => `
     <a href="card.html?name=Sol%20Ring" class="home-store-chip" title="${titlePrefix} ${site.nome}" target="_blank" onclick="event.preventDefault(); searchCardForStore('${site.id}');">
@@ -200,9 +200,9 @@ function renderHomeStores() {
 function searchCardForStore(storeId) {
   const searchInput = document.getElementById("headerSearchInput");
   if (searchInput && searchInput.value.trim()) {
-    window.location.href = `card.html?name=${encodeURIComponent(searchInput.value.trim())}`;
+    window.location.href = gameUrl('card.html', { name: searchInput.value.trim() });
   } else {
-    window.location.href = `card.html?set=dsk`;
+    window.location.href = gameUrl('card.html', CardData.game === 'mtg' ? { set: 'dsk' } : {});
   }
 }
 
@@ -232,6 +232,8 @@ function triggerImportFile() {
 async function loadPopularSets() {
   const grid = document.getElementById("popularSetsGrid");
   if (!grid) return;
+  grid.replaceChildren();
+  const status = document.createElement('p'); status.textContent = I18N.t('loading'); grid.append(status);
   try {
     const sets = await CardData.provider().sets();
     const relevantTypes = ['expansion', 'core', 'masters', 'draft_innovation'];
@@ -242,28 +244,22 @@ async function loadPopularSets() {
       .slice(0, 8);
 
     if (latestSets.length > 0) {
-      const isEn = typeof I18N !== 'undefined' && I18N.current === 'en';
-      grid.innerHTML = latestSets.map(set => {
+      grid.replaceChildren();
+      latestSets.forEach(set => {
         const year = set.released_at ? new Date(set.released_at).getFullYear() : '';
-        const typeLabel = set.set_type === 'expansion' 
-          ? 'Standard, Pioneer, Modern' 
-          : (set.set_type === 'masters' 
-            ? 'Modern, Commander, Legacy' 
-            : (isEn ? 'Universes Beyond / Special' : 'Universes Beyond / Spécial'));
-        return `
-          <a href="card.html?set=${encodeURIComponent(set.code)}" class="popular-set-card">
-            <span class="popular-set-code">${set.code.toUpperCase()}</span>
-            <div class="popular-set-info">
-              <h4>${set.name}</h4>
-              <p>${year} • ${typeLabel}</p>
-            </div>
-            <span class="popular-set-arrow">→</span>
-          </a>
-        `;
-      }).join('');
+        const link = document.createElement('a'); link.className = 'popular-set-card'; link.href = gameUrl('card.html', { set: set.code });
+        const code = document.createElement('span'); code.className = 'popular-set-code'; code.textContent = set.code.toUpperCase();
+        const info = document.createElement('div'); info.className = 'popular-set-info';
+        const title = document.createElement('h4'); title.textContent = set.name;
+        const detail = document.createElement('p'); detail.textContent = [year, `${set.card_count} ${I18N.t('catalogCardCount')}`].filter(Boolean).join(' · ');
+        info.append(title, detail); link.append(code, info); grid.append(link);
+      });
+    } else {
+      status.textContent = I18N.t('noCollectionsFound');
     }
   } catch (e) {
-    console.warn("Could not load latest sets from Scryfall:", e);
+    status.textContent = I18N.t(e.code || 'sourceUnavailable');
+    const retry = document.createElement('button'); retry.className = 'btn-secondary'; retry.textContent = I18N.t('retry'); retry.onclick = loadPopularSets; grid.append(retry);
   }
 }
 
