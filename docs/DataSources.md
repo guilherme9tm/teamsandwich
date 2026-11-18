@@ -8,9 +8,15 @@ Pesquisa e consultas reais em 18/11/2026. Os links abaixo são referências de i
 - Endpoints efetivos: `GET /sets`, `/cards/search`, `/cards/{id}`, `/cards/named`, `/cards/autocomplete`, `/cards/{set}/{number}/{lang}` e `POST /cards/collection`.
 - `search` usa `unique=cards`; galeria usa `unique=prints`, `oracleid`, variações e paginação. A consulta de ciclos usa nomes completos com o operador exato `!`, nunca palavras parciais. Imports usam até 30 entradas por lote, abaixo do limite de 75 identificadores do endpoint collection.
 - Identidade funcional: `oracle_id`; impressão: `id`, coleção e número. A associação de uma resposta collection não depende da posição no array, pois cartas ausentes são omitidas pela fonte.
-- Preços: `usd`, `usd_foil`, `usd_etched`, `eur`, `eur_foil`, `tix`, cada um com moeda/acabamento explícitos. Não existe conversão para CAD. O preço principal é exclusivamente USD normal da impressão selecionada. Foil de outra impressão nunca substitui esse valor.
+- Preços de origem: `usd`, `usd_foil`, `usd_etched`, `eur`, `eur_foil`, `tix`, cada um com moeda/acabamento explícitos. A interface converte USD/EUR para CAD; TIX permanece uma unidade digital. O preço principal usa o valor normal da impressão selecionada. Foil de outra impressão nunca substitui esse valor.
 - Cache: cinco minutos; coleções, uma hora; LRU de até 160 entradas/4 MiB estimados, com snapshot na sessão do navegador. Até duas requisições ativas, início espaçado em 120 ms, timeout de 10 s e fila limitada. Resposta 429 respeita Retry-After.
 - `fetchedAt` registra a consulta da resposta; não é a data de atualização do mercado. Quando a fonte não informa a atualização, a interface declara isso. A verificação via Node identifica o aplicativo no User-Agent.
+
+## Bank of Canada — conversão para CAD
+
+- Referência: [Valet API](https://www.bankofcanada.ca/valet-api-how-to/). Consulta pública sem chave: `GET https://www.bankofcanada.ca/valet/observations/FXUSDCAD,FXEURCAD/json?recent=1`.
+- A camada de preços preserva os registros originais e multiplica USD/EUR pelas taxas diárias correspondentes para exibir estimativas em CAD no catálogo, detalhes, edições e totais de decks. Os detalhes mostram a fonte e a data do câmbio. Não são cotações ou estoques das lojas.
+- Timeout de oito segundos, deduplicação de chamadas simultâneas e cache de sessão. Em falhas, taxas válidas de até sete dias podem ser reutilizadas; sem taxa válida, a conversão fica indisponível. Valores ausentes continuam ausentes e preços zero continuam zero.
 
 ## TCGdex — Pokémon TCG
 

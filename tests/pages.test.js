@@ -12,7 +12,7 @@ async function waitFor(predicate, message) {
   const deadline = Date.now() + 6000;
   while (!predicate()) { if (Date.now() > deadline) throw new Error(`Timed out: ${message}`); await new Promise(resolve => setTimeout(resolve, 20)); }
 }
-function page(file, query = '', { failure = false, pokemonFailure = false, disablePokemon = false, searchPages = null } = {}) {
+function page(file, query = '', { failure = false, pokemonFailure = false, disablePokemon = false, searchPages = null, rateFailure = false } = {}) {
   const html = fs.readFileSync(file, 'utf8');
   const scripts = [...html.matchAll(/<script src="([^"]+)"><\/script>/g)].map(match => match[1]);
   const errors = []; const requests = [];
@@ -24,6 +24,8 @@ function page(file, query = '', { failure = false, pokemonFailure = false, disab
       window.scrollTo = () => {};
       window.fetch = async url => {
         requests.push(String(url));
+        if (url.includes('bankofcanada.ca')) return rateFailure ? new Response('', { status: 503 })
+          : Response.json({ observations: [{ d: new Date().toISOString().slice(0, 10), FXUSDCAD: { v: '1.40' }, FXEURCAD: { v: '1.50' } }] });
         if (url.includes('play.limitlesstcg.com')) return Response.json(url.includes('/standings') ? standings : [tournament]);
         if (url.startsWith('/api/')) return Response.json({ error: 'topdeckConfiguration' }, { status: 503 });
         if (url.includes('api.tcgdex.net')) {
@@ -61,7 +63,8 @@ test('catalog loads automatically, preserves imports/actions and applies exclusi
     const document = dom.window.document;
     await waitFor(() => document.querySelectorAll('#resultado .card-title-link').length === 2, 'initial cards');
     assert.equal(requests.filter(url => url.includes('/cards/search?')).length, 1);
-    assert.match(document.querySelector('.card-price').textContent, /USD/);
+    await waitFor(() => document.querySelector('.card-price').textContent.includes('CAD'), 'CAD conversion');
+    assert.match(document.querySelector('.card-price').textContent, /2\.80/);
     assert.equal(document.querySelector('.card-title-link').title, baseCard.name);
     assert.equal(document.querySelectorAll('.game-selector [aria-pressed="true"]').length, 1);
     assert.equal(document.querySelector('.game-selector [aria-pressed="true"]').textContent, 'Magic: The Gathering');
@@ -121,7 +124,7 @@ test('Pokémon search stays separate, hides Magic filters and enriches only visi
   const { dom, requests, errors } = page('card.html', '?game=pokemon&name=Tangela');
   try {
     const document = dom.window.document;
-    await waitFor(() => document.querySelector('.card-price')?.textContent.includes('1.25'), 'Pokémon price enrichment');
+    await waitFor(() => document.querySelector('.card-price')?.textContent.includes('1.75'), 'Pokémon CAD price enrichment');
     assert.ok(requests.some(url => url.includes('api.tcgdex.net/v2/en/cards?')));
     assert.ok(!requests.some(url => url.includes('scryfall')));
     assert.equal(document.querySelectorAll('.game-selector [aria-pressed="true"]').length, 1);
@@ -181,8 +184,30 @@ test('details keep missing regular price unavailable and load per-printing compa
     const document = dom.window.document;
     await waitFor(() => document.querySelectorAll('.printing-price-row').length === 2, 'printing comparisons');
     assert.equal(document.querySelector('.primary-price-panel > strong').textContent, 'Price unavailable');
-    assert.match(document.querySelector('.variant-prices').textContent, /USD/);
+    assert.match(document.querySelector('.variant-prices').textContent, /CAD/);
+    assert.match(document.querySelector('.variant-prices').textContent, /11\.20/);
+    assert.equal(document.querySelector('.primary-price-panel').nextElementSibling, document.querySelector('.detail-stores-section'));
+    assert.equal(document.querySelector('.detail-stores-section h3').textContent, 'Store availability');
+    assert.equal(document.querySelector('.detail-store-cta'), null);
+    for (const link of document.querySelectorAll('.detail-store-item')) {
+      assert.ok(link.getAttribute('aria-label'));
+      assert.equal(link.querySelector('svg'), null);
+      assert.ok(link.querySelector('img'));
+    }
     assert.match(document.querySelector('.primary-price-panel').textContent, /two #1/); assert.deepEqual(errors, []);
+  } finally { dom.window.close(); }
+});
+
+test('exchange failures keep CAD prices unavailable while store buttons remain usable', async () => {
+  const { dom, errors } = page('card-detail.html', '?id=first-print', { rateFailure: true });
+  try {
+    const document = dom.window.document;
+    await waitFor(() => document.querySelector('.primary-price-panel'), 'detail with unavailable exchange rate');
+    assert.equal(document.querySelector('.primary-price-panel > strong').textContent, 'Price unavailable');
+    assert.equal(document.querySelector('.exchange-rate-note').textContent, 'CAD conversion unavailable');
+    assert.ok(document.querySelector('.detail-store-item').href.startsWith('https://'));
+    assert.ok(!document.querySelector('.variant-prices').textContent.includes('null'));
+    assert.deepEqual(errors, []);
   } finally { dom.window.close(); }
 });
 test('Lands uses the common catalog and sends explicit cycle membership to Scryfall', async () => {
@@ -219,6 +244,7 @@ test('competitive page loads real-provider schemas, filters standings, analyzes 
     assert.equal(document.getElementById('deckDialog').open, true);
     document.getElementById('copyDeck').click(); await waitFor(() => dom.window.copiedText, 'clipboard'); assert.match(dom.window.copiedText, /4 Tangela \(twm\) 1/);
     await waitFor(() => document.querySelector('#deckImages figure'), 'imported deck images');
+    assert.match(document.getElementById('deckPrice').textContent, /CAD.*7\.00/);
     document.getElementById('closeDeck').click();
     assert.match(document.getElementById('deckOrigin').textContent, /User import/); assert.deepEqual(errors, []);
   } finally { dom.window.close(); }

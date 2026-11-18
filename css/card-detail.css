@@ -482,26 +482,6 @@
   text-overflow: ellipsis;
 }
 
-.detail-store-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: var(--accent);
-  background: rgba(126, 164, 143, 0.12);
-  border: 1px solid rgba(126, 164, 143, 0.3);
-  padding: 6px 12px;
-  border-radius: var(--radius-sm);
-  flex-shrink: 0;
-  transition: var(--transition);
-}
-
-.detail-store-item:hover .detail-store-cta {
-  background: var(--accent);
-  color: #101311;
-}
-
 .detail-card-meta-footer {
   font-size: 0.76rem;
   color: var(--text-muted);

@@ -36,7 +36,7 @@ Foram inspecionados os três HTMLs originais, módulos JavaScript, estilos, docu
 - Nenhuma migração de framework ou novo projeto. O servidor Node é opcional e só necessário para proteger a chave TopDeck.
 - O jogo é determinado pela URL; apenas o idioma é persistido como preferência. Cartas permanecem em inglês.
 - Cache de catálogo por sessão e memória com TTL; torneios em memória, sem base histórica persistente.
-- Preço principal = USD normal da impressão selecionada. Foil, EUR e outros valores têm identificação própria; ausência não vira zero nem valor de outra edição.
+- Preço principal = CAD normal da impressão selecionada. Foil, EUR e outros valores têm identificação própria; ausência não vira zero nem valor de outra edição.
 - Preços Pokémon legados sem identificadores explícitos de variante/mercado são omitidos, seguindo a limitação documentada da fonte.
 - Pokémon de mesmo nome não é presumido como reimpressão funcional. A análise mantém coleção+número e informa essa limitação.
 - Decklist externa permanece link de origem. Lista colada pelo usuário não vira resultado oficial nem entra silenciosamente na amostra publicada.

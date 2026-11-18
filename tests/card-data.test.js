@@ -36,7 +36,7 @@ test('prices retain exact printing, variant, currency, zero and missing values',
   assert.ok(values.every(price => price.printingId === 'printing-a'));
   const noRegular = CardData.normalizeMtg({ ...card, id: 'printing-b', prices: { usd: null, usd_foil: '9.00' } });
   assert.equal(CardPrices.main(noRegular), null); assert.equal(CardPrices.entries(noRegular)[0].printingId, 'printing-b');
-  assert.match(CardPrices.format(values[0]), /USD/);
+  assert.match(CardPrices.format(values[0]), /CAD/);
   assert.deepEqual(CardPrices.entries({ id: 'selected', metadata: { priceRecords: [{ printingId: 'other', value: 20, currency: 'USD' }] } }), []);
 });
 test('collection matches missing cards by printing identifier rather than response position', async () => {

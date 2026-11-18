@@ -65,7 +65,7 @@ function renderArtsGallery() {
       const label = document.createElement('span');
       label.textContent = `${printing.collection.name || printing.collection.id} #${printing.number} · ${printing.metadata.lang || 'en'}`;
       const values = document.createElement('strong');
-      values.textContent = CardPrices.entries(printing).map(price => `${CardPrices.format(price, I18N.current)} (${price.variant})`).join(' · ') || I18N.t('priceUnavailable');
+      values.textContent = CardPrices.entries(printing).map(price => `${CardPrices.format(price, I18N.current) || I18N.t('priceUnavailable')} (${price.variant})`).join(' · ') || I18N.t('priceUnavailable');
       row.append(label, values);
       prices.append(row);
     }

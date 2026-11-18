@@ -4,7 +4,7 @@
 
 `card.html` inicia automaticamente o catálogo do jogo selecionado, sem botão de carga inicial. Pesquisa por nome e coleção, autocomplete, importação TXT, seleção de lojas, grade/lista, filtros e paginação existentes continuam disponíveis. Ao avançar além das cartas carregadas, a paginação busca o próximo lote automaticamente, sem botão `Load more cards` e sem baixar todo o catálogo antecipadamente. Skeleton e estado `aria-busy` acompanham a primeira consulta; falhas oferecem repetição sem recarregar o documento.
 
-Cards priorizam imagem, nome em até duas linhas com tooltip, preço normal USD, coleção/número e ações centralizadas. A grade padrão usa colunas de no mínimo 180 px, três colunas em telas intermediárias e duas no breakpoint móvel. Imagens ausentes mantêm um placeholder com a mesma proporção. Os filtros Magic atuam sobre resultados carregados; Pokémon tem categoria própria e não exibe filtros de cores/tipos Magic. Seus preços são enriquecidos apenas na página visível. Ordenações locais consideram os dados recuperados até aquele momento.
+Cards priorizam imagem, nome em até duas linhas com tooltip, preço normal CAD, coleção/número e ações centralizadas. A grade padrão usa colunas de no mínimo 180 px, três colunas em telas intermediárias e duas no breakpoint móvel. Imagens ausentes mantêm um placeholder com a mesma proporção. Os filtros Magic atuam sobre resultados carregados; Pokémon tem categoria própria e não exibe filtros de cores/tipos Magic. Seus preços são enriquecidos apenas na página visível. Ordenações locais consideram os dados recuperados até aquele momento.
 
 Os dois botões do cabeçalho têm estado exclusivo `aria-pressed`. Magic é o padrão; a URL preserva o jogo entre catálogo, detalhes e competitivo. Pokémon foi habilitado após consulta real de busca, detalhes, imagens e correspondência de impressão. Sem adaptador registrado, seu botão fica desabilitado. Falha temporária da fonte é apresentada como erro recuperável.
 
@@ -12,9 +12,11 @@ Os dois botões do cabeçalho têm estado exclusivo `aria-pressed`. Magic é o p
 
 O catálogo Pokémon abre por coleções: uma grade pesquisável por nome/código leva a `card.html?game=pokemon&set=...`. Dentro da coleção, o seletor permite trocar de set e combinar a categoria; a consulta remota usa `set.id` para não misturar edições. O título mostra o nome da coleção. Pesquisas globais por nome continuam abrangendo todos os sets, com opção de restringir pelo seletor. Importações de decks não são convertidas em navegação por coleção.
 
-O ID da impressão determina imagem, nome, regras, mana quando aplicável, raridade, coleção, número e legalidade. O painel principal especifica USD normal e fonte. Datas de atualização de mercado são distintas da data de consulta; atualização ausente é declarada.
+O ID da impressão determina imagem, nome, regras, mana quando aplicável, raridade, coleção, número e legalidade. O painel principal especifica CAD normal e fonte. Datas de atualização de mercado são distintas da data de consulta; atualização ausente é declarada.
 
-Valores foil/etched, EUR e TIX são separados e identificados. Uma impressão sem preço normal permanece indisponível, mesmo que existam valores foil ou de outra edição. Não há conversão fixa ou preço estimado apresentado como cotação real. A comparação por edição carrega automaticamente e permite navegar para outra impressão. Galeria e carregamento adicional continuam disponíveis.
+Valores foil/etched e os mercados são separados e identificados. USD/EUR são convertidos para estimativas em CAD com a taxa diária do Bank of Canada; TIX permanece uma unidade digital. Uma impressão sem preço normal permanece indisponível, mesmo que existam valores foil ou de outra edição. Não há conversão fixa ou preço estimado apresentado como cotação real. A comparação por edição carrega automaticamente e permite navegar para outra impressão. Galeria e carregamento adicional continuam disponíveis.
+
+A seção “Store availability” fica imediatamente abaixo do painel de preço, inclusive no celular. Cada logo é o link para a pesquisa da carta na loja, sem texto “View price”. O aplicativo não consulta estoque ao vivo. A paleta verde anterior voltou a ser usada em todas as páginas.
 
 Em Pokémon, cartas de mesmo nome podem ter efeitos distintos. A seção as identifica como cartas relacionadas por nome, sem alegar equivalência de reimpressão. Só são mostrados preços com associação explícita de variante/mercado.
 
@@ -34,7 +36,7 @@ O visualizador de decklists apresenta jogador, arquétipo, campeonato, colocaç�
 
 O parser aceita `4 Card Name`, identificadores Arena `4 Card Name (SET) 123` e, em Pokémon, `4 Card Name SET 123` com cabeçalhos contados de Pokémon/Trainer/Energy. Nomes e códigos não reconhecidos permanecem indisponíveis; não são associados por aproximação a outra impressão.
 
-A estimativa utiliza preços USD normais disponíveis. O total só é denominado estimativa total quando todas as cópias foram precificadas; caso contrário, aparece subtotal parcial com cobertura `cópias com preço / cópias totais`. Uma edição explicitamente informada não é substituída por outra. Em listas sem impressão, a interface informa o uso de edição representativa. URLs externas são abertas na origem e não convertidas em snapshots históricos fictícios.
+A estimativa utiliza preços CAD normais disponíveis. O total só é denominado estimativa total quando todas as cópias foram precificadas; caso contrário, aparece subtotal parcial com cobertura `cópias com preço / cópias totais`. Uma edição explicitamente informada não é substituída por outra. Em listas sem impressão, a interface informa o uso de edição representativa. URLs externas são abertas na origem e não convertidas em snapshots históricos fictícios.
 
 ## Análise competitiva
 

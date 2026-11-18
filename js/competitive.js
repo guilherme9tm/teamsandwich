@@ -166,13 +166,15 @@ const Competitive = (() => {
     if (!byId('deckDialog').open) byId('deckDialog').showModal();
     let subtotal = 0; let priced = 0; let total = 0;
     try {
+      await CardPrices.ready;
+      if (signal.aborted) return;
       const cardProvider = CardData.provider(deck.game);
       for (let offset = 0; offset < deck.entries.length; offset += 30) {
         const entries = deck.entries.slice(offset, offset + 30);
         const cards = await cardProvider.collection(entries, { signal });
         if (signal.aborted) return;
         entries.forEach((entry, index) => {
-          const card = cards[index]; const price = card ? CardPrices.main(card) : null;
+          const card = cards[index]; const price = card ? CardPrices.toCAD(CardPrices.main(card)) : null;
           total += entry.quantity;
           if (price) { subtotal += price.value * entry.quantity; priced += entry.quantity; }
           const figure = document.createElement('figure');
@@ -180,7 +182,7 @@ const Competitive = (() => {
           if (card?.images.normal) { const link = document.createElement('a'); link.href = gameUrl('card-detail.html', { id: card.id, name: card.name }); const image = document.createElement('img'); image.src = card.images.normal; image.alt = card.name; image.loading = 'lazy'; link.append(image); figure.append(link); }
           figure.append(caption); byId('deckImages').append(figure);
         });
-        byId('deckPrice').textContent = `${I18N.t(priced === total && offset + entries.length >= deck.entries.length ? 'deckEstimate' : 'pricedSubtotal')}: ${priced ? CardPrices.format({ value: subtotal, currency: 'USD' }, I18N.current) : I18N.t('priceUnavailable')} · ${priced}/${deck.entries.reduce((sum, entry) => sum + entry.quantity, 0)} ${I18N.t('copiesPriced')} · ${I18N.t('representativePrintings')}`;
+        byId('deckPrice').textContent = `${I18N.t(priced === total && offset + entries.length >= deck.entries.length ? 'deckEstimate' : 'pricedSubtotal')}: ${priced ? CardPrices.format({ value: subtotal, currency: 'CAD' }, I18N.current) : I18N.t('priceUnavailable')} · ${priced}/${deck.entries.reduce((sum, entry) => sum + entry.quantity, 0)} ${I18N.t('copiesPriced')} · ${I18N.t('representativePrintings')}`;
       }
     } catch (error) { if (!signal.aborted) byId('deckPrice').textContent = I18N.t(error.code || error.message || 'sourceUnavailable'); }
   }

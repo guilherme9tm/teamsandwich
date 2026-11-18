@@ -75,8 +75,11 @@ function renderCardElement(cardData, selected = getSelected(false)) {
     a.href = site.link(n);
     a.target = "_blank";
     a.rel = 'noopener noreferrer';
+    a.title = `${I18N.t('searchAtStore')} ${site.nome}`;
+    a.setAttribute('aria-label', a.title);
     const im = document.createElement("img");
     im.src = site.logo;
+    im.alt = site.nome;
     im.loading = 'lazy';
     im.onerror = function() { this.style.display = 'none'; };
     a.appendChild(im);
@@ -582,3 +585,5 @@ window.addEventListener('languageChanged', () => {
   updateSearchTitles();
   renderLoadControls();
 });
+
+window.addEventListener('pricesChanged', () => { if (allCards.length) renderPage(); });

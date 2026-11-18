@@ -164,15 +164,11 @@ function renderCardDetailView(card) {
   const storesList = card.game === 'pokemon' ? sites.filter(site => site.id === 'tcgplayer') : sites;
   const storesHtml = storesList.map(site => {
     return `
-      <a href="${site.link(encodedCardName)}" target="_blank" rel="noopener noreferrer" class="detail-store-item" title="${I18N.t('searchAtStore')} ${site.nome}">
+      <a href="${site.link(encodedCardName)}" target="_blank" rel="noopener noreferrer" class="detail-store-item" aria-label="${I18N.t('searchAtStore')} ${escapeHTML(site.nome)}" title="${I18N.t('searchAtStore')} ${site.nome}">
         <div class="detail-store-left">
           ${site.logo ? `<img src="${site.logo}" alt="${site.nome}" class="detail-store-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">` : ''}
           <span class="detail-store-name" style="${site.logo ? 'display:none;' : ''}">${site.nome}</span>
         </div>
-        <span class="detail-store-cta">
-          <span>${I18N.t('viewPrice')}</span>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg>
-        </span>
       </a>
     `;
   }).join('');
@@ -229,10 +225,24 @@ function renderCardDetailView(card) {
         <section class="primary-price-panel">
           <span>${I18N.t('selectedPrinting')} · ${escapeHTML(card.set)} #${escapeHTML(card.collector_number)} · ${escapeHTML(card.lang || 'en')}</span>
           <strong>${CardPrices.format(mainPrice, I18N.current) || I18N.t('priceUnavailable')}</strong>
-          <small>${I18N.t('normal')} · USD · ${escapeHTML(card.source)} / TCGplayer · ${mainPrice?.updatedAt ? `${I18N.t('updatedAt')}: ${escapeHTML(new Date(mainPrice.updatedAt).toLocaleString(I18N.current))}` : I18N.t('sourceUpdateUnknown')}</small>
+          <small>${I18N.t('normal')} · CAD · ${escapeHTML(card.source)} / TCGplayer · ${mainPrice?.updatedAt ? `${I18N.t('updatedAt')}: ${escapeHTML(new Date(mainPrice.updatedAt).toLocaleString(I18N.current))}` : I18N.t('sourceUpdateUnknown')}</small>
           <small>${I18N.t('retrievedAt')}: ${card.fetchedAt ? escapeHTML(new Date(card.fetchedAt).toLocaleString(I18N.current)) : '—'}</small>
-          <div class="variant-prices">${priceRecords.map(price => `<div><b>${CardPrices.format(price, I18N.current)}</b> · ${escapeHTML(price.variant)} · ${escapeHTML(price.market)}${price.updatedAt ? `<small>${I18N.t('updatedAt')}: ${escapeHTML(new Date(price.updatedAt).toLocaleString(I18N.current))}</small>` : ''}</div>`).join('')}</div>
+          <small class="exchange-rate-note">${CardPrices.rateDate ? `${I18N.t('cadEstimate')} · <a href="https://www.bankofcanada.ca/rates/exchange/daily-exchange-rates/" target="_blank" rel="noopener noreferrer">Bank of Canada</a> · ${CardPrices.rateDate}` : I18N.t('exchangeRateUnavailable')}</small>
+          <div class="variant-prices">${priceRecords.map(price => `<div><b>${CardPrices.format(price, I18N.current) || I18N.t('priceUnavailable')}</b> · ${escapeHTML(price.variant)} · ${escapeHTML(price.market)}${price.updatedAt ? `<small>${I18N.t('updatedAt')}: ${escapeHTML(new Date(price.updatedAt).toLocaleString(I18N.current))}</small>` : ''}</div>`).join('')}</div>
         </section>
+        <div class="detail-stores-section">
+          <div class="detail-stores-header">
+            <div class="detail-stores-title-group">
+              <h3>${I18N.t('storeAvailability')}</h3>
+              <p>${I18N.t('storesSectionDesc')}</p>
+            </div>
+          </div>
+
+          <div class="detail-stores-grid">
+            ${storesHtml}
+          </div>
+        </div>
+
         ${card.game === 'pokemon' ? `<p class="sample-note">${I18N.t('pokemonPriceNotice')}</p>` : ''}
         <section class="printing-prices"><h2>${I18N.t(card.game === 'pokemon' ? 'relatedPokemon' : 'printingPrices')}</h2><div id="printingPrices" aria-live="polite"></div></section>
         <div class="detail-oracle-box">
@@ -251,19 +261,6 @@ function renderCardDetailView(card) {
               ${statsHtml}
             </div>
           ` : ''}
-        </div>
-
-        <div class="detail-stores-section">
-          <div class="detail-stores-header">
-            <div class="detail-stores-title-group">
-              <h3>${I18N.t('storesSectionTitle')}</h3>
-              <p>${I18N.t('storesSectionDesc')}</p>
-            </div>
-          </div>
-
-          <div class="detail-stores-grid">
-            ${storesHtml}
-          </div>
         </div>
 
         <div class="detail-card-meta-footer">
@@ -285,3 +282,8 @@ window.addEventListener('languageChanged', () => {
 });
 
 document.addEventListener('DOMContentLoaded', loadCardDetails);
+
+window.addEventListener('pricesChanged', () => {
+  if (currentCardData) renderCardDetailView(currentCardData);
+  renderArtsGallery();
+});
