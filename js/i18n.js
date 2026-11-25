@@ -331,12 +331,30 @@ const I18N = {
     }
   },
 
-  t(key) {
-    return this.dict[this.current]?.[key] || this.dict.en[key] || key;
+  t(key, params = {}) {
+    const text = this.dict[this.current]?.[key] || this.dict.en[key] || key;
+    return text.replace(/\{(\w+)\}/g, (match, name) => Object.hasOwn(params, name) ? String(params[name]) : match);
+  },
+
+  bind(element, key, params = {}) {
+    element.dataset.i18n = key;
+    element.dataset.i18nParams = JSON.stringify(params);
+    this.translateElement(element);
+  },
+
+  translateElement(element) {
+    const params = JSON.parse(element.dataset.i18nParams || '{}');
+    for (const [attribute, target] of [['data-i18n-aria', 'aria-label'], ['data-i18n-title', 'title'], ['data-i18n-alt', 'alt'], ['data-i18n-content', 'content']]) {
+      if (element.hasAttribute(attribute)) element.setAttribute(target, this.t(element.getAttribute(attribute), params));
+    }
+    if (!element.hasAttribute('data-i18n')) return;
+    const translated = this.t(element.dataset.i18n, params);
+    if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') element.placeholder = translated;
+    else element.textContent = translated;
   },
 
   setLang(lang) {
-    if (!this.dict[lang]) return;
+    if (!Object.hasOwn(this.dict, lang)) return;
     this.current = lang;
     AppStorage.local.setItem('lang', lang);
     this.updateDOM();
@@ -344,28 +362,37 @@ const I18N = {
   },
 
   updateDOM() {
-    document.querySelectorAll('[data-i18n-aria]').forEach(element => {
-      element.setAttribute('aria-label', this.t(element.getAttribute('data-i18n-aria')));
-    });
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-      const key = el.getAttribute('data-i18n');
-      const translated = this.t(key);
-      if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-        el.placeholder = translated;
-      } else {
-        el.textContent = translated;
-      }
-    });
+    document.querySelectorAll('[data-i18n], [data-i18n-aria], [data-i18n-title], [data-i18n-alt], [data-i18n-content]').forEach(element => this.translateElement(element));
 
     document.documentElement.lang = this.current;
-
-    const selector = document.querySelector('.lang-selector-select');
-    if (selector) selector.value = this.current;
-
-    const sidebarSelector = document.querySelector('.sidebar-lang-select');
-    if (sidebarSelector) sidebarSelector.value = this.current;
+    this.selectors ||= new WeakSet();
+    document.querySelectorAll('.lang-selector-select, .sidebar-lang-select').forEach(selector => {
+      if (!this.selectors.has(selector)) {
+        selector.innerHTML = '<option value="en">English</option><option value="pt">Português</option><option value="es">Español</option><option value="fr">Français</option><option value="de">Deutsch</option>';
+        selector.addEventListener('change', event => this.setLang(event.target.value));
+        this.selectors.add(selector);
+      }
+      selector.value = this.current;
+      selector.setAttribute('aria-label', this.t('languageLabel'));
+    });
   }
 };
+
+function syncStoredLanguage() {
+  const stored = AppStorage.local.getItem('lang');
+  const lang = Object.hasOwn(I18N.dict, stored) ? stored : 'en';
+  if (lang !== I18N.current) {
+    I18N.current = lang;
+    I18N.updateDOM();
+    window.dispatchEvent(new CustomEvent('languageChanged', { detail: { lang } }));
+  } else I18N.updateDOM();
+}
+
+document.addEventListener?.('DOMContentLoaded', () => I18N.updateDOM());
+window.addEventListener?.('storage', event => {
+  if (event.key === 'lang' || event.key === null) syncStoredLanguage();
+});
+window.addEventListener?.('pageshow', syncStoredLanguage);
 
 Object.assign(I18N.dict.fr, {
   retry: 'Réessayer', close: 'Fermer',

@@ -20,6 +20,20 @@ test('all English interface keys have translations in every supported language',
   const { locale } = localization();
   for (const lang of ['pt', 'es', 'fr', 'de']) assert.deepEqual(Object.keys(locale.dict.en).filter(key => !locale.dict[lang][key]), [], lang);
 });
+
+test('every page loads localization and references keys translated in all five languages', () => {
+  const { locale } = localization();
+  for (const file of fs.readdirSync('.').filter(file => file.endsWith('.html'))) {
+    const html = fs.readFileSync(file, 'utf8');
+    assert.match(html, /src="js\/i18n.js"/, file);
+    assert.match(html, /src="js\/locales.js"/, file);
+    assert.match(html, /<title data-i18n="[^"]+"/, file);
+    assert.match(html, /class="lang-selector-select"/, file);
+    for (const match of html.matchAll(/data-i18n(?:-aria|-title|-alt|-content)?="([^"]+)"/g)) {
+      for (const lang of ['en', 'pt', 'es', 'fr', 'de']) assert.ok(locale.dict[lang][match[1]], `${file}: ${lang}.${match[1]}`);
+    }
+  }
+});
 test('land cycles use explicit full card identities and never substring matching', () => {
   const context = vm.createContext({ module: { exports: {} } }); vm.runInContext(fs.readFileSync('js/lands.js', 'utf8'), context);
   const lands = context.module.exports;

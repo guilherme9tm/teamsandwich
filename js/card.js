@@ -273,6 +273,7 @@ function renderPagination() {
     const prevBtn = document.createElement("button");
     prevBtn.className = "page-btn arrow-btn";
     prevBtn.textContent = "‹";
+    prevBtn.setAttribute('aria-label', I18N.t('previousPage'));
     prevBtn.disabled = currentPage === 1;
     prevBtn.onclick = () => goToPage(currentPage - 1);
     navEl.appendChild(prevBtn);
@@ -312,6 +313,7 @@ function renderPagination() {
     const nextBtn = document.createElement("button");
     nextBtn.className = "page-btn arrow-btn";
     nextBtn.textContent = "›";
+    nextBtn.setAttribute('aria-label', I18N.t('nextPage'));
     nextBtn.disabled = currentPage >= totalPages && (!moreAvailable || isLoadingCards);
     nextBtn.onclick = () => goToPage(currentPage + 1);
     navEl.appendChild(nextBtn);
@@ -551,6 +553,8 @@ function initLayout() {
 }
 
 function updateSearchTitles() {
+  const pageTitle = document.querySelector('title');
+  I18N.bind(pageTitle, typeof Lands !== 'undefined' && Lands.active ? 'landsPageTitle' : 'catalogPageTitle');
   const params = new URLSearchParams(window.location.search);
   const titleEl = document.getElementById("searchTitle");
   const subtitleEl = document.getElementById("searchSubtitle");

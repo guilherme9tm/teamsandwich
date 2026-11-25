@@ -75,14 +75,14 @@
     }
     return data.decks;
   }
-  function status(message, error = false) {
-    $('saveStatus').textContent = message;
+  function status(key, error = false, params = {}) {
+    I18N.bind($('saveStatus'), key, params);
     $('saveStatus').classList.toggle('deck-error', error);
   }
   function persist() {
     if (!guard() || readFailed) return;
     const saved = AppStorage.local.setItem(key, JSON.stringify({ version: 1, decks }));
-    status(saved ? '✓ Alterações salvas neste navegador.' : 'Armazenamento indisponível ou cheio. As alterações estão apenas nesta página; não recarregue antes de liberar espaço.', !saved);
+    status(saved ? 'changesSaved' : 'deckStorageUnavailable', !saved);
   }
   function current() { return decks.find(deck => deck.id === selected); }
   function totals(cards) {
@@ -97,7 +97,7 @@
     if (!decks.length) {
       const empty = document.createElement('p');
       empty.className = 'deck-note deck-library-empty';
-      empty.textContent = 'Nenhum deck salvo. Importe sua primeira lista.';
+      I18N.bind(empty, 'noSavedDecks');
       $('deckBoxes').append(empty);
     }
     for (const deck of decks) {
@@ -108,7 +108,7 @@
       button.className = 'deck-box';
       button.dataset.deckId = deck.id;
       button.setAttribute('aria-pressed', String(deck.id === selected));
-      button.innerHTML = `<span class="deck-stack-icon" aria-hidden="true">TS</span><span><strong>${escape(deck.name)}</strong><small>${total.quantity} cartas · ${total.missing ? `${total.missing} pendentes` : 'Completo'}</small></span>`;
+      button.innerHTML = `<span class="deck-stack-icon" aria-hidden="true">TS</span><span><strong>${escape(deck.name)}</strong><small>${I18N.t('deckBoxCount', { count: total.quantity, status: total.missing ? I18N.t('pendingCopies', { count: total.missing }) : I18N.t('deckComplete') })}</small></span>`;
       button.onclick = () => {
         if (!guard()) return;
         selected = deck.id;
@@ -122,21 +122,25 @@
   function summary(tile, card) {
     const missing = Math.max(0, card.quantity - card.owned);
     tile.classList.toggle('is-missing', missing > 0);
-    tile.querySelector('.deck-card-status').textContent = `${card.owned} de ${card.quantity} · ${missing ? `Faltam ${missing}` : 'Completa'}`;
+    tile.querySelector('.deck-card-status').textContent = I18N.t('ownedSummary', { owned: card.owned, quantity: card.quantity, status: missing ? I18N.t('missingCards', { count: missing }) : I18N.t('cardComplete') });
   }
   function updateSummary() {
     const total = totals(current().cards);
-    $('deckSummary').textContent = `${total.quantity} cartas no total · ${total.missing} cópias pendentes`;
+    $('deckSummary').textContent = I18N.t('deckSummary', total);
     boxes();
   }
   function cardTile(card) {
     const tile = document.createElement('article');
     tile.className = 'deck-card';
-    tile.innerHTML = `<div class="deck-card-art"><span class="deck-image-fallback">Carregando imagem…</span></div>
+    tile.dataset.cardId = card.id;
+    tile.innerHTML = `<div class="deck-card-art"><span class="deck-image-fallback" data-i18n="loadingImage">${I18N.t('loadingImage')}</span></div>
       <h3>${escape(card.name)}</h3><p class="deck-card-status" aria-live="polite"></p>
-      <div class="deck-card-counts"><label>Exigidas<input class="required-count" type="number" min="1" max="1000" step="1" value="${card.quantity}" aria-label="Cópias exigidas de ${escape(card.name)}"></label>
-      <label>Possuídas<input class="owned-count" type="number" min="0" max="1000" step="1" value="${card.owned}" aria-label="Cópias possuídas de ${escape(card.name)}"></label></div>
-      <div class="deck-card-actions"><button type="button" class="deck-button minus" aria-label="Diminuir possuídas de ${escape(card.name)}">−</button><button type="button" class="deck-button plus" aria-label="Aumentar possuídas de ${escape(card.name)}">+</button><button type="button" class="deck-remove">Remover</button></div>`;
+      <div class="deck-card-counts"><label><span data-i18n="requiredCopies">${I18N.t('requiredCopies')}</span><input class="required-count" type="number" min="1" max="1000" step="1" value="${card.quantity}" data-i18n-aria="requiredCardCopies" aria-label="${escape(I18N.t('requiredCardCopies', { name: card.name }))}"></label>
+      <label><span data-i18n="ownedCopies">${I18N.t('ownedCopies')}</span><input class="owned-count" type="number" min="0" max="1000" step="1" value="${card.owned}" data-i18n-aria="ownedCardCopies" aria-label="${escape(I18N.t('ownedCardCopies', { name: card.name }))}"></label></div>
+      <div class="deck-card-actions"><button type="button" class="deck-button minus" data-i18n-aria="decreaseOwned" aria-label="${escape(I18N.t('decreaseOwned', { name: card.name }))}">−</button><button type="button" class="deck-button plus" data-i18n-aria="increaseOwned" aria-label="${escape(I18N.t('increaseOwned', { name: card.name }))}">+</button><button type="button" class="deck-remove" data-i18n="remove">${I18N.t('remove')}</button></div>`;
+    tile.querySelectorAll('[data-i18n-aria]').forEach(element => {
+      element.dataset.i18nParams = JSON.stringify({ name: card.name });
+    });
     const required = tile.querySelector('.required-count');
     const owned = tile.querySelector('.owned-count');
     const change = (field, input, min) => {
@@ -144,7 +148,7 @@
       const value = input.value === '' ? NaN : Number(input.value);
       if (!validCount(value, min)) {
         input.value = card[field];
-        status(`Use um número inteiro de ${min} a 1000 para ${card.name}.`, true);
+        status('invalidCopyCount', true, { min, name: card.name });
         return;
       }
       card[field] = value;
@@ -178,7 +182,7 @@
   function showImage(tile, card, url) {
     if (!tile.isConnected) return;
     const art = tile.querySelector('.deck-card-art');
-    art.querySelector('.deck-image-fallback').textContent = 'Imagem indisponível';
+    I18N.bind(art.querySelector('.deck-image-fallback'), 'imageUnavailable');
     if (!url || !/^https:\/\//i.test(url)) return;
     const img = document.createElement('img');
     img.alt = card.name; img.loading = 'lazy'; img.width = 488; img.height = 680;
@@ -216,15 +220,15 @@
     if (!deck) return;
     $('deckDetail').getAnimations?.().forEach(animation => animation.cancel());
     $('deckDetail').inert = false;
-    $('deckDetail').innerHTML = `<div class="deck-detail-heading"><div><p class="deck-eyebrow">SUA LISTA</p><h2 id="deckTitle"></h2><p id="deckSummary" class="deck-note"></p></div></div>
-      <form id="renameDeck" class="deck-inline-form"><label for="deckName">Nome do deck<input id="deckName" maxlength="100" required></label><button class="deck-button" type="submit">Renomear</button><button id="deleteDeck" class="deck-button deck-delete" type="button">Excluir decklist</button></form>
-      <details class="deck-add"><summary>+ Adicionar carta</summary><form id="addCard" class="deck-inline-form"><label>Nome da carta<input id="addName" maxlength="200" placeholder="Ex.: Lightning Bolt" required></label><label>Exigidas<input id="addQuantity" type="number" min="1" max="1000" step="1" value="1" required></label><label>Seção<select id="addSection"><option value="main">Deck principal</option><option value="sideboard">Sideboard</option></select></label><button class="deck-button" type="submit">Adicionar</button></form><p id="addError" class="deck-error" role="alert"></p></details>
+    $('deckDetail').innerHTML = `<div class="deck-detail-heading"><div><p class="deck-eyebrow" data-i18n="yourList">${I18N.t('yourList')}</p><h2 id="deckTitle"></h2><p id="deckSummary" class="deck-note"></p></div></div>
+      <form id="renameDeck" class="deck-inline-form"><label for="deckName"><span data-i18n="deckName">${I18N.t('deckName')}</span><input id="deckName" maxlength="100" required></label><button class="deck-button" type="submit" data-i18n="rename">${I18N.t('rename')}</button><button id="deleteDeck" class="deck-button deck-delete" type="button" data-i18n="deleteDeck">${I18N.t('deleteDeck')}</button></form>
+      <details class="deck-add"><summary data-i18n="addCard">${I18N.t('addCard')}</summary><form id="addCard" class="deck-inline-form"><label><span data-i18n="cardName">${I18N.t('cardName')}</span><input id="addName" maxlength="200" data-i18n="cardExample" placeholder="${I18N.t('cardExample')}" required></label><label><span data-i18n="requiredCopies">${I18N.t('requiredCopies')}</span><input id="addQuantity" type="number" min="1" max="1000" step="1" value="1" required></label><label><span data-i18n="section">${I18N.t('section')}</span><select id="addSection"><option value="main" data-i18n="mainDeck">${I18N.t('mainDeck')}</option><option value="sideboard" data-i18n="sideboard">${I18N.t('sideboard')}</option></select></label><button class="deck-button" type="submit" data-i18n="add">${I18N.t('add')}</button></form><p id="addError" class="deck-error" role="alert"></p></details>
       <div id="deckSections"></div>`;
     $('deckTitle').textContent = deck.name;
     $('deckName').value = deck.name;
     $('deleteDeck').onclick = () => {
       if (!guard() || readFailed) return;
-      if (!window.confirm(`Excluir a decklist “${deck.name}” e todas as suas cartas? Esta ação não pode ser desfeita.`)) return;
+      if (!window.confirm(I18N.t('confirmDeleteDeck', { name: deck.name }))) return;
       decks = decks.filter(item => item.id !== deck.id);
       selected = null;
       const url = new URL(window.location.href);
@@ -234,6 +238,7 @@
       leave($('deckDetail'), () => {
         if (selected || !DeckAccess.allowed()) return;
         $('deckDetail').innerHTML = emptyDetail;
+        I18N.updateDOM();
         enter($('deckDetail').firstElementChild);
         ($('deckBoxes').querySelector('button:not([data-leaving])') || $('importDeck')).focus();
       });
@@ -255,19 +260,19 @@
       if (!name || !validCount(quantity, 1)) return;
       const existing = deck.cards.find(card => card.name.toLowerCase() === name.toLowerCase() && card.section === section && !card.set);
       if (existing ? existing.quantity + quantity > 1000 : deck.cards.length >= 1000) {
-        $('addError').textContent = 'Limite de 1000 cartas distintas ou 1000 cópias por carta atingido.'; return;
+        I18N.bind($('addError'), 'deckCardLimit'); return;
       }
       if (existing) existing.quantity += quantity;
       else deck.cards.push({ id: id(), name, quantity, owned: 0, section });
       persist(); boxes(); detail();
     };
     const items = [];
-    for (const [section, title] of [['main', 'Deck principal'], ['sideboard', 'Sideboard']]) {
+    for (const [section, title] of [['main', 'mainDeck'], ['sideboard', 'sideboard']]) {
       const cards = deck.cards.filter(card => card.section === section);
       const group = document.createElement('section');
       group.className = 'deck-section';
-      group.innerHTML = `<h3 class="deck-section-title">${title} <span>${totals(cards).quantity}</span></h3><div class="deck-card-grid"></div>`;
-      if (!cards.length) group.querySelector('.deck-card-grid').innerHTML = '<p class="deck-note">Nenhuma carta nesta seção.</p>';
+      group.innerHTML = `<h3 class="deck-section-title"><b data-i18n="${title}">${I18N.t(title)}</b> <span>${totals(cards).quantity}</span></h3><div class="deck-card-grid"></div>`;
+      if (!cards.length) group.querySelector('.deck-card-grid').innerHTML = `<p class="deck-note" data-i18n="emptyDeckSection">${I18N.t('emptyDeckSection')}</p>`;
       for (const card of cards) {
         const tile = cardTile(card);
         group.querySelector('.deck-card-grid').append(tile);
@@ -285,15 +290,17 @@
   function preview() {
     let parsed;
     try { parsed = DeckImport.parse($('importText').value, { requireQuantity: true }); }
-    catch { $('importErrors').textContent = 'Lista muito grande. Limite: 256 KB e 1000 cartas distintas.'; $('saveImport').disabled = true; return null; }
+    catch { I18N.bind($('importErrors'), 'deckImportLimit'); $('saveImport').disabled = true; return null; }
     const lines = $('importText').value.split(/\r?\n/);
+    delete $('importErrors').dataset.i18n;
+    delete $('importErrors').dataset.i18nParams;
     $('importErrors').replaceChildren();
     if (parsed.warnings.length) {
-      const heading = document.createElement('p'); heading.textContent = 'Corrija estas linhas antes de salvar:'; $('importErrors').append(heading);
+      const heading = document.createElement('p'); I18N.bind(heading, 'fixImportLines'); $('importErrors').append(heading);
       const list = document.createElement('ul');
-      for (const line of parsed.warnings) { const item = document.createElement('li'); item.textContent = `Linha ${line}: ${lines[line - 1]}`; list.append(item); }
+      for (const line of parsed.warnings) { const item = document.createElement('li'); I18N.bind(item, 'invalidImportLine', { line, text: lines[line - 1] }); list.append(item); }
       $('importErrors').append(list);
-    } else $('importErrors').textContent = parsed.entries.length ? `${totals(parsed.entries).quantity} cartas · ${parsed.entries.length} entradas válidas` : 'Adicione ao menos uma linha com quantidade e nome.';
+    } else I18N.bind($('importErrors'), parsed.entries.length ? 'validImportEntries' : 'addImportLine', { quantity: totals(parsed.entries).quantity, entries: parsed.entries.length });
     $('saveImport').disabled = !!parsed.warnings.length || !parsed.entries.length;
     return parsed;
   }
@@ -303,7 +310,7 @@
     const file = $('deckFile').files[0];
     $('deckFile').value = '';
     if (!file) return;
-    if (!/\.txt$/i.test(file.name) || file.size > 256000) { status('Selecione um arquivo .txt de até 256 KB.', true); return; }
+    if (!/\.txt$/i.test(file.name) || file.size > 256000) { status('selectDeckFile', true); return; }
     const token = ++fileRead;
     try {
       const text = await file.text();
@@ -311,7 +318,7 @@
       $('importName').value = file.name.replace(/\.txt$/i, '').slice(0, 100);
       $('importText').value = text;
       preview(); $('importDialog').showModal();
-    } catch { status('Não foi possível ler o arquivo. Tente selecioná-lo novamente.', true); }
+    } catch { status('deckFileReadError', true); }
   };
   $('importText').oninput = preview;
   $('cancelImport').onclick = closeImport;
@@ -322,10 +329,21 @@
     const parsed = preview();
     const name = $('importName').value.trim();
     if (!name || !parsed?.entries.length || parsed.warnings.length) return;
-    if (decks.length >= 200) { $('importErrors').textContent = 'Limite de 200 decks neste navegador atingido.'; return; }
+    if (decks.length >= 200) { I18N.bind($('importErrors'), 'deckLibraryLimit'); return; }
     decks.push({ id: id(), name, cards: parsed.entries.map(card => ({ ...card, id: id(), owned: 0 })) });
     persist(); boxes(); closeImport();
   };
+  window.addEventListener('languageChanged', () => {
+    boxes();
+    const deck = current();
+    if (deck) {
+      updateSummary();
+      $('deckSections').querySelectorAll('.deck-card').forEach(tile => {
+        const card = deck.cards.find(item => item.id === tile.dataset.cardId);
+        if (card) summary(tile, card);
+      });
+    }
+  });
   $('deckLogout').onclick = () => { DeckAccess.logout(); guard(); };
   window.addEventListener('pageshow', guard);
   window.addEventListener('storage', event => {
@@ -333,16 +351,18 @@
     try {
       decks = read(); readFailed = false; boxes();
       if (current()) detail(); else $('deckDetail').innerHTML = emptyDetail;
+      I18N.updateDOM();
       $('importDeck').disabled = false;
-      status('Biblioteca atualizada a partir de outra aba.');
+      status('deckLibraryUpdated');
     } catch {
       readFailed = true;
       $('importDeck').disabled = true;
       $('deckDetail').innerHTML = emptyDetail;
-      status('Os dados salvos não puderam ser lidos. A gravação foi bloqueada para preservar sua biblioteca.', true);
+      I18N.updateDOM();
+      status('deckLibraryReadError', true);
     }
   });
-  try { decks = read(); } catch { readFailed = true; status('Os dados salvos não puderam ser lidos. A gravação foi bloqueada para preservar sua biblioteca.', true); }
+  try { decks = read(); } catch { readFailed = true; status('deckLibraryReadError', true); }
   $('importDeck').disabled = readFailed;
   boxes();
   if (current()) detail();

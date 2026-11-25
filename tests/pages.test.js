@@ -12,7 +12,7 @@ async function waitFor(predicate, message) {
   const deadline = Date.now() + 6000;
   while (!predicate()) { if (Date.now() > deadline) throw new Error(`Timed out: ${message}`); await new Promise(resolve => setTimeout(resolve, 20)); }
 }
-function page(file, query = '', { failure = false, pokemonFailure = false, disablePokemon = false, searchPages = null, rateFailure = false } = {}) {
+function page(file, query = '', { failure = false, pokemonFailure = false, disablePokemon = false, searchPages = null, rateFailure = false, lang = null } = {}) {
   const html = fs.readFileSync(file, 'utf8');
   const scripts = [...html.matchAll(/<script src="([^"]+)"><\/script>/g)].map(match => match[1]);
   const errors = []; const requests = [];
@@ -21,6 +21,7 @@ function page(file, query = '', { failure = false, pokemonFailure = false, disab
   const dom = new JSDOM(html.replace(/<script src="[^"]+"><\/script>/g, ''), {
     url: `http://localhost/${file}${query}`, runScripts: 'dangerously', virtualConsole,
     beforeParse(window) {
+      if (lang) window.localStorage.setItem('lang', lang);
       window.scrollTo = () => {};
       window.fetch = async url => {
         requests.push(String(url));
@@ -270,4 +271,63 @@ test('Magic tournaments report the missing credential with no fictitious cards',
     await waitFor(() => dom.window.document.getElementById('tournamentStatus').textContent.includes('TOPDECK_API_KEY'), 'configuration notice');
     assert.equal(dom.window.document.querySelectorAll('.tournament-card').length, 0); assert.deepEqual(errors, []);
   } finally { dom.window.close(); }
+});
+
+test('every catalog page restores the chosen language and updates content and both selectors', async () => {
+  for (const file of ['index.html', 'card.html', 'card-detail.html', 'competitive.html']) {
+    const { dom, errors } = page(file, '', { lang: 'pt' });
+    try {
+      const document = dom.window.document;
+      await waitFor(() => document.querySelector('.catalog-nav a')?.textContent, `${file}: navigation`);
+      if (file === 'index.html') await waitFor(() => document.querySelector('#popularSetsGrid .popular-set-card'), 'home sets');
+      assert.equal(document.documentElement.lang, 'pt', file);
+      const labels = { pt: 'Início', es: 'Inicio', fr: 'Accueil', de: 'Startseite', en: 'Home' };
+      const login = { pt: 'Entrar', es: 'Iniciar sesión', fr: 'Connexion', de: 'Anmelden', en: 'Login' };
+      for (const lang of ['de', 'es', 'fr', 'en', 'pt']) {
+        const selector = document.querySelector('.sidebar-lang-select') || document.querySelector('.lang-selector-select');
+        selector.value = lang; selector.dispatchEvent(new dom.window.Event('change'));
+        assert.equal(document.documentElement.lang, lang, file);
+        assert.equal(dom.window.localStorage.getItem('lang'), lang);
+        assert.equal(document.querySelector('.catalog-nav a').textContent, labels[lang]);
+        assert.equal(document.querySelector('#headerUserActions a').textContent, login[lang]);
+        for (const select of document.querySelectorAll('.lang-selector-select, .sidebar-lang-select')) {
+          assert.equal(select.value, lang); assert.equal(select.options.length, 5);
+        }
+        const locale = dom.window.eval('I18N');
+        assert.equal(document.title, locale.t(document.querySelector('title').dataset.i18n));
+        if (file === 'index.html') assert.equal(document.querySelector('.hero-subtitle').textContent, locale.t('heroSubtitle'));
+        if (file === 'card-detail.html') assert.equal(document.querySelector('.detail-loading-state h3').textContent, locale.t('noCardSpecifiedTitle'));
+      }
+      assert.deepEqual(errors, [], file);
+    } finally { dom.window.close(); }
+  }
+});
+
+test('language changes translate loaded errors, land cycles and competitive deck prices without reloading', async () => {
+  const catalog = page('card.html', '', { failure: true });
+  const lands = page('card.html', '?view=lands', { lang: 'pt' });
+  const competitive = page('competitive.html', '?game=pokemon');
+  try {
+    await waitFor(() => catalog.dom.window.document.querySelector('.load-error'), 'catalog failure');
+    const document = competitive.dom.window.document;
+    await waitFor(() => document.querySelector('.tournament-card'), 'tournament');
+    document.getElementById('pasteDeck').value = '4 Tangela';
+    document.getElementById('pasteDeckForm').dispatchEvent(new competitive.dom.window.Event('submit', { cancelable: true }));
+    await waitFor(() => document.getElementById('deckPrice').textContent.includes('copies priced'), 'deck pricing');
+    for (const current of [catalog, lands, competitive]) {
+      const selector = current.dom.window.document.querySelector('.lang-selector-select');
+      selector.value = 'pt'; selector.dispatchEvent(new current.dom.window.Event('change'));
+    }
+    assert.match(catalog.dom.window.document.querySelector('.load-error').textContent, /indisponível/);
+    assert.equal(catalog.dom.window.document.querySelector('#searchLoadControls button').textContent, 'Tentar novamente');
+    assert.equal(lands.dom.window.document.querySelector('#landCycle option[value="fast"]').textContent, 'Terrenos rápidos');
+    assert.equal(lands.dom.window.document.title, 'Terrenos — Team Sandwich');
+    assert.match(document.getElementById('deckPrice').textContent, /cópias com preço/);
+    assert.match(document.querySelector('#deckImages figcaption').textContent, /Deck principal/);
+    assert.equal(document.getElementById('pasteDeck').value, '4 Tangela');
+    assert.match(document.getElementById('tournamentSource').textContent, /Fonte:/);
+    assert.match(document.getElementById('tournamentStatus').textContent, /campeonatos carregados/);
+    assert.equal(document.getElementById('deckDialog').open, true);
+    assert.deepEqual([...catalog.errors, ...lands.errors, ...competitive.errors], []);
+  } finally { catalog.dom.window.close(); lands.dom.window.close(); competitive.dom.window.close(); }
 });

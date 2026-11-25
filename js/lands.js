@@ -33,7 +33,7 @@ const Lands = (() => {
     if (title) title.textContent = I18N.t('lands');
     const controls = document.createElement('form');
     controls.className = 'lands-controls';
-    controls.innerHTML = `<label><span data-i18n="cycle"></span><select id="landCycle">${Object.entries(cycles).map(([id, data]) => `<option value="${id}">${data.label}</option>`).join('')}</select></label>
+    controls.innerHTML = `<label><span data-i18n="cycle"></span><select id="landCycle">${Object.entries(cycles).map(([id, data]) => `<option value="${id}" data-i18n="landCycle_${id}">${data.label}</option>`).join('')}</select></label>
       <label><span data-i18n="filterByColor"></span><select id="landColor"><option value="" data-i18n="all"></option>${['W', 'U', 'B', 'R', 'G', 'WU', 'UB', 'BR', 'RG', 'GW', 'WB', 'UR', 'BG', 'RW', 'GU', 'WUBRG'].map(value => `<option>${value}</option>`).join('')}</select></label>
       <label><span data-i18n="formats"></span><select id="landFormat"><option value="" data-i18n="all"></option>${['standard', 'pioneer', 'modern', 'legacy', 'vintage', 'pauper', 'commander'].map(value => `<option>${value}</option>`).join('')}</select></label>
       <label><span data-i18n="searchPlaceholder"></span><input id="landName" type="search"></label>

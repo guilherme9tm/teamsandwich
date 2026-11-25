@@ -138,9 +138,9 @@ async function initPokemonSets() {
     typeText.dataset.i18n = 'filterByType'; typeText.textContent = I18N.t('filterByType');
     const typeSelect = document.createElement('select');
     typeSelect.id = 'pokemonCategoryFilter';
-    for (const value of ['', 'Pokemon', 'Trainer', 'Energy']) {
-      const option = new Option(value || I18N.t('all'), value);
-      if (!value) option.dataset.i18n = 'all';
+    for (const [value, key] of [['', 'all'], ['Pokemon', 'pokemonCategory'], ['Trainer', 'trainerCategory'], ['Energy', 'energyCategory']]) {
+      const option = new Option(I18N.t(key), value);
+      option.dataset.i18n = key;
       typeSelect.add(option);
     }
     typeSelect.value = searchParams.get('category') || '';
@@ -173,7 +173,7 @@ async function initPokemonSets() {
     controls.after(directory);
   }
   async function load() {
-    status.replaceChildren(document.createTextNode(I18N.t('loading')));
+    I18N.bind(status, 'loading');
     try {
       const sets = await CardData.provider().sets();
       setSelect.replaceChildren(allOption);
@@ -184,6 +184,7 @@ async function initPokemonSets() {
       const selected = searchParams.get('set');
       if (selected && !sets.some(set => set.code === selected)) setSelect.add(new Option(selected.toUpperCase(), selected));
       setSelect.value = selected || ''; setSelect.disabled = false;
+      delete status.dataset.i18n;
       status.replaceChildren();
       if (directory) {
         const render = () => {
@@ -197,9 +198,12 @@ async function initPokemonSets() {
       }
       updateSearchTitles();
     } catch (error) {
-      status.textContent = I18N.t(error.code || 'sourceUnavailable');
+      delete status.dataset.i18n;
+      const message = document.createElement('span');
+      I18N.bind(message, error.code || 'sourceUnavailable');
+      status.replaceChildren(message);
       const retry = document.createElement('button');
-      retry.type = 'button'; retry.className = 'btn-secondary'; retry.textContent = I18N.t('retry'); retry.onclick = load;
+      retry.type = 'button'; retry.className = 'btn-secondary'; I18N.bind(retry, 'retry'); retry.onclick = load;
       status.append(retry);
     }
   }

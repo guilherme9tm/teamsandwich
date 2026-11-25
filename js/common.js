@@ -21,13 +21,13 @@ function initGameNavigation() {
   const group = document.createElement('div');
   group.className = 'game-selector';
   group.setAttribute('role', 'group');
-  group.setAttribute('aria-label', I18N.t('game'));
+  group.dataset.i18nAria = 'game';
   for (const [game, label] of [['mtg', 'Magic: The Gathering'], ['pokemon', 'Pokémon TCG']]) {
     const button = document.createElement('button');
     button.type = 'button';
     button.textContent = label;
     button.setAttribute('aria-pressed', String(CardData.game === game));
-    try { CardData.provider(game); } catch { button.disabled = true; button.title = I18N.t('unsupportedGame'); }
+    try { CardData.provider(game); } catch { button.disabled = true; button.dataset.i18nTitle = 'unsupportedGame'; }
     button.onclick = () => { window.location.href = `card.html?game=${game}`; };
     group.append(button);
   }
@@ -40,7 +40,7 @@ function initGameNavigation() {
   header.append(actionsRight);
   const nav = document.createElement('nav');
   nav.className = 'catalog-nav';
-  nav.setAttribute('aria-label', I18N.t('navigation'));
+  nav.dataset.i18nAria = 'navigation';
   nav.innerHTML = `<div class="catalog-nav-links"><a href="${gameUrl('index.html')}" data-i18n="home"></a><a href="${gameUrl('card.html')}" data-i18n="catalog"></a>${CardData.game === 'mtg' ? '<a href="card.html?view=lands" data-i18n="lands">Lands</a>' : ''}<a href="${gameUrl('competitive.html')}" data-i18n="competitive"></a></div><span class="card-language-note" data-i18n="cardLanguage"></span>`;
   const page = window.location.pathname.split('/').pop() || 'index.html';
   const isLands = new URLSearchParams(window.location.search).get('view') === 'lands';
@@ -51,9 +51,7 @@ function initGameNavigation() {
     if (matches) link.setAttribute('aria-current', 'page');
   });
   header.after(nav);
-  document.querySelectorAll('.lang-selector-select, .sidebar-lang-select').forEach(select => {
-    select.innerHTML = '<option value="en">English</option><option value="pt">Português</option><option value="es">Español</option><option value="fr">Français</option><option value="de">Deutsch</option>';
-  });
+
   if (CardData.game === 'pokemon') {
     document.getElementById('sectionFormats')?.setAttribute('hidden', '');
     document.querySelectorAll('.hero-badge span').forEach(label => { label.textContent = 'POKÉMON TCG'; });
@@ -90,7 +88,7 @@ function renderSidebar() {
 
   sidebar.innerHTML = `
     <div class="sidebar-drawer-header">
-      <button class="sidebar-close-btn" onclick="closeSidebarDrawer()" aria-label="Fermer le menu">
+      <button class="sidebar-close-btn" onclick="closeSidebarDrawer()" data-i18n-aria="closeMenu">
         &times;
       </button>
     </div>
@@ -98,7 +96,7 @@ function renderSidebar() {
     <div class="sidebar-mobile-actions">
       <div class="sidebar-mobile-lang">
         <label class="sidebar-field-label" data-i18n="languageLabel">Langue / Language</label>
-        <select class="sidebar-lang-select" aria-label="Language">
+        <select class="sidebar-lang-select" data-i18n-aria="languageLabel">
           <option value="fr">FR</option>
           <option value="en">EN</option>
         </select>
@@ -378,14 +376,14 @@ async function loadSets() {
     const viewAllBtn = document.createElement("button");
     viewAllBtn.className = "btn-view-all-collections";
     viewAllBtn.setAttribute("data-i18n", "viewAllCollections");
-    viewAllBtn.textContent = I18N.t('viewAllCollections');
+    I18N.bind(viewAllBtn, 'viewAllCollections');
     viewAllBtn.onclick = () => openCollectionsModal();
     container.appendChild(viewAllBtn);
 
   } catch (e) {
     container.replaceChildren();
-    const message = document.createElement('p'); message.textContent = I18N.t(e.code || 'sourceUnavailable');
-    const retry = document.createElement('button'); retry.type = 'button'; retry.className = 'btn-secondary'; retry.textContent = I18N.t('retry'); retry.onclick = loadSets;
+    const message = document.createElement('p'); I18N.bind(message, e.code || 'sourceUnavailable');
+    const retry = document.createElement('button'); retry.type = 'button'; retry.className = 'btn-secondary'; I18N.bind(retry, 'retry'); retry.onclick = loadSets;
     container.append(message, retry);
   }
 }
@@ -465,7 +463,7 @@ function renderCollectionsGrid(sets) {
   if (!grid) return;
 
   if (sets.length === 0) {
-    grid.innerHTML = `<div class="collections-empty">${I18N.t('noCollectionsFound')}</div>`;
+    grid.innerHTML = `<div class="collections-empty" data-i18n="noCollectionsFound">${I18N.t('noCollectionsFound')}</div>`;
     return;
   }
 
@@ -642,12 +640,12 @@ function updateUserUI() {
     if (!container) return;
     if (user) {
       container.innerHTML = `
-        <a class="btn-login-header" href="my-decks.html">Meus Decks</a>
+        <a class="btn-login-header" href="my-decks.html" data-i18n="myDecks">${I18N.t('myDecks')}</a>
         <button class="btn-logout-header" onclick="logoutUser()" data-i18n="logout">${I18N.t('logout')}</button>
       `;
     } else {
       container.innerHTML = `
-        <a class="btn-login-header" href="login.html">Login</a>
+        <a class="btn-login-header" href="login.html" data-i18n="login">${I18N.t('login')}</a>
       `;
     }
   };
@@ -664,27 +662,12 @@ function logoutUser() {
 }
 
 function initLangSelector() {
-  const selector = document.querySelector('.lang-selector-select');
-  if (selector) {
-    selector.value = I18N.current;
-    selector.addEventListener('change', (e) => {
-      I18N.setLang(e.target.value);
-      updateUserUI();
-    });
-  }
-
-  const sidebarSelector = document.querySelector('.sidebar-lang-select');
-  if (sidebarSelector) {
-    sidebarSelector.value = I18N.current;
-    sidebarSelector.addEventListener('change', (e) => {
-      I18N.setLang(e.target.value);
-      updateUserUI();
-    });
-  }
+  I18N.updateDOM();
 }
 
 window.addEventListener('languageChanged', () => {
   updateUserUI();
+  if (document.getElementById('collectionsModal')?.classList.contains('visible')) filterAndRenderCollections();
 });
 
 window.addEventListener('pageshow', updateUserUI);

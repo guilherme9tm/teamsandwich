@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Login · Meus Decks — Team Sandwich</title>
+  <title data-i18n="loginPageTitle">Login · Meus Decks — Team Sandwich</title>
   <link rel="icon" href="assets/icons/favicon.ico">
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/my-decks.css">
@@ -11,22 +11,25 @@
 <body class="decks-page">
   <header class="header decks-header">
     <a href="index.html" class="logo-link-header"><img src="assets/images/IMG_6262.jpg" alt="Team Sandwich" class="header-logo" width="2548" height="1004"></a>
-    <a href="index.html">← Voltar ao site</a>
+    <div class="lang-selector"><select class="lang-selector-select" data-i18n-aria="languageLabel"></select></div>
+    <a href="index.html" data-i18n="backToSite">← Voltar ao site</a>
   </header>
   <main class="deck-login">
     <div class="deck-stack-icon" aria-hidden="true">TS</div>
     <p class="deck-eyebrow">MAGIC: THE GATHERING</p>
-    <h1>Meus Decks</h1>
-    <p>Organize suas listas e acompanhe as cartas que faltam.</p>
+    <h1 data-i18n="myDecks">Meus Decks</h1>
+    <p data-i18n="deckLoginIntro">Organize suas listas e acompanhe as cartas que faltam.</p>
     <form id="deckLoginForm">
-      <label for="deckPassword">Senha de acesso</label>
+      <label for="deckPassword" data-i18n="accessPassword">Senha de acesso</label>
       <input type="password" id="deckPassword" autocomplete="current-password" required autofocus aria-describedby="loginError">
       <p id="loginError" class="deck-error" role="alert"></p>
-      <button type="submit" class="deck-button primary">Entrar em Meus Decks →</button>
+      <button type="submit" class="deck-button primary" data-i18n="enterMyDecks">Entrar em Meus Decks →</button>
     </form>
-    <p class="deck-note">Protótipo local. Seus decks ficam salvos neste navegador.</p>
+    <p class="deck-note" data-i18n="localPrototype">Protótipo local. Seus decks ficam salvos neste navegador.</p>
   </main>
   <script src="js/storage.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/locales.js"></script>
   <script src="js/deck-login.js"></script>
 </body>
 </html>

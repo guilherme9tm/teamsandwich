@@ -8,6 +8,7 @@ const Competitive = (() => {
   let controller = new AbortController();
   let generation = 0;
   let currentDeck = null;
+  let deckPriceState = null;
   let deckController = null;
   let focusBeforeDeck = null;
   const formats = { mtg: ['Standard', 'Pioneer', 'Modern', 'Legacy', 'EDH', 'Pauper', 'Vintage', 'Premodern'], pokemon: ['STANDARD', 'EXPANDED', 'GLC', 'CUSTOM'] };
@@ -24,11 +25,11 @@ const Competitive = (() => {
   }
   async function load(reset = false) {
     if (loading && !reset) return;
-    if (filters().start && filters().end && filters().start > filters().end) { byId('tournamentStatus').textContent = I18N.t('invalidQuery'); return; }
+    if (filters().start && filters().end && filters().start > filters().end) { I18N.bind(byId('tournamentStatus'), 'invalidQuery'); return; }
     if (reset) { controller.abort(); controller = new AbortController(); generation++; tournaments = []; results = new Map(); nextPage = 1; render(); }
     const version = generation;
     loading = true;
-    byId('tournamentStatus').textContent = I18N.t('loading');
+    I18N.bind(byId('tournamentStatus'), 'loading');
     byId('tournamentRetry').hidden = true;
     byId('moreTournaments').disabled = true;
     try {
@@ -37,11 +38,11 @@ const Competitive = (() => {
       const known = new Set(tournaments.map(tournament => tournament.id));
       tournaments.push(...page.tournaments.filter(tournament => !known.has(tournament.id)));
       nextPage = page.nextPage;
-      byId('tournamentStatus').textContent = tournaments.length ? `${tournaments.length} ${I18N.t('tournamentsLoaded')}` : I18N.t('noResults');
+      I18N.bind(byId('tournamentStatus'), tournaments.length ? 'tournamentLoadedCount' : 'noResults', { count: tournaments.length });
       render();
     } catch (error) {
       if (version !== generation || error.name === 'AbortError') return;
-      byId('tournamentStatus').textContent = I18N.t(error.message || 'sourceUnavailable');
+      I18N.bind(byId('tournamentStatus'), error.message || 'sourceUnavailable');
       byId('tournamentRetry').hidden = false;
     } finally {
       if (version === generation) { loading = false; byId('moreTournaments').disabled = false; byId('moreTournaments').hidden = !nextPage; }
@@ -65,7 +66,7 @@ const Competitive = (() => {
       }
       render();
     } catch (error) {
-      if (version === generation && error.name !== 'AbortError') byId('tournamentStatus').textContent = I18N.t(error.message || 'sourceUnavailable');
+      if (version === generation && error.name !== 'AbortError') I18N.bind(byId('tournamentStatus'), error.message || 'sourceUnavailable');
     } finally { if (actionButton) actionButton.disabled = false; }
   }
   function render() {
@@ -84,7 +85,7 @@ const Competitive = (() => {
         const open = button(I18N.t('viewResults'), () => loadResults(tournament, open)); card.append(open);
       } else {
         const sampleSelect = document.createElement('select'); sampleSelect.setAttribute('aria-label', I18N.t('sample'));
-        for (const [value, label] of [['8', 'Top 8'], ['16', 'Top 16'], ['0', I18N.t('allLists')]]) { const option = new Option(label, value); sampleSelect.add(option); }
+        for (const [value, key] of [['8', 'top8'], ['16', 'top16'], ['0', 'allLists']]) { const option = new Option(I18N.t(key), value); sampleSelect.add(option); }
         const list = document.createElement('div');
         function show() {
           list.replaceChildren(); const limit = Number(sampleSelect.value);
@@ -157,12 +158,24 @@ const Competitive = (() => {
     byId('deckText').textContent = deckText(currentDeck);
     if (currentDeck.sourceUrl) sourceLink(byId('deckOrigin'), `${I18N.t('publishedList')} · ${currentDeck.source} · ${I18N.t('retrievedAt')}: ${new Date(currentDeck.fetchedAt).toLocaleString(I18N.current)}`, currentDeck.sourceUrl);
     else byId('deckOrigin').textContent = I18N.t('localImportNotice');
+    byId('deckImages').querySelectorAll('figcaption').forEach(caption => {
+      const { quantity, name, section } = caption.dataset;
+      caption.textContent = I18N.t('deckImageCaption', { quantity, name, section: I18N.t(section === 'sideboard' ? 'sideboard' : 'mainDeck') });
+    });
+    renderDeckPrice();
+  }
+  function renderDeckPrice() {
+    if (!deckPriceState) return;
+    const { subtotal, priced, complete, total } = deckPriceState;
+    delete byId('deckPrice').dataset.i18n;
+    byId('deckPrice').textContent = `${I18N.t(complete ? 'deckEstimate' : 'pricedSubtotal')}: ${priced ? CardPrices.format({ value: subtotal, currency: 'CAD' }, I18N.current) : I18N.t('priceUnavailable')} · ${priced}/${total} ${I18N.t('copiesPriced')} · ${I18N.t('representativePrintings')}`;
   }
   async function openDeck(deck) {
     currentDeck = deck;
+    deckPriceState = null;
     deckController?.abort(); deckController = new AbortController(); const signal = deckController.signal;
     focusBeforeDeck = document.activeElement;
-    renderDeck(); byId('deckImages').replaceChildren(); byId('deckPrice').textContent = I18N.t('loading'); byId('deckCopyStatus').textContent = '';
+    renderDeck(); byId('deckImages').replaceChildren(); I18N.bind(byId('deckPrice'), 'loading'); byId('deckCopyStatus').textContent = ''; delete byId('deckCopyStatus').dataset.i18n;
     if (!byId('deckDialog').open) byId('deckDialog').showModal();
     let subtotal = 0; let priced = 0; let total = 0;
     try {
@@ -179,12 +192,14 @@ const Competitive = (() => {
           if (price) { subtotal += price.value * entry.quantity; priced += entry.quantity; }
           const figure = document.createElement('figure');
           const caption = document.createElement('figcaption'); caption.textContent = `${entry.quantity} × ${entry.name} · ${I18N.t(entry.section === 'sideboard' ? 'sideboard' : 'mainDeck')}`;
+          Object.assign(caption.dataset, { quantity: entry.quantity, name: entry.name, section: entry.section });
           if (card?.images.normal) { const link = document.createElement('a'); link.href = gameUrl('card-detail.html', { id: card.id, name: card.name }); const image = document.createElement('img'); image.src = card.images.normal; image.alt = card.name; image.loading = 'lazy'; link.append(image); figure.append(link); }
           figure.append(caption); byId('deckImages').append(figure);
         });
-        byId('deckPrice').textContent = `${I18N.t(priced === total && offset + entries.length >= deck.entries.length ? 'deckEstimate' : 'pricedSubtotal')}: ${priced ? CardPrices.format({ value: subtotal, currency: 'CAD' }, I18N.current) : I18N.t('priceUnavailable')} · ${priced}/${deck.entries.reduce((sum, entry) => sum + entry.quantity, 0)} ${I18N.t('copiesPriced')} · ${I18N.t('representativePrintings')}`;
+        deckPriceState = { subtotal, priced, complete: priced === total && offset + entries.length >= deck.entries.length, total: deck.entries.reduce((sum, entry) => sum + entry.quantity, 0) };
+        renderDeckPrice();
       }
-    } catch (error) { if (!signal.aborted) byId('deckPrice').textContent = I18N.t(error.code || error.message || 'sourceUnavailable'); }
+    } catch (error) { if (!signal.aborted) { deckPriceState = null; I18N.bind(byId('deckPrice'), error.code || error.message || 'sourceUnavailable'); } }
   }
   function compare() {
     const target = byId('comparison'); target.replaceChildren();
@@ -238,18 +253,23 @@ const Competitive = (() => {
       try {
         const parsed = DeckImport.parse(byId('pasteDeck').value, { game: CardData.game });
         if (!parsed.entries.length || parsed.warnings.length) throw new Error('invalidImport');
-        const deck = { id: `local:${Date.now()}`, game: CardData.game, format: byId('importDeckFormat').value, archetype: byId('importDeckName').value || I18N.t('deckName'), entries: parsed.entries, provenance: 'local', source: 'local' };
-        byId('importStatus').textContent = ''; void openDeck(deck);
-      } catch (error) { byId('importStatus').textContent = I18N.t(error.message); }
+        const deck = { id: `local:${Date.now()}`, game: CardData.game, format: byId('importDeckFormat').value, archetype: byId('importDeckName').value, entries: parsed.entries, provenance: 'local', source: 'local' };
+        byId('importStatus').textContent = ''; delete byId('importStatus').dataset.i18n; void openDeck(deck);
+      } catch (error) { I18N.bind(byId('importStatus'), error.message); }
     };
     byId('closeDeck').onclick = () => byId('deckDialog').close();
     byId('deckDialog').addEventListener('close', () => { deckController?.abort(); focusBeforeDeck?.focus(); });
     byId('copyDeck').onclick = async () => {
-      try { await navigator.clipboard.writeText(deckText(currentDeck)); byId('deckCopyStatus').textContent = I18N.t('copied'); }
-      catch { byId('deckCopyStatus').textContent = I18N.t('copyFailed'); }
+      try { await navigator.clipboard.writeText(deckText(currentDeck)); I18N.bind(byId('deckCopyStatus'), 'copied'); }
+      catch { I18N.bind(byId('deckCopyStatus'), 'copyFailed'); }
     };
     byId('printDeck').onclick = () => window.print();
-    window.addEventListener('languageChanged', () => { render(); renderDeck(); });
+    window.addEventListener('languageChanged', () => {
+      setOptions(byId('tournamentFormat'), formats[CardData.game].map(value => [value, value]), true);
+      sourceLink(byId('tournamentSource'), `${I18N.t('source')}: ${CardData.game === 'mtg' ? 'TopDeck.gg' : 'Limitless TCG'}`, CardData.game === 'mtg' ? 'https://topdeck.gg' : 'https://play.limitlesstcg.com');
+      render(); renderDeck();
+      if (byId('comparison').textContent) compare();
+    });
     I18N.updateDOM(); void load();
   }
   document.addEventListener('DOMContentLoaded', init);

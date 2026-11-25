@@ -55,10 +55,10 @@ async function loadCardDetails() {
   const container = document.getElementById('detailContainer');
   const breadcrumb = document.getElementById('breadcrumbCurrent');
   if (!params.get('id') && !params.get('name')) {
-    container.innerHTML = `<div class="detail-loading-state"><h3>${I18N.t('noCardSpecifiedTitle')}</h3><p>${I18N.t('noCardSpecifiedDesc')}</p><a href="index.html" class="btn-primary">${I18N.t('backToHome')}</a></div>`;
+    container.innerHTML = `<div class="detail-loading-state"><h3 data-i18n="noCardSpecifiedTitle">${I18N.t('noCardSpecifiedTitle')}</h3><p data-i18n="noCardSpecifiedDesc">${I18N.t('noCardSpecifiedDesc')}</p><a href="index.html" class="btn-primary" data-i18n="backToHome">${I18N.t('backToHome')}</a></div>`;
     return;
   }
-  container.innerHTML = `<div class="detail-loading-state"><div class="spinner"></div><p>${I18N.t('loadingCardInfo')}</p></div>`;
+  container.innerHTML = `<div class="detail-loading-state"><div class="spinner"></div><p data-i18n="loadingCardInfo">${I18N.t('loadingCardInfo')}</p></div>`;
   try {
     const provider = CardData.provider();
     let result;
@@ -66,12 +66,14 @@ async function loadCardDetails() {
       result = await provider.get(params.get('id'));
     } else result = await provider.named(params.get('name'));
     currentCardData = CardData.toView(result);
+    document.querySelector('title').removeAttribute('data-i18n');
     document.title = `${currentCardData.name} — TEAM SANDWICH`;
     if (breadcrumb) breadcrumb.textContent = currentCardData.name;
     renderCardDetailView(currentCardData);
     void loadAlternateArts();
   } catch (error) {
-    container.innerHTML = `<div class="detail-loading-state"><h3>${I18N.t(error.code || 'sourceUnavailable')}</h3><button type="button" onclick="loadCardDetails()" class="btn-primary">${I18N.t('retry')}</button><button type="button" onclick="goBackOrHome()" class="btn-secondary">${I18N.t('backBtn')}</button></div>`;
+    container.innerHTML = `<div class="detail-loading-state"><h3></h3><button type="button" onclick="loadCardDetails()" class="btn-primary" data-i18n="retry">${I18N.t('retry')}</button><button type="button" onclick="goBackOrHome()" class="btn-secondary" data-i18n="backBtn">${I18N.t('backBtn')}</button></div>`;
+    I18N.bind(container.querySelector('h3'), error.code || 'sourceUnavailable');
   }
 }
 
@@ -176,7 +178,7 @@ function renderCardDetailView(card) {
   const rarityClass = ['common', 'uncommon', 'rare', 'mythic', 'special', 'bonus'].includes(card.rarity) ? card.rarity : 'common';
   const rarityKey = `rarity${rarityClass.charAt(0).toUpperCase() + rarityClass.slice(1)}`;
   const rarityName = card.game === 'pokemon' ? escapeHTML(card.rarity || I18N.t('unavailable'))
-    : I18N.dict.fr[rarityKey] ? I18N.t(rarityKey) : (rarityClass.charAt(0).toUpperCase() + rarityClass.slice(1));
+    : I18N.t(rarityKey);
   const setSvgUri = card.set_uri ? `https://svgs.scryfall.io/sets/${encodeURIComponent(card.set)}.svg` : '';
 
   container.innerHTML = `

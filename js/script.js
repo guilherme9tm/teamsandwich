@@ -127,8 +127,6 @@ function renderHomepageEvents(fmt) {
     ? mockEvents 
     : mockEvents.filter(e => e.format === fmt);
 
-  const isEn = I18N.current !== 'fr';
-
   if (badge) {
     const noun = I18N.t(filtered.length > 1 ? 'eventCountPlural' : 'eventCountSingular');
     badge.textContent = `${filtered.length} ${noun}`;
@@ -154,20 +152,23 @@ function renderHomepageEvents(fmt) {
     grid.innerHTML = `
       <div class="events-list-grid">
         ${filtered.map(event => {
-          const details = isEn ? (event.detailsEn || event.detailsFr) : (event.detailsFr || event.detailsEn);
-          const entry = isEn ? (event.entryEn || event.entryFr) : (event.entryFr || event.entryEn);
+          const kind = ['Standard', 'Pioneer', 'Modern', 'Commander'][event.id - 1];
+          const name = I18N.t(`event${kind}Name`);
+          const details = I18N.t(`event${kind}Details`);
+          const entry = event.id === 4 ? I18N.t('freeEntry') : new Intl.NumberFormat(I18N.current, { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 }).format(event.id === 3 ? 25 : 10);
+          const date = new Date(Date.UTC(2026, event.month === 'JUN' ? 5 : 6, Number(event.day))).toLocaleDateString(I18N.current, { day: 'numeric', month: 'short', timeZone: 'UTC' });
           return `
             <div class="event-card">
               <div class="event-card-media">
-                <img src="${event.img}" alt="${event.name}" class="event-img" onerror="this.src='assets/images/IMG_6262.jpg'">
+                <img src="${event.img}" alt="${name}" class="event-img" onerror="this.src='assets/images/IMG_6262.jpg'">
                 <span class="event-format-chip">${event.format.toUpperCase()}</span>
               </div>
               <div class="event-info">
                 <div class="event-meta-row">
-                  <span class="event-date-badge">${event.date} • ${event.time || '18:00'}</span>
+                  <span class="event-date-badge">${date} • ${event.time || '18:00'}</span>
                   <span class="event-entry-badge">${entry}</span>
                 </div>
-                <h3 class="event-name-title">${event.name}</h3>
+                <h3 class="event-name-title">${name}</h3>
                 <p class="event-location-text">${event.location}</p>
                 <p class="event-desc-text">${details}</p>
               </div>
@@ -229,13 +230,15 @@ function triggerImportFile() {
   }
 }
 
+let popularSetsData = null;
 async function loadPopularSets() {
   const grid = document.getElementById("popularSetsGrid");
   if (!grid) return;
   grid.replaceChildren();
-  const status = document.createElement('p'); status.textContent = I18N.t('loading'); grid.append(status);
+  const status = document.createElement('p'); I18N.bind(status, 'loading'); grid.append(status);
   try {
-    const sets = await CardData.provider().sets();
+    const sets = popularSetsData || await CardData.provider().sets();
+    popularSetsData = sets;
     const relevantTypes = ['expansion', 'core', 'masters', 'draft_innovation'];
     
     const latestSets = sets
@@ -255,10 +258,10 @@ async function loadPopularSets() {
         info.append(title, detail); link.append(code, info); grid.append(link);
       });
     } else {
-      status.textContent = I18N.t('noCollectionsFound');
+      I18N.bind(status, 'noCollectionsFound'); grid.replaceChildren(status);
     }
   } catch (e) {
-    status.textContent = I18N.t(e.code || 'sourceUnavailable');
+    I18N.bind(status, e.code || 'sourceUnavailable');
     const retry = document.createElement('button'); retry.className = 'btn-secondary'; retry.textContent = I18N.t('retry'); retry.onclick = loadPopularSets; grid.append(retry);
   }
 }

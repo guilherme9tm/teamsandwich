@@ -68,7 +68,7 @@ test('wrong password is rejected; correct password creates only a session gate',
   try {
     const input = current.document.getElementById('deckPassword');
     input.value = 'wrong'; submit(current, 'deckLoginForm');
-    assert.match(current.document.getElementById('loginError').textContent, /Senha incorreta/);
+    assert.match(current.document.getElementById('loginError').textContent, /Incorrect password/);
     assert.equal(current.dom.window.sessionStorage.getItem(accessKey), null);
     input.value = 'teamsandwich'; submit(current, 'deckLoginForm');
     assert.equal(current.dom.window.sessionStorage.getItem(accessKey), 'granted');
@@ -87,12 +87,12 @@ test('import, open folder, own two Bolts, reload and retain the missing-two labe
     current.document.querySelector('.deck-box').click();
     const owned = current.document.querySelector('.owned-count');
     owned.value = '2'; owned.dispatchEvent(new current.dom.window.Event('input', { bubbles: true }));
-    assert.equal(current.document.querySelector('.deck-card-status').textContent, '2 de 4 · Faltam 2');
+    assert.equal(current.document.querySelector('.deck-card-status').textContent, '2 of 4 · Missing 2');
     assert.ok(current.document.querySelector('.deck-card.is-missing'));
     const local = { [storageKey]: current.dom.window.localStorage.getItem(storageKey) };
     reopened = page('my-decks.html', { local, query: current.dom.window.location.search });
     assert.equal(reopened.document.querySelector('#deckTitle').textContent, 'Mono Red Burn');
-    assert.equal(reopened.document.querySelector('.deck-card-status').textContent, '2 de 4 · Faltam 2');
+    assert.equal(reopened.document.querySelector('.deck-card-status').textContent, '2 of 4 · Missing 2');
     assert.deepEqual(current.errors, []); assert.deepEqual(reopened.errors, []);
   } finally { current.dom.window.close(); reopened?.dom.window.close(); }
 });
@@ -101,7 +101,7 @@ test('invalid imports cannot save until corrected; main and sideboard own counts
   const current = page();
   try {
     await upload(current, '4 Lightning Bolt\ninvalid\nSideboard\n2 Lightning Bolt');
-    assert.match(current.document.getElementById('importErrors').textContent, /Linha 2: invalid/);
+    assert.match(current.document.getElementById('importErrors').textContent, /Line 2: invalid/);
     assert.equal(current.document.getElementById('saveImport').disabled, true);
     submit(current, 'importForm'); assert.equal(saved(current), null);
     current.document.getElementById('importText').value = '4 Lightning Bolt\nSideboard\n2 Lightning Bolt';
@@ -109,8 +109,8 @@ test('invalid imports cannot save until corrected; main and sideboard own counts
     submit(current, 'importForm'); current.document.querySelector('.deck-box').click();
     const cards = current.document.querySelectorAll('.deck-card'); assert.equal(cards.length, 2);
     cards[0].querySelector('.plus').click();
-    assert.equal(cards[0].querySelector('.deck-card-status').textContent, '1 de 4 · Faltam 3');
-    assert.equal(cards[1].querySelector('.deck-card-status').textContent, '0 de 2 · Faltam 2');
+    assert.equal(cards[0].querySelector('.deck-card-status').textContent, '1 of 4 · Missing 3');
+    assert.equal(cards[1].querySelector('.deck-card-status').textContent, '0 of 2 · Missing 2');
   } finally { current.dom.window.close(); }
 });
 
@@ -123,7 +123,7 @@ test('rename, add, adjust requirements, complete, reject invalid counts and remo
     assert.equal(current.document.querySelector('.deck-box strong').textContent, '<Burn & Friends>');
     change(current, current.document.querySelector('.required-count'), '2');
     change(current, current.document.querySelector('.owned-count'), '2');
-    assert.equal(current.document.querySelector('.deck-card-status').textContent, '2 de 2 · Completa');
+    assert.equal(current.document.querySelector('.deck-card-status').textContent, '2 of 2 · Complete');
     assert.equal(current.document.querySelector('.is-missing'), null);
     change(current, current.document.querySelector('.owned-count'), '-1');
     assert.equal(saved(current).decks[0].cards[0].owned, 2);
@@ -139,7 +139,7 @@ test('unavailable catalog and images leave names, counts and edits usable', asyn
   try {
     await upload(current, '4 Lightning Bolt'); submit(current, 'importForm'); current.document.querySelector('.deck-box').click();
     await new Promise(resolve => setTimeout(resolve, 30));
-    assert.match(current.document.querySelector('.deck-image-fallback').textContent, /Imagem indisponível/);
+    assert.match(current.document.querySelector('.deck-image-fallback').textContent, /Image unavailable/);
     assert.equal(current.document.querySelector('.deck-card h3').textContent, 'Lightning Bolt');
     change(current, current.document.querySelector('.owned-count'), '2');
     assert.equal(saved(current).decks[0].cards[0].owned, 2);
@@ -175,7 +175,7 @@ test('deleting a deck requires confirmation, preserves other decks and persists 
     reopened.dom.window.confirm = () => true;
     reopened.document.getElementById('deleteDeck').click();
     assert.deepEqual(saved(reopened).decks, []);
-    assert.match(reopened.document.getElementById('deckBoxes').textContent, /Nenhum deck salvo/);
+    assert.match(reopened.document.getElementById('deckBoxes').textContent, /No saved decks/);
     assert.equal(reopened.document.getElementById('deckTitle'), null);
     assert.deepEqual(current.errors, []); assert.deepEqual(reopened.errors, []);
   } finally { current.dom.window.close(); reopened?.dom.window.close(); }
@@ -190,9 +190,69 @@ test('storage quota failure is visible and corrupt saved data is preserved', asy
       if (key === storageKey) throw new Error('Quota exceeded'); return native.call(this, key, value);
     };
     submit(current, 'importForm');
-    assert.match(current.document.getElementById('saveStatus').textContent, /apenas nesta página/);
+    assert.match(current.document.getElementById('saveStatus').textContent, /only exist on this page/);
     assert.equal(current.dom.window.localStorage.getItem(storageKey), null);
     assert.equal(corrupt.document.getElementById('importDeck').disabled, true);
     assert.equal(corrupt.dom.window.localStorage.getItem(storageKey), 'broken json');
   } finally { current.dom.window.close(); corrupt.dom.window.close(); }
+});
+
+test('login restores all supported languages and translates existing validation without clearing the password', () => {
+  const labels = { en: 'My Decks', pt: 'Meus Decks', es: 'Mis mazos', fr: 'Mes decks', de: 'Meine Decks' };
+  for (const [lang, label] of Object.entries(labels)) {
+    const current = page('login.html', { authenticated: false, local: { lang } });
+    try {
+      assert.equal(current.document.documentElement.lang, lang);
+      assert.equal(current.document.querySelector('h1').textContent, label);
+      const input = current.document.getElementById('deckPassword');
+      input.value = 'wrong'; submit(current, 'deckLoginForm');
+      input.value = 'draft password';
+      const select = current.document.querySelector('.lang-selector-select');
+      change(current, select, 'pt');
+      assert.equal(current.document.getElementById('loginError').textContent, 'Senha incorreta. Tente novamente.');
+      assert.equal(input.value, 'draft password');
+      assert.equal(select.options.length, 5);
+      assert.equal(current.document.title, 'Entrar · Meus Decks — Team Sandwich');
+      assert.deepEqual(current.errors, []);
+    } finally { current.dom.window.close(); }
+  }
+});
+
+test('deck language changes preserve drafts, selected deck, quantities and import errors across tabs and reloads', async () => {
+  const current = page('my-decks.html', { local: { lang: 'pt' } }); let reopened;
+  try {
+    await upload(current, '4 Lightning Bolt'); submit(current, 'importForm');
+    current.document.querySelector('.deck-box').click();
+    const owned = current.document.querySelector('.owned-count');
+    change(current, owned, '2');
+    const name = current.document.getElementById('deckName'); name.value = 'Unsaved name';
+    current.document.getElementById('addName').value = 'Island';
+    await upload(current, '4 Lightning Bolt\ninvalid');
+    const before = current.dom.window.localStorage.getItem(storageKey);
+    const select = current.document.querySelector('.lang-selector-select');
+    change(current, select, 'es');
+    assert.equal(current.document.documentElement.lang, 'es');
+    assert.equal(current.document.querySelector('.deck-card-status').textContent, '2 de 4 · Faltan 2');
+    assert.match(current.document.getElementById('importErrors').textContent, /Línea 2: invalid/);
+    assert.equal(current.document.querySelector('.owned-count'), owned);
+    assert.equal(name.value, 'Unsaved name');
+    assert.equal(current.document.getElementById('addName').value, 'Island');
+    assert.equal(current.document.getElementById('importDialog').open, true);
+    assert.equal(current.dom.window.localStorage.getItem(storageKey), before);
+    current.dom.window.localStorage.setItem('lang', 'de');
+    current.dom.window.dispatchEvent(new current.dom.window.StorageEvent('storage', { key: 'lang', newValue: 'de' }));
+    assert.equal(current.document.querySelector('h1').textContent, 'Meine Decks');
+    assert.equal(current.document.querySelector('.owned-count').getAttribute('aria-label'), 'Exemplare im Besitz von Lightning Bolt');
+    assert.equal(current.document.querySelector('.deck-card-status').textContent, '2 von 4 · 2 fehlen');
+    assert.equal(name.value, 'Unsaved name');
+    reopened = page('my-decks.html', { local: { lang: 'de', [storageKey]: before }, query: current.dom.window.location.search });
+    assert.equal(reopened.document.querySelector('h1').textContent, 'Meine Decks');
+    assert.equal(reopened.document.querySelector('.owned-count').value, '2');
+    assert.equal(reopened.document.querySelector('.deck-card-status').textContent, '2 von 4 · 2 fehlen');
+    current.dom.window.localStorage.setItem('lang', 'fr');
+    current.dom.window.dispatchEvent(new current.dom.window.PageTransitionEvent('pageshow', { persisted: true }));
+    assert.equal(current.document.querySelector('h1').textContent, 'Mes decks');
+    assert.equal(select.value, 'fr');
+    assert.deepEqual(current.errors, []); assert.deepEqual(reopened.errors, []);
+  } finally { current.dom.window.close(); reopened?.dom.window.close(); }
 });

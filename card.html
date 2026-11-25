@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Résultats — Team Sandwich</title>
-  <meta name="description" content="Résultats de recherche de cartes MTG">
+  <title data-i18n="catalogPageTitle">Résultats — Team Sandwich</title>
+  <meta name="description" data-i18n-content="siteDescription" content="Résultats de recherche de cartes MTG">
   <link rel="icon" href="assets/icons/favicon.ico">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,7 +25,7 @@
   <div class="main-layout" id="mainLayout">
 
     <header class="header" id="header">
-      <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleSidebarMobile()" aria-label="Open menu">
+      <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleSidebarMobile()" data-i18n-aria="openMenu" aria-label="Open menu">
         <span></span><span></span><span></span>
       </button>
 
@@ -36,8 +36,8 @@
       <div class="header-search-container">
         <div class="search-input-wrapper">
           <input type="text" id="headerSearchInput" class="search-input" data-i18n="searchPlaceholder" placeholder="Rechercher une carte, collection, numéro...">
-          <button class="search-clear-btn" id="searchClearBtn" onclick="clearHeaderSearch()">&times;</button>
-          <button class="search-btn" id="searchSubmitBtn" onclick="submitHeaderSearch()">
+          <button data-i18n-aria="clear" class="search-clear-btn" id="searchClearBtn" onclick="clearHeaderSearch()">&times;</button>
+          <button data-i18n-aria="search" class="search-btn" id="searchSubmitBtn" onclick="submitHeaderSearch()">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
           </button>
         </div>
@@ -47,7 +47,7 @@
       <div class="header-spacer"></div>
 
       <div class="lang-selector">
-        <select class="lang-selector-select" aria-label="Language">
+        <select class="lang-selector-select" data-i18n-aria="languageLabel" aria-label="Language">
           <option value="fr">FR</option>
           <option value="en">EN</option>
         </select>
@@ -61,7 +61,7 @@
 
     <section class="search-info" id="searchInfo">
       <div class="search-info-header">
-        <a href="index.html" class="back-btn" aria-label="Retour à l'accueil" title="Accueil">
+        <a href="index.html" class="back-btn" data-i18n-aria="backToHome" data-i18n-title="home" title="Accueil">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
         </a>
         <div class="search-title-group">
@@ -109,13 +109,13 @@
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
           </button>
           <div class="filter-dropdown-menu">
-            <label class="filter-checkbox"><input type="checkbox" value="W" onchange="updateFilters()"><img src="https://svgs.scryfall.io/card-symbols/W.svg" alt="White" class="mana-symbol-icon"><span data-i18n="colorWhite">Blanc</span></label>
-            <label class="filter-checkbox"><input type="checkbox" value="U" onchange="updateFilters()"><img src="https://svgs.scryfall.io/card-symbols/U.svg" alt="Blue" class="mana-symbol-icon"><span data-i18n="colorBlue">Bleu</span></label>
-            <label class="filter-checkbox"><input type="checkbox" value="B" onchange="updateFilters()"><img src="https://svgs.scryfall.io/card-symbols/B.svg" alt="Black" class="mana-symbol-icon"><span data-i18n="colorBlack">Noir</span></label>
-            <label class="filter-checkbox"><input type="checkbox" value="R" onchange="updateFilters()"><img src="https://svgs.scryfall.io/card-symbols/R.svg" alt="Red" class="mana-symbol-icon"><span data-i18n="colorRed">Rouge</span></label>
-            <label class="filter-checkbox"><input type="checkbox" value="G" onchange="updateFilters()"><img src="https://svgs.scryfall.io/card-symbols/G.svg" alt="Green" class="mana-symbol-icon"><span data-i18n="colorGreen">Vert</span></label>
-            <label class="filter-checkbox"><input type="checkbox" value="C" onchange="updateFilters()"><img src="https://svgs.scryfall.io/card-symbols/C.svg" alt="Colorless" class="mana-symbol-icon"><span data-i18n="colorColorless">Incolore</span></label>
-            <label class="filter-checkbox"><input type="checkbox" value="M" onchange="updateFilters()"><img src="https://svgs.scryfall.io/card-symbols/WU.svg" alt="Multicolor" class="mana-symbol-icon"><span data-i18n="colorMulticolor">Multicolore</span></label>
+            <label class="filter-checkbox"><input type="checkbox" value="W" onchange="updateFilters()"><img src="https://svgs.scryfall.io/card-symbols/W.svg" data-i18n-alt="colorWhite" alt="White" class="mana-symbol-icon"><span data-i18n="colorWhite">Blanc</span></label>
+            <label class="filter-checkbox"><input type="checkbox" value="U" onchange="updateFilters()"><img src="https://svgs.scryfall.io/card-symbols/U.svg" data-i18n-alt="colorBlue" alt="Blue" class="mana-symbol-icon"><span data-i18n="colorBlue">Bleu</span></label>
+            <label class="filter-checkbox"><input type="checkbox" value="B" onchange="updateFilters()"><img src="https://svgs.scryfall.io/card-symbols/B.svg" data-i18n-alt="colorBlack" alt="Black" class="mana-symbol-icon"><span data-i18n="colorBlack">Noir</span></label>
+            <label class="filter-checkbox"><input type="checkbox" value="R" onchange="updateFilters()"><img src="https://svgs.scryfall.io/card-symbols/R.svg" data-i18n-alt="colorRed" alt="Red" class="mana-symbol-icon"><span data-i18n="colorRed">Rouge</span></label>
+            <label class="filter-checkbox"><input type="checkbox" value="G" onchange="updateFilters()"><img src="https://svgs.scryfall.io/card-symbols/G.svg" data-i18n-alt="colorGreen" alt="Green" class="mana-symbol-icon"><span data-i18n="colorGreen">Vert</span></label>
+            <label class="filter-checkbox"><input type="checkbox" value="C" onchange="updateFilters()"><img src="https://svgs.scryfall.io/card-symbols/C.svg" data-i18n-alt="colorColorless" alt="Colorless" class="mana-symbol-icon"><span data-i18n="colorColorless">Incolore</span></label>
+            <label class="filter-checkbox"><input type="checkbox" value="M" onchange="updateFilters()"><img src="https://svgs.scryfall.io/card-symbols/WU.svg" data-i18n-alt="colorMulticolor" alt="Multicolor" class="mana-symbol-icon"><span data-i18n="colorMulticolor">Multicolore</span></label>
           </div>
         </div>
 
@@ -149,13 +149,13 @@
       </button>
 
       <div class="layout-toggles">
-        <button class="layout-toggle-btn active" data-layout="auto" onclick="setGridLayout('auto')" title="Auto">
+        <button class="layout-toggle-btn active" data-layout="auto" onclick="setGridLayout('auto')" data-i18n-title="layoutAuto" title="Auto">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="0" y="0" width="4.5" height="4.5" rx="1"/><rect x="5.75" y="0" width="4.5" height="4.5" rx="1"/><rect x="11.5" y="0" width="4.5" height="4.5" rx="1"/><rect x="0" y="5.75" width="4.5" height="4.5" rx="1"/><rect x="5.75" y="5.75" width="4.5" height="4.5" rx="1"/><rect x="11.5" y="5.75" width="4.5" height="4.5" rx="1"/><rect x="0" y="11.5" width="4.5" height="4.5" rx="1"/><rect x="5.75" y="11.5" width="4.5" height="4.5" rx="1"/><rect x="11.5" y="11.5" width="4.5" height="4.5" rx="1"/></svg>
         </button>
-        <button class="layout-toggle-btn" data-layout="grid-2" onclick="setGridLayout('grid-2')" title="2 colonnes">
+        <button class="layout-toggle-btn" data-layout="grid-2" onclick="setGridLayout('grid-2')" data-i18n-title="layoutTwoColumns" title="2 colonnes">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="0" y="0" width="7" height="7" rx="1"/><rect x="9" y="0" width="7" height="7" rx="1"/><rect x="0" y="9" width="7" height="7" rx="1"/><rect x="9" y="9" width="7" height="7" rx="1"/></svg>
         </button>
-        <button class="layout-toggle-btn" data-layout="grid-list" onclick="setGridLayout('grid-list')" title="Liste">
+        <button class="layout-toggle-btn" data-layout="grid-list" onclick="setGridLayout('grid-list')" data-i18n-title="layoutList" title="Liste">
           <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><rect x="0" y="0" width="16" height="3" rx="1"/><rect x="0" y="4.33" width="16" height="3" rx="1"/><rect x="0" y="8.66" width="16" height="3" rx="1"/><rect x="0" y="13" width="16" height="3" rx="1"/></svg>
         </button>
       </div>
@@ -163,7 +163,7 @@
 
     <div class="active-filters-strip" id="activeFiltersStrip" style="display:none;">
       <span class="active-filters-text" id="activeFiltersText"></span>
-      <button class="active-filters-clear" onclick="clearAllFilters()">✕</button>
+      <button data-i18n-aria="clearFilters" class="active-filters-clear" onclick="clearAllFilters()">✕</button>
     </div>
 
     <section class="pagination-bar" id="paginationBar">
@@ -196,7 +196,7 @@
 <div class="filter-drawer" id="filterDrawer">
   <div class="filter-drawer-header">
     <h3 data-i18n="filters">Filtres</h3>
-    <button class="filter-drawer-close" onclick="closeFilterDrawer()">&times;</button>
+    <button data-i18n-aria="close" class="filter-drawer-close" onclick="closeFilterDrawer()">&times;</button>
   </div>
   <div class="filter-drawer-body">
     
@@ -225,13 +225,13 @@
     <div class="filter-drawer-section">
       <h4 data-i18n="filterByColor">Couleur</h4>
       <div class="filter-drawer-options">
-        <label class="filter-checkbox"><input type="checkbox" value="W" onchange="updateFilters()"><img src="https://svgs.scryfall.io/card-symbols/W.svg" alt="White" class="mana-symbol-icon"><span data-i18n="colorWhite">Blanc</span></label>
-        <label class="filter-checkbox"><input type="checkbox" value="U" onchange="updateFilters()"><img src="https://svgs.scryfall.io/card-symbols/U.svg" alt="Blue" class="mana-symbol-icon"><span data-i18n="colorBlue">Bleu</span></label>
-        <label class="filter-checkbox"><input type="checkbox" value="B" onchange="updateFilters()"><img src="https://svgs.scryfall.io/card-symbols/B.svg" alt="Black" class="mana-symbol-icon"><span data-i18n="colorBlack">Noir</span></label>
-        <label class="filter-checkbox"><input type="checkbox" value="R" onchange="updateFilters()"><img src="https://svgs.scryfall.io/card-symbols/R.svg" alt="Red" class="mana-symbol-icon"><span data-i18n="colorRed">Rouge</span></label>
-        <label class="filter-checkbox"><input type="checkbox" value="G" onchange="updateFilters()"><img src="https://svgs.scryfall.io/card-symbols/G.svg" alt="Green" class="mana-symbol-icon"><span data-i18n="colorGreen">Vert</span></label>
-        <label class="filter-checkbox"><input type="checkbox" value="C" onchange="updateFilters()"><img src="https://svgs.scryfall.io/card-symbols/C.svg" alt="Colorless" class="mana-symbol-icon"><span data-i18n="colorColorless">Incolore</span></label>
-        <label class="filter-checkbox"><input type="checkbox" value="M" onchange="updateFilters()"><img src="https://svgs.scryfall.io/card-symbols/WU.svg" alt="Multicolor" class="mana-symbol-icon"><span data-i18n="colorMulticolor">Multicolore</span></label>
+        <label class="filter-checkbox"><input type="checkbox" value="W" onchange="updateFilters()"><img src="https://svgs.scryfall.io/card-symbols/W.svg" data-i18n-alt="colorWhite" alt="White" class="mana-symbol-icon"><span data-i18n="colorWhite">Blanc</span></label>
+        <label class="filter-checkbox"><input type="checkbox" value="U" onchange="updateFilters()"><img src="https://svgs.scryfall.io/card-symbols/U.svg" data-i18n-alt="colorBlue" alt="Blue" class="mana-symbol-icon"><span data-i18n="colorBlue">Bleu</span></label>
+        <label class="filter-checkbox"><input type="checkbox" value="B" onchange="updateFilters()"><img src="https://svgs.scryfall.io/card-symbols/B.svg" data-i18n-alt="colorBlack" alt="Black" class="mana-symbol-icon"><span data-i18n="colorBlack">Noir</span></label>
+        <label class="filter-checkbox"><input type="checkbox" value="R" onchange="updateFilters()"><img src="https://svgs.scryfall.io/card-symbols/R.svg" data-i18n-alt="colorRed" alt="Red" class="mana-symbol-icon"><span data-i18n="colorRed">Rouge</span></label>
+        <label class="filter-checkbox"><input type="checkbox" value="G" onchange="updateFilters()"><img src="https://svgs.scryfall.io/card-symbols/G.svg" data-i18n-alt="colorGreen" alt="Green" class="mana-symbol-icon"><span data-i18n="colorGreen">Vert</span></label>
+        <label class="filter-checkbox"><input type="checkbox" value="C" onchange="updateFilters()"><img src="https://svgs.scryfall.io/card-symbols/C.svg" data-i18n-alt="colorColorless" alt="Colorless" class="mana-symbol-icon"><span data-i18n="colorColorless">Incolore</span></label>
+        <label class="filter-checkbox"><input type="checkbox" value="M" onchange="updateFilters()"><img src="https://svgs.scryfall.io/card-symbols/WU.svg" data-i18n-alt="colorMulticolor" alt="Multicolor" class="mana-symbol-icon"><span data-i18n="colorMulticolor">Multicolore</span></label>
       </div>
     </div>
     
@@ -251,7 +251,7 @@
   </div>
   <div class="filter-drawer-footer">
     <button class="btn-secondary" onclick="clearAllFilters()" data-i18n="clearFilters">Effacer les filtres</button>
-    <button class="btn-primary" onclick="closeFilterDrawer()">OK</button>
+    <button class="btn-primary" onclick="closeFilterDrawer()" data-i18n="apply">OK</button>
   </div>
 </div>
 

@@ -8,9 +8,7 @@ document.getElementById('deckLoginForm').addEventListener('submit', event => {
     window.location.replace('my-decks.html');
     return;
   }
-  document.getElementById('loginError').textContent = correct
-    ? 'Permita o armazenamento da sessão neste navegador para entrar.'
-    : 'Senha incorreta. Tente novamente.';
+  I18N.bind(document.getElementById('loginError'), correct ? 'loginStorageBlocked' : 'wrongPassword');
   input.setAttribute('aria-invalid', 'true');
   input.value = '';
   input.focus();
