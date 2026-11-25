@@ -27,3 +27,18 @@ const AppStorage = (() => {
   }
   return { local: storage('localStorage'), session: storage('sessionStorage') };
 })();
+
+// Local demonstration gate only; shared deployments must authenticate on a server.
+const DeckAccess = (() => {
+  const key = 'teamSandwich.deckAccess.v1';
+  return {
+    allowed: () => AppStorage.session.getItem(key) === 'granted',
+    login(password) {
+      if (password !== 'teamsandwich') return false;
+      const saved = AppStorage.session.setItem(key, 'granted');
+      if (!saved) AppStorage.session.removeItem(key);
+      return saved;
+    },
+    logout: () => AppStorage.session.removeItem(key)
+  };
+})();

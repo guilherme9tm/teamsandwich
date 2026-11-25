@@ -12,6 +12,12 @@ function gameUrl(path, params = {}) {
 function initGameNavigation() {
   const header = document.querySelector('.header');
   if (!header) return;
+  if (!document.getElementById('headerUserActions')) {
+    const actions = document.createElement('div');
+    actions.id = 'headerUserActions';
+    actions.className = 'user-actions';
+    header.append(actions);
+  }
   const group = document.createElement('div');
   group.className = 'game-selector';
   group.setAttribute('role', 'group');
@@ -595,21 +601,11 @@ function clearHeaderSearch() {
 }
 
 function openLoginModal() {
-  closeAuthModals();
-  closeSidebarDrawer();
-  const modal = document.getElementById('loginModal');
-  const overlay = document.getElementById('authModalOverlay');
-  if (modal) modal.classList.add('visible');
-  if (overlay) overlay.classList.add('visible');
+  window.location.href = DeckAccess.allowed() ? 'my-decks.html' : 'login.html';
 }
 
 function openSignupModal() {
-  closeAuthModals();
-  closeSidebarDrawer();
-  const modal = document.getElementById('signupModal');
-  const overlay = document.getElementById('authModalOverlay');
-  if (modal) modal.classList.add('visible');
-  if (overlay) overlay.classList.add('visible');
+  openLoginModal();
 }
 
 function closeAuthModals() {
@@ -622,42 +618,30 @@ function switchToSignup(e) { e && e.preventDefault(); closeAuthModals(); openSig
 function switchToLogin(e) { e && e.preventDefault(); closeAuthModals(); openLoginModal(); }
 
 function handleLoginSubmit(e) {
-  // Existing demo account only. Real password validation requires the deferred backend.
   e.preventDefault();
-  const email = document.getElementById('loginEmail').value;
-  AppStorage.local.setItem('user', JSON.stringify({ email, username: email.split('@')[0] }));
-  document.getElementById('loginPassword').value = '';
-  closeAuthModals();
-  updateUserUI();
+  openLoginModal();
 }
 
 function handleSignupSubmit(e) {
   e.preventDefault();
-  const username = document.getElementById('signupUsername').value;
-  const email = document.getElementById('signupEmail').value;
-  AppStorage.local.setItem('user', JSON.stringify({ email, username }));
-  document.getElementById('signupPassword').value = '';
-  closeAuthModals();
-  updateUserUI();
+  openLoginModal();
 }
 
 function updateUserUI() {
   const userActions = document.getElementById('headerUserActions');
   const sidebarActions = document.getElementById('sidebarUserActions');
-  const storedUser = AppStorage.local.readJSON('user', null);
-  const user = typeof storedUser?.username === 'string' && typeof storedUser?.email === 'string' ? storedUser : null;
+  const user = DeckAccess.allowed();
 
   const renderAuth = (container) => {
     if (!container) return;
     if (user) {
       container.innerHTML = `
-        <span class="user-greeting">${escapeHTML(user.username)}</span>
+        <a class="btn-login-header" href="my-decks.html">Meus Decks</a>
         <button class="btn-logout-header" onclick="logoutUser()" data-i18n="logout">${I18N.t('logout')}</button>
       `;
     } else {
       container.innerHTML = `
-        <button class="btn-login-header" onclick="openLoginModal()" data-i18n="login">${I18N.t('login')}</button>
-        <button class="btn-signup-header" onclick="openSignupModal()" data-i18n="signup">${I18N.t('signup')}</button>
+        <a class="btn-login-header" href="login.html">Login</a>
       `;
     }
   };
@@ -667,8 +651,10 @@ function updateUserUI() {
 }
 
 function logoutUser() {
+  DeckAccess.logout();
   AppStorage.local.removeItem('user');
   updateUserUI();
+  if (window.location.pathname.endsWith('/my-decks.html')) window.location.replace('login.html');
 }
 
 function initLangSelector() {

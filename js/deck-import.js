@@ -2,7 +2,7 @@ const DeckImport = (() => {
   const MAX_ENTRIES = 1000;
   const MAX_QUANTITY = 1000;
 
-  function parse(text, { game = 'mtg' } = {}) {
+  function parse(text, { game = 'mtg', requireQuantity = false } = {}) {
     if (text.length > 256000) throw new Error('importTooLarge');
     let section = 'main';
     const entries = new Map();
@@ -22,6 +22,7 @@ const DeckImport = (() => {
       if (/^SB\s*:/i.test(line)) { cardSection = 'sideboard'; line = line.replace(/^SB\s*:\s*/i, ''); }
       if (cardSection === 'ignored') continue;
       const match = line.match(/^(\d+)\s*x?\s+(.+)$/i) || line.match(/^(\d+)x\s*(.+)$/i);
+      if (requireQuantity && !match) { warnings.push(index + 1); continue; }
       const quantity = match ? Number(match[1]) : 1;
       let name = (match ? match[2] : line).replace(/\s+\*(?:F|E)\*\s*$/i, '').trim();
       let set = null;

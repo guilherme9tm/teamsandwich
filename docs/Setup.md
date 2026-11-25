@@ -42,6 +42,7 @@ Esse modo não disponibiliza o proxy TopDeck. Não execute ambos os servidores n
 
 Entradas úteis:
 
+- `login.html`: acesso a Meus Decks com `teamsandwich`; [teste e persistência local](MeusDecks.md).
 - `card.html`: catálogo automático de Magic.
 - `card.html?game=pokemon&name=Pikachu`: pesquisa Pokémon.
 - `card.html?view=lands`: catálogo especializado de terrenos.

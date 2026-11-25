@@ -1,5 +1,9 @@
 # Team Sandwich — MTG Card Fetcher
 
+## Meus Decks — protótipo local
+
+Entre pelo **Login** com `teamsandwich`, importe um `.txt`, abra a caixa do deck e ajuste as cópias possuídas. Os decks e as alterações ficam no `localStorage` deste navegador (`teamSandwich.myDecks.v1`); não há sincronização entre dispositivos. O acesso usa uma sessão local de demonstração. Consulte o [guia de teste e persistência](docs/MeusDecks.md).
+
 ## Atualização TCG — 18/11/2026
 
 O projeto mantém HTML/CSS/JavaScript puro e agora inclui catálogo automático Magic/Pokémon, preços identificados por impressão/moeda, cinco idiomas, 14 ciclos de terrenos e a página `competitive.html` com torneios, decklists e análise de frequência.
@@ -69,6 +73,6 @@ Le site reste entièrement statique, sans backend ni installation de dépendance
 
 `js/card-data.js` centralise les appels Scryfall, le cache, les limites de concurrence et la normalisation. `js/deck-import.js` analyse les listes; `js/card-search.js` gère le chargement progressif; `js/card-arts.js` gère la galerie. Les libellés sont disponibles en français et en anglais.
 
-Le compte utilisateur actuel reste une démonstration locale : il ne valide pas les mots de passe. L'authentification réelle et le renouvellement sécurisé des sessions sont reportés avec le backend.
+L'accès à Meus Decks vérifie désormais le mot de passe général du prototype dans le navigateur. Ce verrou local ne remplace pas une authentification serveur ; voir [Meus Decks](docs/MeusDecks.md).
 
 La [couverture des exigences](docs/melhorias.md) ainsi que la [recherche de sources pour les autres TCGs](docs/fontes-tcg.md) sont documentées en portugais.

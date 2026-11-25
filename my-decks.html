@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Meus Decks — Team Sandwich</title>
+  <link rel="icon" href="assets/icons/favicon.ico">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/my-decks.css">
+</head>
+<body class="decks-page">
+  <header class="header decks-header">
+    <a href="index.html" class="logo-link-header"><img src="assets/images/IMG_6262.jpg" alt="Team Sandwich" class="header-logo" width="2548" height="1004"></a>
+    <a href="index.html">← Voltar ao site</a>
+    <button id="deckLogout" class="deck-button" type="button">Sair</button>
+  </header>
+  <main id="decksWorkspace" class="decks-workspace" hidden>
+    <div class="decks-topbar">
+      <div><p class="deck-eyebrow">MAGIC: THE GATHERING</p><h1>Meus <span>Decks</span></h1></div>
+      <button id="importDeck" class="deck-button primary" type="button">↑ Importar deck <small>.txt</small></button>
+      <input id="deckFile" type="file" accept=".txt,text/plain" hidden>
+    </div>
+    <p class="deck-note">Salvo neste navegador · As alterações são salvas automaticamente.</p>
+    <p id="saveStatus" role="status" aria-live="polite"></p>
+    <div class="decks-layout">
+      <aside class="deck-library" aria-label="Decks salvos"><h2>Sua biblioteca</h2><div id="deckBoxes" class="deck-boxes"></div></aside>
+      <section id="deckDetail" class="deck-detail" aria-label="Lista do deck">
+        <div class="deck-empty"><div class="deck-stack-icon" aria-hidden="true">TS</div><h2>Seu próximo deck começa aqui</h2><p>Importe uma lista .txt ou abra uma caixa da sua biblioteca.</p></div>
+      </section>
+    </div>
+  </main>
+  <dialog id="importDialog" class="deck-dialog" aria-labelledby="importTitle">
+    <form id="importForm">
+      <div class="deck-row"><h2 id="importTitle">Importar deck</h2><button id="cancelImport" class="deck-button" type="button" aria-label="Fechar importação">×</button></div>
+      <label for="importName">Nome do deck</label><input id="importName" maxlength="100" required>
+      <label for="importText">Lista de cartas</label><textarea id="importText" rows="10" spellcheck="false" required aria-describedby="importHelp importErrors"></textarea>
+      <p id="importHelp" class="deck-note">Uma carta por linha: 4 Lightning Bolt. Use “Sideboard” para iniciar a reserva. Você pode corrigir a lista aqui.</p>
+      <div id="importErrors" class="deck-error" role="status" aria-live="polite"></div>
+      <button id="saveImport" class="deck-button primary" type="submit">Salvar deck</button>
+    </form>
+  </dialog>
+  <script src="js/storage.js"></script>
+  <script src="js/card-data.js"></script>
+  <script src="js/deck-import.js"></script>
+  <script src="js/my-decks.js"></script>
+</body>
+</html>
