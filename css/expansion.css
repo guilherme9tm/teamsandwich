@@ -21,7 +21,7 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .logo-link-header { gap: 10px; order: 1; }
 .header-logo { display: block; width: auto; height: 44px; object-fit: contain; }
 .hamburger-btn { order: 0; width: 34px; height: 36px; border-color: var(--border-subtle); background: transparent; }
-.header-search-container { order: 3; margin: 0; min-width: 120px; max-width: 620px; flex: 1 1 240px; }
+.header-search-container { order: 3; margin: 0; min-width: 160px; max-width: none; flex: 1 1 240px; }
 .search-input-wrapper { height: 42px; background: var(--bg-primary); border: 1px solid var(--border-medium); border-radius: 9px; box-shadow: none; padding-left: 14px; }
 .search-input-wrapper:hover, .search-input-wrapper:focus-within { background: var(--bg-elevated); border-color: var(--border-strong); box-shadow: none; }
 .search-input, .search-input::placeholder { font-size: 13px; letter-spacing: 0; }
@@ -37,8 +37,12 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 }
 .game-selector button:hover { color: var(--text-primary); }
 .game-selector button[aria-pressed="true"] { background: rgba(126, 164, 143, 0.082); color: var(--accent); box-shadow: inset 0 0 0 1px rgba(126, 164, 143, 0.149); }
-.header .lang-selector, .header > .lang-selector-select { order: 4; flex-shrink: 0; }
-.header .user-actions { order: 5; gap: 8px; }
+.header .header-actions-right { order: 4; display: flex; align-items: center; gap: 16px; margin-left: auto; flex-shrink: 0; }
+.header .header-actions-right .lang-selector, .header .header-actions-right > .lang-selector-select { flex-shrink: 0; }
+.header .user-actions { display: flex !important; align-items: center; flex-wrap: nowrap; gap: 8px; padding-left: 16px; border-left: 1px solid var(--border-medium); }
+.header .user-actions > a, .header .user-actions > button, .header .lang-selector-select { display: inline-flex; align-items: center; justify-content: center; min-height: 42px; box-sizing: border-box; font-size: 12px; line-height: 1.2; white-space: nowrap; }
+.header .btn-login-header { background: var(--bg-elevated); color: var(--text-primary); }
+.header .btn-logout-header { padding: 8px 12px; border-radius: 7px; }
 .lang-selector-select { padding: 8px 10px; width: 100px; border-radius: 7px; border: 1px solid var(--border-medium); background: transparent; color: var(--text-secondary); font-size: 12px; }
 .btn-login-header, .btn-signup-header { box-shadow: none; font-size: 12px; padding: 8px 12px; border-radius: 7px; }
 .btn-signup-header { background: var(--accent); color: var(--bg-primary); border-color: var(--accent); }
@@ -225,7 +229,14 @@ dialog::backdrop { background: rgba(10, 14, 11, .85); backdrop-filter: blur(3px)
 .demo-notice { padding: 12px 18px; border-left: 2px solid var(--accent); background: var(--bg-card); color: var(--text-muted); font-size: 12px; }
 @media (max-width: 1240px) {
   .header { gap: 14px; padding-inline: 24px; }
-  .header .user-actions { display: none; }
+  .header .header-actions-right { gap: 10px; }
+  .header .user-actions { padding-left: 10px; }
+}
+@media (min-width: 761px) and (max-width: 1100px) {
+  .header { flex-wrap: wrap; }
+  .header .header-actions-right { order: 2; }
+  .header .game-selector { order: 3; }
+  .header .header-search-container { order: 4; }
 }
 @media (max-width: 1000px) {
   .hero-section { grid-template-columns: 1fr; padding: 34px; }
@@ -240,12 +251,15 @@ dialog::backdrop { background: rgba(10, 14, 11, .85); backdrop-filter: blur(3px)
   .deck-tools-grid { grid-template-columns: 1fr; }
   .workspace-tabs { gap: 20px; }
   .workspace-tabs button { font-size: 12px; }
-  .header { flex-wrap: wrap; gap: 10px; padding: 12px 18px; min-height: 0; }
-  .header-logo { height: 36px; }
-  .header-search-container { order: 6; flex: 1 1 100%; max-width: none; margin: 0; }
-  .game-selector { margin-left: auto; }
+  .header { flex-wrap: wrap; gap: 8px; padding: 12px; min-height: 0; }
+  .header-logo { height: 32px; }
+  .header-search-container { order: 4; flex: 1 1 100%; max-width: none; margin: 0; }
+  .header .header-actions-right { order: 2; gap: 8px; }
+  .header .user-actions { display: flex !important; padding-left: 0; border-left: 0; gap: 6px; }
+  .header .user-actions > a, .header .user-actions > button { min-height: 38px; padding: 8px 10px; font-size: 11px; }
+  .game-selector { order: 3; flex: 1 1 100%; justify-content: center; margin-left: 0; }
   .game-selector button { font-size: 11px; padding: 8px 9px; }
-  .header > .lang-selector-select { width: 85px; margin-left: auto; }
+  .header .header-actions-right > .lang-selector-select { width: 85px; }
   .catalog-nav { min-height: 44px; padding-inline: 18px; }
   .catalog-nav-links { width: 100%; justify-content: space-between; gap: 12px; }
   .catalog-nav a { min-height: 44px; font-size: 11px; }

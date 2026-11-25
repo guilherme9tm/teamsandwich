@@ -11,6 +11,7 @@ Inicie com `npm start` e abra `http://127.0.0.1:5500`. Também funciona em um se
 5. Salve, abra a caixa do deck e altere **Possuídas** para `2` (ou clique duas vezes em `+`). A carta deve ficar vermelha com **2 de 4 · Faltam 2**.
 6. Recarregue: o mesmo deck permanece aberto pela identificação na URL, com as duas cópias possuídas. Fechar e reabrir o navegador pode exigir entrar novamente; os decks permanecem salvos.
 7. Teste renomear, adicionar uma carta ao principal ou ao sideboard, editar **Exigidas**, completar uma carta e remover uma entrada. Recarregue para confirmar as alterações.
+8. Para retirar uma lista inteira, abra sua caixa e clique em **Excluir decklist**. A confirmação mostra o nome da lista. Cancelar mantém os dados; confirmar remove o deck e suas cartas deste navegador, inclusive após recarregar.
 
 ## Armazenamento e acesso
 

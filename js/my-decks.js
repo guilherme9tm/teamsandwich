@@ -23,6 +23,38 @@
   if (!guard()) return;
   const emptyDetail = $('deckDetail').innerHTML;
 
+  function canAnimate(element) {
+    return element.isConnected && typeof element.animate === 'function'
+      && !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  }
+  function enter(element, delay = 0) {
+    if (!canAnimate(element)) return;
+    element.animate([
+      { opacity: 0, transform: 'translateY(16px) scale(.97)' },
+      { opacity: 1, transform: 'translateY(0) scale(1)' }
+    ], { duration: 280, delay, easing: 'cubic-bezier(.2,.7,.2,1)', fill: 'backwards' });
+  }
+  function leave(element, done) {
+    if (!canAnimate(element)) { done(); return; }
+    if (element.dataset.leaving) return;
+    element.dataset.leaving = 'true';
+    element.inert = true;
+    element.getAnimations().forEach(animation => animation.cancel());
+    const animation = element.animate([
+      { opacity: 1, transform: 'translateY(0) scale(1)' },
+      { opacity: 0, transform: 'translateY(-10px) scale(.96)' }
+    ], { duration: 180, easing: 'ease-in', fill: 'forwards' });
+    animation.finished.catch(() => {}).then(() => {
+      animation.cancel();
+      element.inert = false;
+      delete element.dataset.leaving;
+      done();
+    });
+  }
+  function closeImport() {
+    leave($('importDialog'), () => $('importDialog').close());
+  }
+
   function read() {
     const raw = AppStorage.local.getItem(key);
     if (!raw) return [];
@@ -57,13 +89,24 @@
     return cards.reduce((sum, card) => ({ quantity: sum.quantity + card.quantity, missing: sum.missing + Math.max(0, card.quantity - (card.owned || 0)) }), { quantity: 0, missing: 0 });
   }
   function boxes() {
-    $('deckBoxes').replaceChildren();
-    if (!decks.length) $('deckBoxes').innerHTML = '<p class="deck-note">Nenhum deck salvo. Importe sua primeira lista.</p>';
+    const existing = new Map([...$('deckBoxes').querySelectorAll('.deck-box')].map(button => [button.dataset.deckId, button]));
+    for (const [deckId, button] of existing) {
+      if (!decks.some(deck => deck.id === deckId)) leave(button, () => button.remove());
+    }
+    $('deckBoxes').querySelector('.deck-library-empty')?.remove();
+    if (!decks.length) {
+      const empty = document.createElement('p');
+      empty.className = 'deck-note deck-library-empty';
+      empty.textContent = 'Nenhum deck salvo. Importe sua primeira lista.';
+      $('deckBoxes').append(empty);
+    }
     for (const deck of decks) {
       const total = totals(deck.cards);
-      const button = document.createElement('button');
+      const button = existing.get(deck.id) || document.createElement('button');
+      const isNew = !existing.has(deck.id);
       button.type = 'button';
       button.className = 'deck-box';
+      button.dataset.deckId = deck.id;
       button.setAttribute('aria-pressed', String(deck.id === selected));
       button.innerHTML = `<span class="deck-stack-icon" aria-hidden="true">TS</span><span><strong>${escape(deck.name)}</strong><small>${total.quantity} cartas · ${total.missing ? `${total.missing} pendentes` : 'Completo'}</small></span>`;
       button.onclick = () => {
@@ -73,6 +116,7 @@
         boxes(); detail();
       };
       $('deckBoxes').append(button);
+      if (isNew) enter(button, Math.min(decks.indexOf(deck) * 35, 140));
     }
   }
   function summary(tile, card) {
@@ -119,8 +163,13 @@
     tile.querySelector('.plus').disabled = card.owned === 1000;
     tile.querySelector('.deck-remove').onclick = () => {
       if (!guard()) return;
-      current().cards = current().cards.filter(item => item.id !== card.id);
-      persist(); boxes(); detail();
+      const deck = current();
+      deck.cards = deck.cards.filter(item => item.id !== card.id);
+      persist(); updateSummary();
+      leave(tile, () => {
+        if (tile.isConnected && current()?.id === deck.id && DeckAccess.allowed()) detail(false);
+        else tile.remove();
+      });
     };
     summary(tile, card);
     return tile;
@@ -133,8 +182,15 @@
     if (!url || !/^https:\/\//i.test(url)) return;
     const img = document.createElement('img');
     img.alt = card.name; img.loading = 'lazy'; img.width = 488; img.height = 680;
-    img.onload = () => { art.classList.add('has-image'); };
-    img.onerror = () => { img.remove(); art.classList.remove('has-image'); };
+    img.onload = () => {
+      art.style.setProperty('--deck-card-image', `url(${JSON.stringify(img.currentSrc || img.src)})`);
+      art.classList.add('has-image');
+    };
+    img.onerror = () => {
+      img.remove();
+      art.style.removeProperty('--deck-card-image');
+      art.classList.remove('has-image');
+    };
     img.src = url; art.append(img);
   }
   async function loadImages(items) {
@@ -155,15 +211,33 @@
       });
     }
   }
-  function detail() {
+  function detail(animate = true) {
     const deck = current();
     if (!deck) return;
+    $('deckDetail').getAnimations?.().forEach(animation => animation.cancel());
+    $('deckDetail').inert = false;
     $('deckDetail').innerHTML = `<div class="deck-detail-heading"><div><p class="deck-eyebrow">SUA LISTA</p><h2 id="deckTitle"></h2><p id="deckSummary" class="deck-note"></p></div></div>
-      <form id="renameDeck" class="deck-inline-form"><label for="deckName">Nome do deck<input id="deckName" maxlength="100" required></label><button class="deck-button" type="submit">Renomear</button></form>
+      <form id="renameDeck" class="deck-inline-form"><label for="deckName">Nome do deck<input id="deckName" maxlength="100" required></label><button class="deck-button" type="submit">Renomear</button><button id="deleteDeck" class="deck-button deck-delete" type="button">Excluir decklist</button></form>
       <details class="deck-add"><summary>+ Adicionar carta</summary><form id="addCard" class="deck-inline-form"><label>Nome da carta<input id="addName" maxlength="200" placeholder="Ex.: Lightning Bolt" required></label><label>Exigidas<input id="addQuantity" type="number" min="1" max="1000" step="1" value="1" required></label><label>Seção<select id="addSection"><option value="main">Deck principal</option><option value="sideboard">Sideboard</option></select></label><button class="deck-button" type="submit">Adicionar</button></form><p id="addError" class="deck-error" role="alert"></p></details>
       <div id="deckSections"></div>`;
     $('deckTitle').textContent = deck.name;
     $('deckName').value = deck.name;
+    $('deleteDeck').onclick = () => {
+      if (!guard() || readFailed) return;
+      if (!window.confirm(`Excluir a decklist “${deck.name}” e todas as suas cartas? Esta ação não pode ser desfeita.`)) return;
+      decks = decks.filter(item => item.id !== deck.id);
+      selected = null;
+      const url = new URL(window.location.href);
+      url.searchParams.delete('deck');
+      window.history.replaceState(null, '', url);
+      persist(); boxes();
+      leave($('deckDetail'), () => {
+        if (selected || !DeckAccess.allowed()) return;
+        $('deckDetail').innerHTML = emptyDetail;
+        enter($('deckDetail').firstElementChild);
+        ($('deckBoxes').querySelector('button:not([data-leaving])') || $('importDeck')).focus();
+      });
+    };
     $('renameDeck').onsubmit = event => {
       event.preventDefault();
       if (!guard()) return;
@@ -202,6 +276,10 @@
       $('deckSections').append(group);
     }
     updateSummary();
+    if (animate) {
+      enter($('deckDetail').querySelector('.deck-detail-heading'));
+      items.forEach((item, index) => enter(item.tile, Math.min(index * 35, 175)));
+    }
     void loadImages(items);
   }
   function preview() {
@@ -236,7 +314,8 @@
     } catch { status('Não foi possível ler o arquivo. Tente selecioná-lo novamente.', true); }
   };
   $('importText').oninput = preview;
-  $('cancelImport').onclick = () => $('importDialog').close();
+  $('cancelImport').onclick = closeImport;
+  $('importDialog').addEventListener('cancel', event => { event.preventDefault(); closeImport(); });
   $('importForm').onsubmit = event => {
     event.preventDefault();
     if (!guard() || readFailed) return;
@@ -245,7 +324,7 @@
     if (!name || !parsed?.entries.length || parsed.warnings.length) return;
     if (decks.length >= 200) { $('importErrors').textContent = 'Limite de 200 decks neste navegador atingido.'; return; }
     decks.push({ id: id(), name, cards: parsed.entries.map(card => ({ ...card, id: id(), owned: 0 })) });
-    persist(); boxes(); $('importDialog').close();
+    persist(); boxes(); closeImport();
   };
   $('deckLogout').onclick = () => { DeckAccess.logout(); guard(); };
   window.addEventListener('pageshow', guard);

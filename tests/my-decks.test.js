@@ -147,6 +147,40 @@ test('unavailable catalog and images leave names, counts and edits usable', asyn
   } finally { current.dom.window.close(); }
 });
 
+test('deleting a deck requires confirmation, preserves other decks and persists after reload', async () => {
+  const current = page(); let reopened;
+  try {
+    await upload(current, '4 Lightning Bolt', 'Burn.txt'); submit(current, 'importForm');
+    await upload(current, '2 Island', 'Control.txt'); submit(current, 'importForm');
+    const controlId = saved(current).decks[1].id;
+    current.document.querySelector('.deck-box').click();
+    const before = current.dom.window.localStorage.getItem(storageKey);
+    current.dom.window.confirm = message => { assert.match(message, /Burn/); return false; };
+    current.document.getElementById('deleteDeck').click();
+    assert.equal(current.dom.window.localStorage.getItem(storageKey), before);
+    assert.equal(current.document.querySelectorAll('.deck-box').length, 2);
+    assert.equal(current.document.getElementById('deckTitle').textContent, 'Burn');
+    current.dom.window.confirm = () => true;
+    current.document.getElementById('deleteDeck').click();
+    assert.deepEqual(saved(current).decks.map(deck => deck.name), ['Control']);
+    assert.equal(saved(current).decks[0].cards[0].name, 'Island');
+    assert.equal(current.document.querySelector('.deck-card'), null);
+    assert.equal(current.dom.window.location.search, '');
+    reopened = page('my-decks.html', {
+      local: { [storageKey]: current.dom.window.localStorage.getItem(storageKey) },
+      query: `?deck=${controlId}`
+    });
+    assert.equal(reopened.document.querySelectorAll('.deck-box').length, 1);
+    assert.equal(reopened.document.getElementById('deckTitle').textContent, 'Control');
+    reopened.dom.window.confirm = () => true;
+    reopened.document.getElementById('deleteDeck').click();
+    assert.deepEqual(saved(reopened).decks, []);
+    assert.match(reopened.document.getElementById('deckBoxes').textContent, /Nenhum deck salvo/);
+    assert.equal(reopened.document.getElementById('deckTitle'), null);
+    assert.deepEqual(current.errors, []); assert.deepEqual(reopened.errors, []);
+  } finally { current.dom.window.close(); reopened?.dom.window.close(); }
+});
+
 test('storage quota failure is visible and corrupt saved data is preserved', async () => {
   const current = page(); const corrupt = page('my-decks.html', { local: { [storageKey]: 'broken json' } });
   try {

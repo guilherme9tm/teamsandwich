@@ -31,7 +31,13 @@ function initGameNavigation() {
     button.onclick = () => { window.location.href = `card.html?game=${game}`; };
     group.append(button);
   }
-  header.append(group);
+  header.insertBefore(group, header.querySelector('.header-search-container'));
+  const actionsRight = document.createElement('div');
+  actionsRight.className = 'header-actions-right';
+  const language = header.querySelector('.lang-selector') || header.querySelector('.lang-selector-select');
+  if (language) actionsRight.append(language);
+  actionsRight.append(document.getElementById('headerUserActions'));
+  header.append(actionsRight);
   const nav = document.createElement('nav');
   nav.className = 'catalog-nav';
   nav.setAttribute('aria-label', I18N.t('navigation'));
