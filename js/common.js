@@ -78,21 +78,40 @@ function escapeHTML(value) {
 }
 
 const sites = [
-  { id: 'facetoface', nome: 'Face to Face', link: n => `https://facetofacegames.com/search?q=${n}`, logo: 'https://facetofacegames.com/cdn/shop/files/wide-f2f-EN-white-logo.png?v=1784296074&width=255' },
+  { id: 'facetoface', nome: 'Face to Face', canadianPokemon: true, link: n => `https://facetofacegames.com/search?q=${n}`, logo: 'https://facetofacegames.com/cdn/shop/files/wide-f2f-EN-white-logo.png?v=1784296074&width=255' },
   { id: 'levalet', nome: 'Levalet', link: n => `https://levalet.crystalcommerce.com/products/search?q=${n}&c=1`, logo: 'https://cc-client-assets.nyc3.cdn.digitaloceanspaces.com/store/levalet/13b0d4f01acb11e9a8aac9b93f52c525/large/logolevalet.png' },
   { id: 'secretdesk', nome: 'Secret Desk', link: n => `https://www.lesecretdeskorrigans.com/products/search?q=${n}`, logo: 'https://cc-client-assets.nyc3.cdn.digitaloceanspaces.com/store/lesecretdeskorrigans/d6c705a0588d40bcad29108b0f9fda1b/medium/logolesecretfavi.png' },
   { id: 'cardhoarder', nome: 'Cardhoarder', link: n => `https://www.cardhoarder.com/cards?cardname=${n}`, logo: 'https://cdn.shopify.com/s/files/1/1781/6359/files/nav-logo.png?height=628&pad_color=fff&v=1613525588&width=1200' },
   { id: 'gamekeeper', nome: 'Gamekeeper', link: n => `https://www.gamekeeperonline.com/products/search?q=${n}`, logo: 'https://cc-client-assets.nyc3.cdn.digitaloceanspaces.com/photo/gamekeeperonline/file/768163/logo-2017.png?1508604932' },
   { id: 'expedition', nome: 'Expedition', link: n => `https://www.expeditionjeux.com/products/search?q=${n}`, logo: 'https://cc-client-assets.nyc3.cdn.digitaloceanspaces.com/store/expeditionjeux/26105d544a1449c7b3d28a192b99b961/large/expedition_logo_long.png' },
-  { id: 'tcgplayer', nome: 'TCGPlayer', link: n => `https://www.tcgplayer.com/search/${CardData.game === 'pokemon' ? 'pokemon' : 'magic'}/product?q=${n}`, logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRwc05VHb_4Y30nHRhc-thfIAdqVAN19LqSgQ&s' },
+  { id: 'tcgplayer', nome: 'TCGPlayer', link: (n, game = CardData.game) => `https://www.tcgplayer.com/search/${game === 'pokemon' ? 'pokemon' : 'magic'}/product?q=${n}`, logo: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRwc05VHb_4Y30nHRhc-thfIAdqVAN19LqSgQ&s' },
   { id: 'mtgtop8', nome: 'MTGTop8', link: n => `https://www.mtgtop8.com/search.php?cards=${n}`, logo: 'https://mtgtop8.com/graph/title.png' },
-  { id: 'silvergoblin', nome: 'Silver Goblin', link: n => `https://silvergoblin.cards/search?q=${n}&options%5Bprefix%5D=last`, logo: 'https://silvergoblin.cards/cdn/shop/files/Homepage_logo_5f1b015e-ccda-4e73-8c97-9259e49ab786.png?v=1741746772&width=1500' },
+  { id: 'silvergoblin', nome: 'Silver Goblin', canadianPokemon: true, link: n => `https://silvergoblin.cards/search?q=${n}&options%5Bprefix%5D=last`, logo: 'https://silvergoblin.cards/cdn/shop/files/Homepage_logo_5f1b015e-ccda-4e73-8c97-9259e49ab786.png?v=1741746772&width=1500' },
   { id: 'altf4', nome: 'Alt F4', link: n => `https://altf4online.com/search?options%5Bprefix%5D=last&q=${n}`, logo: 'https://altf4online.com/cdn/shop/files/altf4_altf4-logo-color-web.png?v=1734379537&width=270' },
-  { id: 'threekings', nome: 'Three Kings Loot', link: n => `https://www.threekingsloot.com/products/search?q=${n}`, logo: 'https://bluedefault.crystalcommerce.com/themes/clients/threekingsloot/assets/img/logo.png?1415786210' },
+  { id: 'threekings', nome: 'Three Kings Loot', canadianPokemon: true, link: n => `https://www.threekingsloot.com/products/search?q=${n}`, logo: 'https://bluedefault.crystalcommerce.com/themes/clients/threekingsloot/assets/img/logo.png?1415786210' },
   { id: 'mythicstore', nome: 'Boutique Mythic', link: n => `https://themythicstore.com/a/search?q=${n}`, logo: 'https://cdn.shopify.com/s/files/1/0360/6895/0061/files/Social_Media_Share_TMS.png?v=1714682307' },
   { id: 'wizardtower', nome: 'Wizard Tower', link: n => `https://store.wizardtower.com/search?q=${n}&options%5Bprefix%5D=last`, logo: 'https://store.wizardtower.com/cdn/shop/files/Long-Wt.png?v=1758040051&width=270' },
   { id: 'chezgeeks', nome: 'Chez Geeks', link: n => `https://www.chezgeeks.com/products/search?q=${n}`, logo: 'https://cc-client-assets.nyc3.cdn.digitaloceanspaces.com/photo/chezgeeks/file/30f1d741378c4f31909b23ade89a46ae/Chez%20Geeks%20LOGO%20scaled.png' }
 ];
+
+function storesForGame(game = CardData.game) {
+  if (game === 'mtg') return sites;
+  if (game === 'pokemon') return sites.filter(site => site.canadianPokemon || site.id === 'tcgplayer');
+  return [];
+}
+
+function storeSearchUrl(site, card) {
+  const game = card.game || CardData.game;
+  let query = card.name;
+  if (game === 'pokemon' && site.canadianPokemon) {
+    // TCGdex set IDs are not retailer set codes. Use the printed set name when
+    // available and keep the collector number to narrow same-name printings.
+    const set = card.collection?.name || card.set_name;
+    const number = card.number ?? card.collector_number;
+    query = [query, set, number == null ? '' : String(number).replace(/^0+(?=\d)/, '')].filter(Boolean).join(' ');
+  }
+  return site.link(encodeURIComponent(query), game);
+}
 
 function renderSidebar() {
   const sidebar = document.getElementById('sidebar');
@@ -337,14 +356,14 @@ function selectFormat(fmt, event) {
 }
 
 function initStores() {
-  const stored = AppStorage.local.readJSON("stores", []);
-  const saved = Array.isArray(stored) ? stored : [];
+  const stored = AppStorage.local.readJSON(CardData.game === 'pokemon' ? 'stores.pokemon' : 'stores', null);
+  const saved = Array.isArray(stored) ? stored : null;
   const container = document.getElementById("storeList");
   if (!container) return;
 
   container.innerHTML = '';
-  sites.forEach(site => {
-    const checked = saved.length ? saved.includes(site.id) : true;
+  storesForGame().forEach(site => {
+    const checked = saved ? saved.includes(site.id) : true;
     const div = document.createElement("label");
     div.className = "store-item-checkbox";
     div.innerHTML = `
@@ -360,7 +379,10 @@ function getSelected(persist = true) {
   const boxes = document.querySelectorAll("#storeList input");
   const selected = [];
   boxes.forEach(b => { if (b.checked) selected.push(b.value); });
-  if (persist) AppStorage.local.setItem("stores", JSON.stringify(selected));
+  if (persist) {
+    AppStorage.local.setItem(CardData.game === 'pokemon' ? 'stores.pokemon' : 'stores', JSON.stringify(selected));
+    window.dispatchEvent(new Event('storesChanged'));
+  }
   return selected;
 }
 

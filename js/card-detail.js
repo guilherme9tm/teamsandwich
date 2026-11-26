@@ -162,11 +162,10 @@ function renderCardDetailView(card) {
     `;
   }).join('');
 
-  const encodedCardName = encodeURIComponent(card.name);
-  const storesList = card.game === 'pokemon' ? sites.filter(site => site.id === 'tcgplayer') : sites;
+  const storesList = storesForGame(card.game);
   const storesHtml = storesList.map(site => {
     return `
-      <a href="${site.link(encodedCardName)}" target="_blank" rel="noopener noreferrer" class="detail-store-item" aria-label="${I18N.t('searchAtStore')} ${escapeHTML(site.nome)}" title="${I18N.t('searchAtStore')} ${site.nome}">
+      <a href="${escapeHTML(storeSearchUrl(site, card))}" target="_blank" rel="noopener noreferrer" class="detail-store-item" data-store-id="${site.id}" aria-label="${I18N.t('searchAtStore')} ${escapeHTML(site.nome)}" title="${I18N.t('searchAtStore')} ${site.nome}">
         <div class="detail-store-left">
           ${site.logo ? `<img src="${site.logo}" alt="${site.nome}" class="detail-store-logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">` : ''}
           <span class="detail-store-name" style="${site.logo ? 'display:none;' : ''}">${site.nome}</span>
@@ -235,8 +234,8 @@ function renderCardDetailView(card) {
         <div class="detail-stores-section">
           <div class="detail-stores-header">
             <div class="detail-stores-title-group">
-              <h3>${I18N.t('storeAvailability')}</h3>
-              <p>${I18N.t('storesSectionDesc')}</p>
+              <h3>${I18N.t(card.game === 'pokemon' ? 'canadianPokemonStores' : 'storeAvailability')}</h3>
+              <p>${I18N.t(card.game === 'pokemon' ? 'canadianPokemonStoresDesc' : 'storesSectionDesc')}</p>
             </div>
           </div>
 

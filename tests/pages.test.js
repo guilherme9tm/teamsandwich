@@ -12,7 +12,7 @@ async function waitFor(predicate, message) {
   const deadline = Date.now() + 6000;
   while (!predicate()) { if (Date.now() > deadline) throw new Error(`Timed out: ${message}`); await new Promise(resolve => setTimeout(resolve, 20)); }
 }
-function page(file, query = '', { failure = false, pokemonFailure = false, disablePokemon = false, searchPages = null, rateFailure = false, lang = null } = {}) {
+function page(file, query = '', { failure = false, pokemonFailure = false, disablePokemon = false, searchPages = null, rateFailure = false, lang = null, local = {} } = {}) {
   const html = fs.readFileSync(file, 'utf8');
   const scripts = [...html.matchAll(/<script src="([^"]+)"><\/script>/g)].map(match => match[1]);
   const errors = []; const requests = [];
@@ -21,6 +21,7 @@ function page(file, query = '', { failure = false, pokemonFailure = false, disab
   const dom = new JSDOM(html.replace(/<script src="[^"]+"><\/script>/g, ''), {
     url: `http://localhost/${file}${query}`, runScripts: 'dangerously', virtualConsole,
     beforeParse(window) {
+      for (const [key, value] of Object.entries(local)) window.localStorage.setItem(key, value);
       if (lang) window.localStorage.setItem('lang', lang);
       window.scrollTo = () => {};
       window.fetch = async url => {
@@ -178,6 +179,55 @@ test('Pokémon search stays separate, hides Magic filters and enriches only visi
     assert.match(document.querySelector('.card-title-link').href, /game=pokemon/); assert.deepEqual(errors, []);
   } finally { dom.window.close(); }
 });
+test('Pokémon retailer links follow enriched printings and keep store preferences separate from Magic', async () => {
+  const magicStores = JSON.stringify(['cardhoarder']);
+  const { dom, errors } = page('card.html', '?game=pokemon&name=Tangela', { local: { stores: magicStores } });
+  let reopened;
+  try {
+    const document = dom.window.document;
+    await waitFor(() => document.querySelector('.card-price')?.textContent.includes('1.75'), 'enriched Pokémon card');
+    const links = [...document.querySelectorAll('.card [data-store-id]')];
+    assert.deepEqual(links.map(link => link.dataset.storeId), ['facetoface', 'silvergoblin', 'tcgplayer', 'threekings']);
+    for (const link of links.filter(link => link.dataset.storeId !== 'tcgplayer')) {
+      assert.equal(new URL(link.href).searchParams.get('q'), 'Tangela Twilight Masquerade 1');
+      assert.equal(link.target, '_blank'); assert.equal(link.rel, 'noopener noreferrer');
+    }
+    assert.equal(document.querySelector('#storeList input[value="cardhoarder"]'), null);
+    assert.equal(document.querySelector('#storeList input[value="mtgtop8"]'), null);
+    const checkbox = document.querySelector('#storeList input[value="silvergoblin"]');
+    checkbox.checked = false; checkbox.dispatchEvent(new dom.window.Event('change', { bubbles: true }));
+    assert.equal(document.querySelector('.card [data-store-id="silvergoblin"]'), null);
+    assert.equal(dom.window.localStorage.getItem('stores'), magicStores);
+    const selected = dom.window.localStorage.getItem('stores.pokemon');
+    assert.ok(!JSON.parse(selected).includes('silvergoblin'));
+    reopened = page('card.html', '?game=pokemon&name=Tangela', { local: { stores: magicStores, 'stores.pokemon': selected } });
+    await waitFor(() => reopened.dom.window.document.querySelector('.card'), 'restored Pokémon catalog');
+    assert.equal(reopened.dom.window.document.querySelector('.card [data-store-id="silvergoblin"]'), null);
+    assert.deepEqual(errors, []); assert.deepEqual(reopened.errors, []);
+  } finally { dom.window.close(); reopened?.dom.window.close(); }
+});
+
+test('Pokémon details offer Canadian store searches without representing converted prices as store quotes', async () => {
+  const { dom, errors } = page('card-detail.html', '?game=pokemon&id=sv06-001', { rateFailure: true });
+  try {
+    const document = dom.window.document;
+    await waitFor(() => document.querySelector('.detail-store-item'), 'Pokémon store links');
+    const links = [...document.querySelectorAll('.detail-store-item')];
+    assert.equal(links.length, 4);
+    assert.match(document.querySelector('.detail-stores-section h3').textContent, /Canadian stores/);
+    assert.match(document.querySelector('.detail-stores-title-group p').textContent, /not a store quote/);
+    assert.equal(document.querySelector('.primary-price-panel > strong').textContent, 'Price unavailable');
+    assert.equal(new URL(links.find(link => link.dataset.storeId === 'facetoface').href).searchParams.get('q'), 'Tangela Twilight Masquerade 1');
+    const build = dom.window.eval('storeSearchUrl');
+    const site = dom.window.eval('sites.find(site => site.id === "silvergoblin")');
+    const name = 'Mr. Mime & Friends + #1 /?';
+    const url = new URL(build(site, { game: 'pokemon', name, number: '001', collection: { name: 'Test & Set' } }));
+    assert.equal(url.searchParams.get('q'), `${name} Test & Set 1`);
+    assert.deepEqual([...url.searchParams.keys()], ['q', 'options[prefix]']);
+    assert.deepEqual(errors, []);
+  } finally { dom.window.close(); }
+});
+
 test('Pokemon catalog opens a searchable set directory instead of mixed cards', async () => {
   const { dom, requests, errors } = page('card.html', '?game=pokemon');
   try {

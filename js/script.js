@@ -189,7 +189,7 @@ function renderHomeStores() {
 
   const titlePrefix = I18N.t('buyAt');
 
-  container.innerHTML = sites.map(site => `
+  container.innerHTML = storesForGame().map(site => `
     <a href="card.html?name=Sol%20Ring" class="home-store-chip" title="${titlePrefix} ${site.nome}" target="_blank" onclick="event.preventDefault(); searchCardForStore('${site.id}');">
       ${site.logo ? `<img src="${site.logo}" alt="${site.nome}" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">` : ''}
       <span class="home-store-name" style="${site.logo ? 'display:none;' : ''}">${site.nome}</span>

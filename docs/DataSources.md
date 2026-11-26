@@ -12,6 +12,14 @@ Pesquisa e consultas reais em 18/11/2026. Os links abaixo são referências de i
 - Cache: cinco minutos; coleções, uma hora; LRU de até 160 entradas/4 MiB estimados, com snapshot na sessão do navegador. Até duas requisições ativas, início espaçado em 120 ms, timeout de 10 s e fila limitada. Resposta 429 respeita Retry-After.
 - `fetchedAt` registra a consulta da resposta; não é a data de atualização do mercado. Quando a fonte não informa a atualização, a interface declara isso. A verificação via Node identifica o aplicativo no User-Agent.
 
+## Links de lojas canadenses — Pokémon
+
+Verificado em 26/11/2026. O catálogo, os detalhes e o seletor de lojas de Pokémon oferecem buscas em Face to Face, Silver Goblin e Three Kings Loot, além do TCGplayer como referência de mercado separada. Os catálogos oficiais confirmam a venda de singles: [Face to Face](https://facetofacegames.com/collections/pokemon), [Silver Goblin](https://silvergoblin.cards/collections/all-pokemon-singles) e [Three Kings Loot](https://www.threekingsloot.com/catalog/pokemon-pokemon_singles-sword__shield_series-pokemon_go/5685).
+
+As buscas canadenses incluem nome, nome da coleção e número quando disponíveis. Os links do catálogo são atualizados após o enriquecimento dos detalhes; IDs internos TCGdex não são usados como siglas de lojas. São páginas de busca, não uma associação garantida a um SKU: o usuário confirma impressão, acabamento, condição, estoque e preço em CAD na loja. Não há coleta de preços ou estoques dos varejistas, scraping, novas credenciais ou serviços pagos. As preferências Pokémon ficam em `stores.pokemon`, separadas das preferências Magic em `stores`.
+
+Na verificação automatizada, a busca Three Kings Loot respondeu HTTP 200; Face to Face e Silver Goblin responderam HTTP 429. Seus catálogos públicos foram consultados, mas os resultados das buscas dessas duas lojas precisam ser conferidos em navegação normal. Os testes locais cobrem a geração de URLs, a atualização da edição e o isolamento de preferências.
+
 ## Bank of Canada — conversão para CAD
 
 - Referência: [Valet API](https://www.bankofcanada.ca/valet-api-how-to/). Consulta pública sem chave: `GET https://www.bankofcanada.ca/valet/observations/FXUSDCAD,FXEURCAD/json?recent=1`.
