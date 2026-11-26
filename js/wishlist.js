@@ -56,7 +56,7 @@
     }
     $('wishlistPrev').disabled = page === 0; $('wishlistNext').disabled = (page + 1) * 20 >= filtered.length;
   }
-  AccountLibrary.controls(library, $('wishlistControls'), $('wishlistStatus'), render);
+  AccountLibrary.bindStatus(library, $('wishlistStatus'), render);
   $('wishlistGame').onchange = () => { page = 0; render(); };
   $('wishlistPrev').onclick = () => { page--; render(); }; $('wishlistNext').onclick = () => { page++; render(); };
   $('wishlistLogout').onclick = async () => { try { await DeckAccess.logout(); } catch { I18N.bind($('wishlistStatus'), 'authUnavailable'); } };

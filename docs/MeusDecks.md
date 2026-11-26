@@ -19,7 +19,7 @@ Configure o Supabase Auth conforme o [guia de autenticação](Autenticacao.md), 
 - O acesso depende de sessão real validada pelo Supabase, com tokens em cookies HttpOnly. **Sair** revoga a sessão atual e bloqueia a área sem apagar os decks. A antiga chave de demonstração não libera acesso.
 - O banco protege as listas com RLS por usuário. Caches e rascunhos locais não são criptografados contra alguém com acesso ao perfil do navegador. Listas antigas só são copiadas após confirmação, preservando a origem.
 - As listas confirmadas na nuvem ficam disponíveis em outros dispositivos com a mesma conta. Limpar o navegador pode apagar rascunhos ainda não sincronizados, mas não apaga o que já foi confirmado pelo servidor.
-- Cada lista usa uma revisão. Alterações concorrentes geram um aviso de conflito; o rascunho é preservado. Use Sincronização e backup para baixar uma cópia, recarregar da nuvem ou restaurar um backup. Não há mesclagem automática.
+- Cada lista usa uma revisão. Alterações concorrentes geram um aviso de conflito; o rascunho é preservado. Não há mesclagem automática.
 - Falhas de rede deixam o salvamento pendente e permitem tentar novamente. Se o armazenamento local estiver bloqueado, mantenha a página aberta até a confirmação do servidor. Dados inválidos não são tratados como uma biblioteca vazia.
 
 ## Formato de importação

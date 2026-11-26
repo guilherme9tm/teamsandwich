@@ -129,24 +129,31 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .card-img-link:hover { transform: none; }
 .card .card-img-link img { height: 100%; width: 100%; object-fit: contain; margin: 0; border-radius: 7px; }
 .card-image-placeholder { display: flex; align-items: center; justify-content: center; height: 100%; background: var(--bg-elevated); color: var(--text-muted); text-align: center; font-size: 12px; }
-.card-copy { display: flex; flex-direction: column; min-width: 0; flex: 1; padding: 12px 2px 1px; }
-.card-title-link { display: block; height: 2.7em; overflow: hidden; margin: 0; color: var(--text-primary); }
-.card-title-link strong { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.35; font-size: 13px; font-weight: 600; margin: 0; }
-.card .card-price { display: block; font-style: normal; font-weight: 700; font-size: 17px; letter-spacing: -.025em; color: var(--accent); margin: 9px 0 4px; }
+.card-copy { display: flex; flex-direction: column; min-width: 0; flex: 1; padding: 8px 0 1px; width: 100%; }
+.card-price-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px 6px; min-width: 0; }
+.card .card-price { display: block; flex: 1 1 48px; min-width: 0; font-style: normal; font-weight: 700; font-size: 16px; letter-spacing: -.025em; color: var(--accent); margin: 0; overflow-wrap: anywhere; }
 .card-edition { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-muted); font-size: 10px; line-height: 1.7; }
-.card-actions-row { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border-subtle); }
-.card-actions-row .btn-card-detail { min-width: 0; flex: 1; font-size: 11px; padding: 8px 4px; gap: 4px; line-height: 1.3; background: transparent; border: 0; color: var(--text-secondary); white-space: nowrap; }
-.card-actions-row .btn-card-detail:hover { color: var(--accent); background: transparent; transform: none; }
-.card-actions-row .btn-card-detail svg { display: none; }
-.card-actions-row .toggle-btn { flex: 0 0 28px; width: 28px; height: 28px; margin: 0; border-radius: 6px; border: 1px solid var(--border-medium); background: transparent; }
+.card-actions-row { display: flex; flex: 0 0 auto; align-items: center; justify-content: flex-end; flex-wrap: nowrap; gap: 4px; margin: 0 0 0 auto; padding: 0; border: 0; }
+.card-actions-row .toggle-btn, .card-actions-row .btn-wishlist { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 38px; width: 38px; min-width: 38px; height: 38px; margin: 0; padding: 0; border-radius: 8px; border: 1px solid var(--border-medium); background: var(--bg-elevated); color: var(--text-secondary); }
+.card-actions-row .toggle-btn:hover, .card-actions-row .toggle-btn.active, .card-actions-row .btn-wishlist:hover, .card-actions-row .btn-wishlist.is-added { border-color: var(--accent); color: var(--accent); background: rgba(126, 164, 143, .12); }
+.card-actions-row svg { flex-shrink: 0; pointer-events: none; }
+.wishlist-action.is-compact { display: inline-flex; flex: 0 0 auto; }
+.btn-wishlist.is-added svg { fill: currentColor; }
+.card-feedback { display: flex; flex-wrap: wrap; gap: 4px 8px; min-width: 0; overflow-wrap: anywhere; }
+.card-feedback:has(.wishlist-feedback:not(:empty)) { margin-top: 6px; }
+.card-feedback [hidden] { display: none !important; }
+.card-feedback a { color: var(--accent); font-size: 11px; text-decoration: underline; }
+.card .links-container { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.card .links-column { min-width: 0; gap: 6px; }
+.card .links-column a { width: 100%; height: 54px; min-width: 0; padding: 6px; }
+.card .links-column img { width: 100%; height: 100%; max-height: 36px; object-fit: contain; margin: 0; }
 .card-extra { margin-top: 12px; }
 .card-skeleton { height: 340px; background: linear-gradient(110deg, var(--bg-card), var(--bg-elevated), var(--bg-card)); }
 .grid.grid-list .card { flex-direction: row; flex-wrap: wrap; gap: 18px; align-items: center; padding: 12px; }
 .grid.grid-list .card-img-link { width: 90px; }
 .grid.grid-list .card .card-img-link img { width: 100%; }
-.grid.grid-list .card-copy { padding: 0; }
-.grid.grid-list .card-title-link { height: auto; }
-.grid.grid-list .card-actions-row { justify-content: flex-start; max-width: 220px; }
+.grid.grid-list .card .links-column img { width: 100%; }
+.grid.grid-list .card-copy { padding: 0; width: auto; flex: 1 1 120px; }
 .grid.grid-list .card-extra { flex-basis: 100%; }
 .search-load-controls { margin: 0 auto; padding: 12px 28px 24px; display: flex; justify-content: center; align-items: center; gap: 12px; flex-wrap: wrap; }
 .search-load-controls p { font-size: 12px; color: var(--text-muted); }
@@ -264,14 +271,14 @@ dialog::backdrop { background: rgba(10, 14, 11, .85); backdrop-filter: blur(3px)
   .header { flex-wrap: wrap; gap: 8px; padding: 12px; min-height: 0; }
   .header-logo { height: 32px; }
   .header-search-container { order: 4; flex: 1 1 100%; max-width: none; margin: 0; }
-  .header .header-actions-right { order: 2; gap: 8px; }
-  .header .user-actions { display: flex !important; padding-left: 0; border-left: 0; gap: 6px; }
+  .header .header-actions-right { order: 2; flex: 1 1 100%; min-width: 0; max-width: 100%; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
+  .header .user-actions { display: flex !important; min-width: 0; max-width: 100%; flex-wrap: wrap; justify-content: flex-end; padding-left: 0; border-left: 0; gap: 6px; }
   .header .user-actions > a, .header .user-actions > button { min-height: 38px; padding: 8px 10px; font-size: 11px; }
   .game-selector { order: 3; flex: 1 1 100%; justify-content: center; margin-left: 0; }
   .game-selector button { font-size: 11px; padding: 8px 9px; }
   .header .header-actions-right > .lang-selector-select { width: 85px; }
   .catalog-nav { min-height: 44px; padding-inline: 18px; }
-  .catalog-nav-links { width: 100%; justify-content: space-between; gap: 12px; }
+  .catalog-nav-links { width: 100%; justify-content: space-between; flex-wrap: wrap; gap: 0 12px; }
   .catalog-nav a { min-height: 44px; font-size: 11px; }
   .main-content, .workspace { padding: 24px 18px 40px; gap: 26px; }
   .hero-section { padding: 28px 24px; border-radius: 14px; }
@@ -295,6 +302,7 @@ dialog::backdrop { background: rgba(10, 14, 11, .85); backdrop-filter: blur(3px)
   .pagination-bar:not(.pagination-bottom) .page-btn { min-width: 30px; height: 32px; padding: 4px 8px; font-size: 11px; }
   .results-section { padding: 0 18px 18px; }
   .grid:not(.grid-2):not(.grid-list) { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .grid.grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   .card-detail-main { padding: 22px 18px 40px; }
   .detail-grid { grid-template-columns: minmax(0, 1fr); }
   .detail-grid { display: flex; flex-direction: column; gap: 18px; }
@@ -302,6 +310,8 @@ dialog::backdrop { background: rgba(10, 14, 11, .85); backdrop-filter: blur(3px)
   .detail-header-card { order: 0; }
   .detail-card-frame { order: 1; width: min(100%, 240px); margin: auto; }
   .detail-flip-btn { order: 2; width: min(100%, 340px); align-self: center; }
+  #detailWishlistAction { order: 2; width: min(100%, 340px); align-self: center; }
+  #detailWishlistAction .wishlist-action { flex-wrap: wrap; min-width: 0; }
   .primary-price-panel { order: 3; }
   .detail-serial-box, .detail-right-col > .sample-note { order: 4; }
   .detail-oracle-box { order: 5; }
@@ -318,10 +328,10 @@ dialog::backdrop { background: rgba(10, 14, 11, .85); backdrop-filter: blur(3px)
 }
 @media (max-width: 540px) {
   .grid:not(.grid-2):not(.grid-list) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .card-title-link strong { font-size: 12px; }
-  .card .card-price { font-size: 15px; }
+  .card .card-price { font-size: 13px; }
+  .header .search-input { font-size: 16px; }
   .grid .card { padding: 7px; }
-  .card-copy { padding-top: 10px; }
+  .card-copy { padding-top: 6px; }
   .hero-title-sandwich { font-size: 40px; }
   .hero-actions .hero-btn-primary { flex-basis: 100%; justify-content: center; }
   .hero-actions .hero-btn-secondary, .hero-actions .hero-btn-outline { flex: 1; justify-content: center; }
@@ -335,7 +345,11 @@ dialog::backdrop { background: rgba(10, 14, 11, .85); backdrop-filter: blur(3px)
   .workspace dialog { padding: 20px; }
   .game-selector button { font-size: 10px; padding-inline: 8px; }
   .card-edition { font-size: 9px; }
-  .card-actions-row .btn-card-detail { font-size: 10px; }
+  .results-section { padding-inline: 12px; }
+  .grid:not(.grid-list), .grid.grid-2 { gap: 10px; }
+  .pagination-bar, .card-filters-bar, .search-info { padding-inline: 12px; }
+  .page-nav { min-width: 0; max-width: 100%; justify-content: center; }
+  .page-info { white-space: normal; margin-left: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; transition: none !important; animation: none !important; }

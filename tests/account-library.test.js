@@ -115,6 +115,21 @@ test('wishlist actions keep exact printings and games distinct without duplicati
     assert.equal(items.length, 2); assert.deepEqual(items.map(item => item.game), ['mtg', 'pokemon']); assert.ok(items.every(item => item.quantity === 1 && item.printingId === 'printing'));
   } finally { current.close(); }
 });
+test('compact wishlist actions retain their icon after saving and keep feedback outside the price actions', async () => {
+  const remote = new Map(), current = await client(remote);
+  try {
+    current.eval("const feedback = document.createElement('div'); feedback.id = 'feedback'; document.body.append(feedback); document.getElementById('actions').append(createWishlistButton({ id: 'printing', name: 'Example', game: 'mtg' }, { compact: true, feedbackTarget: feedback }))");
+    const document = current.dom.window.document, button = document.querySelector('#actions button');
+    assert.equal(button.textContent, ''); assert.ok(button.querySelector('svg'));
+    button.click(); while (button.disabled) await tick();
+    assert.equal(remote.get(`${userA.id}:wishlist`).items[0].name, 'Example');
+    assert.ok(button.querySelector('svg')); assert.ok(button.classList.contains('is-added'));
+    assert.match(document.getElementById('feedback').textContent, /Saved to your wishlist/);
+    current.eval("I18N.setLang('pt')");
+    assert.ok(button.querySelector('svg')); assert.match(button.getAttribute('aria-label'), /Salva/);
+  } finally { current.close(); }
+});
+
 test('wishlist shows cloud cards, edits quantities, preserves fields on language change and removes entries', async () => {
   const remote = new Map([[`${userA.id}:wishlist`, { revision: 1, items: [wish('mtg'), wish('pokemon')] }]]);
   const current = await client(remote, { file: 'wishlist.html' });

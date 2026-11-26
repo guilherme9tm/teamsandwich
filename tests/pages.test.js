@@ -107,17 +107,28 @@ test('catalog loads automatically, preserves imports/actions and applies exclusi
   const { dom, requests, errors } = page('card.html');
   try {
     const document = dom.window.document;
-    await waitFor(() => document.querySelectorAll('#resultado .card-title-link').length === 2, 'initial cards');
+    await waitFor(() => document.querySelectorAll('#resultado .card-img-link').length === 2, 'initial cards');
     assert.equal(requests.filter(url => url.includes('/cards/search?')).length, 1);
     await waitFor(() => document.querySelector('.card-price').textContent.includes('CAD'), 'CAD conversion');
     assert.match(document.querySelector('.card-price').textContent, /2\.80/);
-    assert.equal(document.querySelector('.card-title-link').title, baseCard.name);
+    assert.equal(document.querySelector('.card-img-link').title, baseCard.name);
+    assert.equal(document.querySelector('.card-img-link').getAttribute('aria-label'), baseCard.name);
+    assert.equal(document.querySelector('.card-copy').textContent.includes(baseCard.name), false);
+    const stores = document.querySelector('.card-price-row .toggle-btn');
+    assert.equal(stores.getAttribute('aria-expanded'), 'false');
+    stores.click(); assert.equal(stores.getAttribute('aria-expanded'), 'true');
+    assert.equal(document.querySelector('.card-extra').style.display, 'block');
+    stores.click(); assert.equal(stores.getAttribute('aria-expanded'), 'false');
+    assert.ok(document.querySelector('.card-price-row .btn-wishlist svg'));
+    assert.ok(document.querySelector('.card-price-row .btn-wishlist').getAttribute('aria-label'));
     assert.equal(document.querySelectorAll('.game-selector [aria-pressed="true"]').length, 1);
     assert.equal(document.querySelector('.game-selector [aria-pressed="true"]').textContent, 'Magic: The Gathering');
     assert.ok(document.querySelector('a[href*="view=lands"]'));
     assert.ok(document.getElementById('arquivoInput'));
     document.querySelector('.lang-selector-select').value = 'pt'; document.querySelector('.lang-selector-select').dispatchEvent(new dom.window.Event('change'));
     assert.equal(document.documentElement.lang, 'pt'); assert.equal(dom.window.localStorage.getItem('lang'), 'pt');
+    assert.ok(document.querySelector('.card-price-row .btn-wishlist svg'), 'language updates preserve the action icon');
+    assert.notEqual(document.querySelector('.card-price-row .btn-wishlist').getAttribute('aria-label'), 'wishlistAdd');
     assert.deepEqual(errors, []);
   } finally { dom.window.close(); }
 });
@@ -130,19 +141,19 @@ test('pagination fetches more cards on demand without a load-more button', async
   ] });
   try {
     const document = dom.window.document;
-    await waitFor(() => document.querySelectorAll('#resultado .card-title-link').length === 15, 'first page');
+    await waitFor(() => document.querySelectorAll('#resultado .card-img-link').length === 15, 'first page');
     assert.equal(document.querySelector('#searchLoadControls button'), null);
     assert.equal(requests.filter(url => url.includes('/cards/search?')).length, 1);
     const next = document.querySelector('#pageNav .arrow-btn:last-of-type');
     assert.equal(next.disabled, false);
     next.click(); next.click();
-    await waitFor(() => document.querySelector('.card-title-link')?.textContent === 'Next 0', 'remote page navigation');
-    assert.equal(document.querySelectorAll('#resultado .card-title-link').length, 5);
+    await waitFor(() => document.querySelector('.card-img-link')?.title === 'Next 0', 'remote page navigation');
+    assert.equal(document.querySelectorAll('#resultado .card-img-link').length, 5);
     assert.equal(requests.filter(url => url.includes('/cards/search?')).length, 2);
     assert.equal(document.querySelector('#pageNav .arrow-btn:last-of-type').disabled, true);
     assert.equal(document.querySelector('#searchLoadControls button'), null);
     document.querySelector('#pageNav .arrow-btn').click();
-    assert.equal(document.querySelector('.card-title-link').textContent, 'Card 0');
+    assert.equal(document.querySelector('.card-img-link').title, 'Card 0');
     assert.equal(requests.filter(url => url.includes('/cards/search?')).length, 2);
     assert.deepEqual(errors, []);
   } finally { dom.window.close(); }
@@ -155,7 +166,7 @@ test('catalog failures expose a working retry and clear skeletons', async () => 
     await waitFor(() => document.querySelector('.load-error'), 'error state');
     assert.equal(document.querySelectorAll('.card-skeleton').length, 0);
     current.allowSearch(); document.querySelector('#searchLoadControls button').click();
-    await waitFor(() => document.querySelector('.card-title-link'), 'retry result'); assert.deepEqual(current.errors, []);
+    await waitFor(() => document.querySelector('.card-img-link'), 'retry result'); assert.deepEqual(current.errors, []);
   } finally { current.dom.window.close(); }
 });
 test('game selector disables Pokémon when no validated adapter is registered', async () => {
@@ -176,7 +187,7 @@ test('Pokémon search stays separate, hides Magic filters and enriches only visi
     assert.equal(document.querySelectorAll('.game-selector [aria-pressed="true"]').length, 1);
     assert.equal(document.querySelector('.game-selector [aria-pressed="true"]').textContent, 'Pokémon TCG');
     assert.equal(document.querySelector('a[href*="view=lands"]'), null);
-    assert.match(document.querySelector('.card-title-link').href, /game=pokemon/); assert.deepEqual(errors, []);
+    assert.match(document.querySelector('.card-img-link').href, /game=pokemon/); assert.deepEqual(errors, []);
   } finally { dom.window.close(); }
 });
 test('Pokémon retailer links follow enriched printings and keep store preferences separate from Magic', async () => {
@@ -252,7 +263,7 @@ test('Pokemon set pages scope remote cards by set and display the collection nam
   const { dom, requests, errors } = page('card.html', '?game=pokemon&set=sv06&category=Pokemon');
   try {
     const document = dom.window.document;
-    await waitFor(() => document.querySelector('.card-title-link'), 'set cards');
+    await waitFor(() => document.querySelector('.card-img-link'), 'set cards');
     const url = new URL(requests.find(url => url.includes('/cards?')));
     assert.equal(url.searchParams.get('set.id'), 'eq:sv06');
     assert.equal(url.searchParams.get('category'), 'eq:Pokemon');
@@ -308,7 +319,7 @@ test('exchange failures keep CAD prices unavailable while store buttons remain u
 test('Lands uses the common catalog and sends explicit cycle membership to Scryfall', async () => {
   const { dom, requests, errors } = page('card.html', '?view=lands');
   try {
-    await waitFor(() => dom.window.document.querySelector('.card-title-link'), 'land results');
+    await waitFor(() => dom.window.document.querySelector('.card-img-link'), 'land results');
     const url = new URL(requests.find(url => url.includes('/cards/search?'))); assert.match(url.searchParams.get('q'), /!"Arid Mesa"/);
     assert.equal(dom.window.document.querySelectorAll('#landCycle option').length, 14); assert.deepEqual(errors, []);
   } finally { dom.window.close(); }

@@ -96,11 +96,6 @@ const AccountLibrary = (() => {
         if (dirty) AppStorage.local.setItem(`${draftKey}:backup`, JSON.stringify({ revision, items }));
         items = next.items; revision = next.revision; dirty = false; failure = null;
         clearDraft(); generation++; notify(true);
-      },
-      backup() {
-        const blob = new Blob([JSON.stringify({ version: 1, kind, items }, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob), link = document.createElement('a');
-        link.href = url; link.download = `team-sandwich-${kind}.json`; link.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
       }
     };
     window.addEventListener('beforeunload', event => { if (dirty) { event.preventDefault(); event.returnValue = ''; } });
@@ -108,37 +103,10 @@ const AccountLibrary = (() => {
     if (dirty && !failure) void flush();
     return api;
   }
-  function controls(library, container, status, replaced) {
-    const make = (key, action) => {
-      const button = document.createElement('button'); button.type = 'button'; button.className = 'deck-button';
-      I18N.bind(button, key); button.onclick = action; container.append(button); return button;
-    };
-    const retry = make('libraryRetry', () => library.retry());
-    const reload = make('libraryReload', async () => {
-      if (library.pending() && !window.confirm(I18N.t('libraryReloadConfirm'))) return;
-      reload.disabled = true;
-      try { await library.reload(); } catch (error) { I18N.bind(status, errors.has(error.message) ? error.message : 'libraryUnavailable'); }
-      finally { reload.disabled = false; }
-    });
-    make('libraryBackup', () => library.backup());
-    const input = document.createElement('input'); input.type = 'file'; input.accept = '.json,application/json'; input.hidden = true; container.append(input);
-    make('libraryRestore', () => input.click());
-    input.onchange = async () => {
-      const file = input.files[0]; input.value = ''; if (!file) return;
-      try {
-        if (file.size > 4 * 1024 * 1024) throw new Error();
-        const backup = JSON.parse(await file.text());
-        if (backup.version !== 1 || !['decks', 'wishlist'].includes(backup.kind)) throw new Error();
-        const expected = container.dataset.kind;
-        if (backup.kind !== expected) throw new Error();
-        LibraryData.validate(expected, backup.items);
-        if (window.confirm(I18N.t('libraryRestoreConfirm'))) { library.save(backup.items); replaced(); }
-      } catch { I18N.bind(status, 'libraryInvalidData'); }
-    };
+  function bindStatus(library, status, replaced) {
     library.subscribe(state => {
       I18N.bind(status, state.error || (state.pending ? 'librarySaving' : 'librarySaved'));
       status.classList.toggle('deck-error', !!state.error);
-      retry.hidden = !state.error || ['libraryConflict', 'authAccountChanged', 'libraryInvalidDraft'].includes(state.error);
       if (state.replaced) replaced();
     });
   }
@@ -152,5 +120,5 @@ const AccountLibrary = (() => {
     }
     return instances.get(key);
   }
-  return { open: shared, controls };
+  return { open: shared, bindStatus };
 })();

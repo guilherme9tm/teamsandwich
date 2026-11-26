@@ -19,16 +19,15 @@ Até executar o SQL, as páginas de listas mostram que o armazenamento da conta 
 
 As listas locais da versão anterior não são enviadas automaticamente. Se a biblioteca da conta na nuvem ainda for nova e vazia, **Recuperar decks anteriores deste navegador** oferece uma cópia após confirmação. A biblioteca local vinculada ao usuário tem prioridade; se ela não existir, é oferecida a antiga biblioteca compartilhada. A origem é preservada. Em uma máquina compartilhada, confirme apenas listas que pertencem a você.
 
-Uma biblioteca existente na nuvem nunca é substituída automaticamente pela cópia local. Para unir uma lista antiga a uma biblioteca já usada, importe o TXT original. Backups JSON da própria aplicação podem ser restaurados em **Sincronização e backup → Restaurar backup**; essa operação substitui a lista correspondente após confirmação.
+Uma biblioteca existente na nuvem nunca é substituída automaticamente pela cópia local. Para unir uma lista antiga a uma biblioteca já usada, importe o TXT original.
 
 ## Salvamento e conflitos
 
 - O estado exibido distingue salvamento em andamento, confirmação pelo servidor e falha. Espere **Salvo na sua conta** antes de fechar a página.
-- Se a rede falhar durante uma gravação, um rascunho fica no navegador, vinculado ao usuário e ao tipo da lista. Há opção de tentar novamente e de baixar um backup. Se o armazenamento local estiver bloqueado, mantenha a página aberta até a confirmação da nuvem.
+- Se a rede falhar durante uma gravação, um rascunho fica no navegador, vinculado ao usuário e ao tipo da lista. A aplicação tenta novamente quando a conexão retorna; uma nova edição também pode iniciar outra tentativa. Se o armazenamento local estiver bloqueado, mantenha a página aberta até a confirmação da nuvem.
 - Cada lista tem uma revisão. Duas abas/dispositivos que partirem da mesma revisão não podem sobrescrever silenciosamente uma à outra. Um conflito preserva o rascunho e interrompe novas gravações daquela cópia.
-- Para resolver um conflito, baixe um backup se precisar das alterações locais e use **Recarregar da nuvem**. Depois refaça as alterações desejadas. Restaurar um backup substitui a lista inteira, não faz uma mesclagem automática.
 - Ao abrir novamente, um rascunho só é reenviado automaticamente se a revisão da nuvem continuar igual. Se ela mudou, a aplicação informa conflito. Uma resposta perdida após uma gravação pode gerar esse conflito conservador; a versão já salva não é apagada.
-- As listas são carregadas ao abrir a página e pelo botão de recarga. Não há atualização em tempo real nem mesclagem automática entre dispositivos.
+- As listas são carregadas ao abrir a página. O salvamento é automático; a seção de sincronização e os controles de recarga, download e restauração de backup foram removidos. Não há atualização em tempo real nem mesclagem automática entre dispositivos.
 
 ## Segurança e limites
 
@@ -36,7 +35,7 @@ Uma única tabela possui até duas linhas por usuário: `decks` e `wishlist`. Ca
 
 O servidor deriva a identidade da sessão e rejeita uma operação se a conta mudou desde que a página foi carregada. Não aceita `user_id` no corpo de salvamento. Limites: até 200 decks, 1.000 entradas por deck, 1.000 entradas na wishlist e 1 a 1.000 cópias por entrada. Há também limite de aproximadamente 4 MB por lista; ele pode ser alcançado antes dos limites de quantidade. As imagens continuam nas fontes Scryfall/TCGdex, sem ocupar o banco com arquivos.
 
-O plano Free atual do Supabase inclui banco de 500 MB, compartilhado com as contas e demais dados do projeto. Esta estrutura começa com **US$ 0/mês dentro das cotas gratuitas**, mas não equivale a espaço ilimitado. Não há um serviço de backup automático contratado nesta entrega: baixe backups JSON das listas importantes e mantenha cópias em outro local. A exclusão de um usuário no Supabase remove as linhas associadas por chave estrangeira.
+O plano Free atual do Supabase inclui banco de 500 MB, compartilhado com as contas e demais dados do projeto. Esta estrutura começa com **US$ 0/mês dentro das cotas gratuitas**, mas não equivale a espaço ilimitado. Não há um serviço de backup automático contratado nem controles de exportação/restauração na interface. Mantenha os arquivos TXT originais em outro local. A exclusão de um usuário no Supabase remove as linhas associadas por chave estrangeira.
 
 Quem controla o perfil do navegador pode acessar rascunhos, caches e cópias locais. Eles não são criptografados. A proteção de acesso entre usuários no servidor e no banco depende das políticas RLS; a divisão das chaves locais não substitui essas políticas.
 

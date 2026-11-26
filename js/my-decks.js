@@ -412,7 +412,7 @@
   window.addEventListener('authChanged', guard);
   window.addEventListener('pageshow', guard);
   decks = library.items;
-  AccountLibrary.controls(library, $('libraryControls'), $('saveStatus'), () => {
+  AccountLibrary.bindStatus(library, $('saveStatus'), () => {
     if (!guard()) return;
     decks = library.items; boxes();
     if (current()) detail(); else $('deckDetail').innerHTML = emptyDetail;

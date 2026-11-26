@@ -1,6 +1,5 @@
 
-const CHEVRON_DOWN_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>`;
-const CHEVRON_UP_SVG = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"></polyline></svg>`;
+const STORE_ACTION_SVG = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9h18l-2-6H5L3 9Z"/><path d="M4 9v11h16V9M9 20v-6h6v6M3 9c0 3 4 3 4 0 0 3 5 3 5 0 0 3 5 3 5 0 0 3 4 3 4 0"/></svg>`;
 
 function toggleCard(btn) {
   const card = btn.closest(".card");
@@ -11,11 +10,11 @@ function toggleCard(btn) {
   if (extra.style.display === "block") {
     extra.style.display = "none";
     btn.classList.remove("active");
-    btn.innerHTML = CHEVRON_DOWN_SVG;
+    btn.setAttribute('aria-expanded', 'false');
   } else {
     extra.style.display = "block";
     btn.classList.add("active");
-    btn.innerHTML = CHEVRON_UP_SVG;
+    btn.setAttribute('aria-expanded', 'true');
   }
 }
 
@@ -34,26 +33,22 @@ function renderCardElement(cardData, selected = getSelected(false)) {
   card.dataset.printingId = cardData.id;
 
   if (img) {
-    card.innerHTML += `<a href="${cardDetailUrl}" class="card-img-link" title="${escapeHTML(cardData.name)}"><img src="${escapeHTML(img)}" alt="${escapeHTML(cardData.name)}" data-card-id="${escapeHTML(cardIdAttr)}" loading="lazy" decoding="async"></a>`;
+    card.innerHTML += `<a href="${cardDetailUrl}" class="card-img-link" title="${escapeHTML(cardData.name)}" aria-label="${escapeHTML(cardData.name)}"><img src="${escapeHTML(img)}" alt="${escapeHTML(cardData.name)}" data-card-id="${escapeHTML(cardIdAttr)}" loading="lazy" decoding="async"></a>`;
   } else {
-    card.innerHTML += `<a href="${cardDetailUrl}" class="card-img-link"><span class="card-image-placeholder">${I18N.t('imageUnavailable')}</span></a>`;
+    card.innerHTML += `<a href="${cardDetailUrl}" class="card-img-link" title="${escapeHTML(cardData.name)}" aria-label="${escapeHTML(cardData.name)}"><span class="card-image-placeholder">${I18N.t('imageUnavailable')}</span></a>`;
   }
 
   card.innerHTML += `
     <div class="card-copy">
-    <a href="${cardDetailUrl}" class="card-title-link" title="${escapeHTML(cardData.name)}"><strong>${escapeHTML(cardData.name)}</strong></a>
     ${cardData._deck ? `<span class="deck-card-badge">${cardData._deck.quantity} × · ${I18N.t(cardData._deck.section === 'sideboard' ? 'sideboard' : 'mainDeck')}</span>` : ''}
-    <em class="card-price">${cad}</em>
-    <small class="card-edition" title="${escapeHTML(cardData.set_name || cardData.set || '')}">${escapeHTML(cardData.set_name || cardData.set || '')} · #${escapeHTML(cardData.collector_number || '')}</small>
-    <div class="card-actions-row">
-      <a href="${cardDetailUrl}" class="btn-card-detail">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-        ${I18N.t('cardDetailsBtn')}
-      </a>
-      <button class="toggle-btn" onclick="toggleCard(this)" title="${I18N.t('quickPreviewTooltip')}">
-        ${CHEVRON_DOWN_SVG}
-      </button>
+    <div class="card-price-row">
+      <em class="card-price">${cad}</em>
+      <div class="card-actions-row">
+        <button type="button" class="toggle-btn" onclick="toggleCard(this)" aria-expanded="false" data-i18n-aria="quickPreviewTooltip" data-i18n-title="quickPreviewTooltip" aria-label="${I18N.t('quickPreviewTooltip')}" title="${I18N.t('quickPreviewTooltip')}">${STORE_ACTION_SVG}</button>
+      </div>
     </div>
+    <small class="card-edition" title="${escapeHTML(cardData.set_name || cardData.set || '')}">${escapeHTML(cardData.set_name || cardData.set || '')} · #${escapeHTML(cardData.collector_number || '')}</small>
+    <div class="card-feedback"></div>
     </div>
   `;
 
@@ -90,7 +85,7 @@ function renderCardElement(cardData, selected = getSelected(false)) {
   links.appendChild(c2);
   extra.appendChild(links);
   card.appendChild(extra);
-  card.querySelector('.card-actions-row').append(createWishlistButton(cardData));
+  card.querySelector('.card-actions-row').append(createWishlistButton(cardData, { compact: true, feedbackTarget: card.querySelector('.card-feedback') }));
 
   return card;
 }
