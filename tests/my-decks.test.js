@@ -5,12 +5,15 @@ const { JSDOM, VirtualConsole } = require('jsdom');
 const DeckImport = require('../js/deck-import');
 const user = { id: '11111111-1111-4111-8111-111111111111', email: 'player@example.com' };
 const legacyKey = 'teamSandwich.myDecks.v1';
-const storageKey = `${legacyKey}:${user.id}`;
+const storageKey = `teamSandwich.cloudCache.v1:${user.id}:decks`;
 const accessKey = 'teamSandwich.deckAccess.v1';
 
-async function page(file = 'my-decks.html', { authenticated = true, local = {}, query = '', offline = false, identity = user, authError = null } = {}) {
+async function page(file = 'my-decks.html', { authenticated = true, local = {}, query = '', offline = false, identity = user, authError = null, libraryError = null } = {}) {
   const html = fs.readFileSync(file, 'utf8');
   const errors = []; const requests = [];
+  let initial = [];
+  try { if (identity.id === user.id) initial = JSON.parse(local[storageKey] || 'null')?.decks || []; } catch { /* Preserved local data is not a cloud response. */ }
+  const remote = { items: initial, revision: initial.length ? 1 : 0 };
   const virtualConsole = new VirtualConsole();
   virtualConsole.on('jsdomError', error => errors.push(error));
   const dom = new JSDOM(html.replace(/<script src="[^"]+"><\/script>/g, ''), {
@@ -27,6 +30,15 @@ async function page(file = 'my-decks.html', { authenticated = true, local = {}, 
         if (url === '/api/auth/login') return Response.json(JSON.parse(options.body).password === 'correct-secret' ? { user } : { error: 'authInvalidCredentials' }, { status: JSON.parse(options.body).password === 'correct-secret' ? 200 : 401 });
         if (url === '/api/auth/signup') return Response.json({ confirmationRequired: true });
         if (url === '/api/auth/logout') { authenticated = false; return Response.json({ user: null }); }
+        if (url === '/api/library/decks') {
+          if (libraryError) return Response.json({ error: libraryError }, { status: 503 });
+          if (options.method === 'PUT') {
+            const input = JSON.parse(options.body);
+            if (input.revision !== remote.revision) return Response.json({ error: 'libraryConflict' }, { status: 409 });
+            remote.items = input.items; remote.revision++;
+          }
+          return Response.json(remote);
+        }
         if (offline) throw new Error('Offline');
         if (url.includes('api.tcgdex.net')) {
           if (url.includes('/series/')) return Response.json({ sets: [] });
@@ -163,7 +175,31 @@ test('old shared libraries require an explicit import and preserve the original'
   } finally { current.dom.window.close(); }
 });
 
-test('accounts see separate local libraries; logout hides the workspace', async () => {
+test('previous per-account local decks are copied explicitly without overwriting their source', async () => {
+  const key = `${legacyKey}:${user.id}`;
+  const source = JSON.stringify({ version: 1, decks: [{ id: 'old-account-deck', name: 'My old deck', game: 'pokemon', cards: [] }] });
+  const current = await page('my-decks.html', { local: { [key]: source } });
+  try {
+    assert.equal(current.document.querySelector('.deck-box'), null);
+    current.dom.window.confirm = () => true; current.document.getElementById('importLegacyDecks').click();
+    await waitFor(() => current.document.getElementById('saveStatus').textContent === 'Saved to your account.');
+    assert.equal(saved(current).decks[0].name, 'My old deck');
+    assert.equal(current.dom.window.localStorage.getItem(key), source);
+  } finally { current.dom.window.close(); }
+});
+
+test('missing database setup never displays a local library as a successfully loaded cloud library', async () => {
+  const source = JSON.stringify({ version: 1, decks: [] });
+  const current = await page('my-decks.html', { libraryError: 'libraryNotConfigured', local: { [legacyKey]: source } });
+  try {
+    assert.equal(current.document.getElementById('decksWorkspace').hidden, true);
+    assert.equal(current.document.getElementById('deckLoadRetry').hidden, false);
+    assert.match(current.document.getElementById('deckSessionStatus').textContent, /database setup/);
+    assert.equal(current.dom.window.localStorage.getItem(legacyKey), source);
+  } finally { current.dom.window.close(); }
+});
+
+test('accounts see separate cloud libraries; logout hides the workspace', async () => {
   const other = { id: '22222222-2222-4222-8222-222222222222', email: 'other@example.com' };
   const data = JSON.stringify({ version: 1, decks: [{ id: 'private', name: 'First account deck', game: 'mtg', cards: [] }] });
   const current = await page('my-decks.html', { identity: other, local: { [storageKey]: data } });
@@ -346,8 +382,8 @@ test('deleting a deck requires confirmation, preserves other decks and persists 
   } finally { current.dom.window.close(); reopened?.dom.window.close(); }
 });
 
-test('storage quota failure is visible and corrupt saved data is preserved', async () => {
-  const current = await page(); const corrupt = await page('my-decks.html', { local: { [storageKey]: 'broken json' } });
+test('local storage failures do not prevent cloud saving; corrupt legacy data is preserved', async () => {
+  const current = await page(); const corrupt = await page('my-decks.html', { local: { [legacyKey]: 'broken json' } });
   try {
     await upload(current, '4 Lightning Bolt');
     const native = current.dom.window.Storage.prototype.setItem;
@@ -355,10 +391,12 @@ test('storage quota failure is visible and corrupt saved data is preserved', asy
       if (key === storageKey) throw new Error('Quota exceeded'); return native.call(this, key, value);
     };
     submit(current, 'importForm');
-    assert.match(current.document.getElementById('saveStatus').textContent, /only exist on this page/);
+    await waitFor(() => current.document.getElementById('saveStatus').textContent === 'Saved to your account.');
     assert.equal(current.dom.window.localStorage.getItem(storageKey), null);
-    assert.equal(corrupt.document.getElementById('importDeck').disabled, true);
-    assert.equal(corrupt.dom.window.localStorage.getItem(storageKey), 'broken json');
+    assert.equal(corrupt.document.getElementById('importDeck').disabled, false);
+    corrupt.dom.window.confirm = () => true; corrupt.document.getElementById('importLegacyDecks').click();
+    assert.match(corrupt.document.getElementById('saveStatus').textContent, /could not be read/);
+    assert.equal(corrupt.dom.window.localStorage.getItem(legacyKey), 'broken json');
   } finally { current.dom.window.close(); corrupt.dom.window.close(); }
 });
 

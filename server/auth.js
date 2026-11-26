@@ -1,4 +1,5 @@
 'use strict';
+const { createLibrary } = require('./library');
 
 // Supabase owns credentials and persistent users. Render only proxies Auth and
 // keeps tokens in HttpOnly cookies; no service-role key or local user database.
@@ -109,7 +110,7 @@ function createAuth({ url = process.env.SUPABASE_URL, key = process.env.SUPABASE
       return result;
     } catch { throw fail('authInvalidInput', 400); }
   }
-  return async (request, response, pathname, json) => {
+  const handle = async (request, response, pathname, json) => {
     const action = pathname.slice('/api/auth/'.length);
     if (!['session', 'signup', 'login', 'logout'].includes(action)) return json(response, 404, { error: 'notFound' });
     if (request.method !== (action === 'session' ? 'GET' : 'POST')) return json(response, 405, { error: 'methodNotAllowed' });
@@ -139,5 +140,7 @@ function createAuth({ url = process.env.SUPABASE_URL, key = process.env.SUPABASE
       return json(response, error.status || 503, { error: error.status ? error.message : 'authUnavailable' });
     }
   };
+  handle.library = createLibrary({ configured, origin, url, key, session, fetchImpl });
+  return handle;
 }
 module.exports = { createAuth };

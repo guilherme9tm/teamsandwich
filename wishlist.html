@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title data-i18n="wishlistPageTitle">Wishlist — Team Sandwich</title>
+  <link rel="icon" href="assets/icons/favicon.ico">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/my-decks.css">
+</head>
+<body class="decks-page">
+  <header class="header decks-header">
+    <a href="index.html" class="logo-link-header"><img src="assets/images/IMG_6262.jpg" alt="Team Sandwich" class="header-logo" width="2548" height="1004"></a>
+    <div class="lang-selector"><select class="lang-selector-select" data-i18n-aria="languageLabel"></select></div>
+    <a href="my-decks.html" data-i18n="myDecks">Meus Decks</a>
+    <a href="index.html" data-i18n="backToSite">← Voltar ao site</a>
+    <button id="wishlistLogout" type="button" class="deck-button" data-i18n="logout">Sair</button>
+  </header>
+  <main class="decks-workspace">
+    <p id="wishlistLoading" role="status" data-i18n="authChecking">Verificando sua sessão…</p>
+    <button id="wishlistRetry" class="deck-button" data-i18n="retry" type="button" hidden>Tentar novamente</button>
+    <section id="wishlistWorkspace" hidden>
+      <div class="decks-topbar"><h1 data-i18n="wishlist">Wishlist</h1><a class="deck-button primary" href="card.html" data-i18n="wishlistBrowse">Adicionar cartas pelo catálogo</a></div>
+      <p id="wishlistAccount" class="deck-note"></p>
+      <p class="deck-note" data-i18n="libraryCloudIntro">Seus decks e sua wishlist são salvos na sua conta e ficam disponíveis em outros dispositivos.</p>
+      <p id="wishlistStatus" role="status" aria-live="polite"></p>
+      <details><summary data-i18n="librarySyncOptions">Sincronização e backup</summary><div id="wishlistControls" class="library-controls" data-kind="wishlist"></div></details>
+      <label for="wishlistGame" data-i18n="game">Jogo</label>
+      <select id="wishlistGame"><option value="all" data-i18n="allDeckGames">Todos os jogos</option><option value="mtg">Magic: The Gathering</option><option value="pokemon">Pokémon TCG</option></select>
+      <p id="wishlistCount" class="deck-note"></p>
+      <div id="wishlistCards" class="deck-card-grid"></div>
+      <nav class="library-controls" data-i18n-aria="navigation"><button id="wishlistPrev" type="button" class="deck-button" data-i18n="previousPage">Anterior</button><button id="wishlistNext" type="button" class="deck-button" data-i18n="nextPage">Próxima</button></nav>
+    </section>
+  </main>
+  <script src="js/storage.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/locales.js"></script>
+  <script src="js/card-data.js"></script>
+  <script src="js/pokemon-provider.js"></script>
+  <script src="js/library-data.js"></script>
+  <script src="js/account-library.js"></script>
+  <script src="js/wishlist.js"></script>
+</body>
+</html>

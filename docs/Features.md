@@ -2,7 +2,7 @@
 
 ## Contas e biblioteca
 
-Cadastro com e-mail, senha e confirmação; login, renovação de sessão e saída via Supabase Auth no servidor Node. Biblioteca local separada por usuário, com recuperação explícita das listas antigas, sem sincronização entre dispositivos. Exige configuração no Render/Supabase: [guia de autenticação](Autenticacao.md).
+Cadastro com e-mail, senha e confirmação; login, renovação de sessão e saída via Supabase Auth no servidor Node. Decks e wishlist persistidos por usuário no Supabase, disponíveis em outros dispositivos, com recuperação explícita das listas antigas, rascunhos e controle de conflitos. Configure também [Listas da conta](ListasDaConta.md). Exige configuração no Render/Supabase: [guia de autenticação](Autenticacao.md).
 
 ## Catálogo e navegação
 

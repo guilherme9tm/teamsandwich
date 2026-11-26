@@ -678,6 +678,7 @@ function updateUserUI() {
     if (user) {
       container.innerHTML = `
         <a class="btn-login-header" href="my-decks.html" data-i18n="myDecks">${I18N.t('myDecks')}</a>
+        <a class="btn-login-header" href="wishlist.html" data-i18n="wishlist">${I18N.t('wishlist')}</a>
         <button class="btn-logout-header" onclick="logoutUser()" data-i18n="logout">${I18N.t('logout')}</button>
       `;
     } else {

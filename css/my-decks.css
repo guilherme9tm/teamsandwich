@@ -78,6 +78,8 @@
 .deck-login form { margin: 26px 0; }
 .deck-login input { margin-top: 8px; }
 .deck-login label { display: block; margin-top: 16px; }
+.library-controls { display: flex; flex-wrap: wrap; gap: 10px; margin: 14px 0; }
+#wishlistGame { max-width: 260px; margin: 8px 0; }
 .deck-login #loginError { min-height: 1.5em; }
 .deck-login .auth-success { color: var(--success); }
 .deck-login button { width: 100%; margin-top: 10px; }

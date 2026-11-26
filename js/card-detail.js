@@ -93,6 +93,7 @@ function toggleCardFace() {
 function renderCardDetailView(card) {
   const container = document.getElementById("detailContainer");
   if (!container) return;
+  // Recreated together with the selected printing, including language changes.
 
   const isFrench = false;
   const frCard = isFrench ? currentFrenchCardData : null;
@@ -195,6 +196,7 @@ function renderCardDetailView(card) {
           </button>
         ` : ''}
 
+        <div id="detailWishlistAction"></div>
         <button type="button" id="viewArtsButton" class="detail-flip-btn" onclick="openArtsGallery()" aria-haspopup="dialog">${I18N.t('viewAlternateArts')}</button>
         <div class="detail-legalities-box">
           <div class="detail-legalities-title">${I18N.t('formatLegalities')}</div>
@@ -272,6 +274,7 @@ function renderCardDetailView(card) {
 
     </div>
   `;
+  document.getElementById('detailWishlistAction').append(createWishlistButton(card));
 }
 
 window.addEventListener('languageChanged', () => {

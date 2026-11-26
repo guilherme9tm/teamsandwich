@@ -2,7 +2,7 @@
 
 ## Cadastro, login e Meus Decks
 
-Cadastre-se com e-mail e senha e entre pelo **Login**. A autenticação usa Supabase Auth pelo servidor no Render. Os decks continuam neste navegador, separados por conta, com recuperação explícita das listas antigas. Configure as variáveis e a confirmação de e-mail conforme o [guia de autenticação](docs/Autenticacao.md); veja também [Meus Decks](docs/MeusDecks.md).
+Cadastre-se com e-mail e senha e entre pelo **Login**. Contas, decks e wishlist usam o mesmo Supabase. Execute a [configuração das listas por conta](docs/ListasDaConta.md) para ativar a persistência na nuvem; a [configuração de autenticação](docs/Autenticacao.md) continua necessária. Decks locais antigos podem ser copiados após confirmação.
 
 ## Atualização TCG — 18/11/2026
 
@@ -13,7 +13,7 @@ npm ci
 npm start
 ```
 
-Abra `http://127.0.0.1:5500`. Para torneios Magic, configure `TOPDECK_API_KEY` em `.env` usando `.env.example`; a chave permanece no servidor. Catálogos e torneios Pokémon públicos funcionam sem chave. Node 22.13+ (24 recomendado); sem banco local e sem build; contas usam o serviço gerenciado Supabase Auth.
+Abra `http://127.0.0.1:5500`. Para torneios Magic, configure `TOPDECK_API_KEY` em `.env` usando `.env.example`; a chave permanece no servidor. Catálogos e torneios Pokémon públicos funcionam sem chave. Node 22.13+ (24 recomendado); sem banco local e sem build; contas e listas usam Supabase gerenciado.
 
 Validação: `npm run check`, `npm test` e, opcionalmente, `npm run test:live`. Os testes jsdom verificam comportamentos, sem substituir uma revisão visual real. A validação autenticada TopDeck e a revisão visual ficaram pendentes por falta de chave e bloqueio da automação do navegador.
 

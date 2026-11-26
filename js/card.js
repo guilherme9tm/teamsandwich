@@ -90,6 +90,7 @@ function renderCardElement(cardData, selected = getSelected(false)) {
   links.appendChild(c2);
   extra.appendChild(links);
   card.appendChild(extra);
+  card.querySelector('.card-actions-row').append(createWishlistButton(cardData));
 
   return card;
 }

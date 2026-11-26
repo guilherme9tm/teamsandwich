@@ -4,7 +4,7 @@
 
 - Aplicação estática: navegador moderno com Fetch, AbortController/AbortSignal.timeout, módulos Intl e dialog nativo. Não abrir por `file://`.
 - Servidor para contas/TopDeck e testes: Node.js 22.13+ (Node 24 recomendado) e npm.
-- Não há banco local, migrações próprias, Docker, build ou dependência de produção. Contas usam Supabase Auth; veja [configuração de cadastro e login](Autenticacao.md).
+- Não há banco local, Docker, build ou dependência de produção. Decks e wishlist exigem a [migração SQL no Supabase](ListasDaConta.md). Contas usam Supabase Auth; veja [configuração de cadastro e login](Autenticacao.md).
 
 ## Instalação e servidor completo
 

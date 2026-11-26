@@ -1,6 +1,6 @@
 # Cadastro e login — Render + Supabase Auth
 
-O login compartilhado foi substituído por contas reais de e-mail e senha. O Supabase guarda os usuários e verifica as senhas; o servidor Node no Render faz as chamadas de autenticação. Não é necessário instalar dependências, criar tabelas SQL, usar Docker ou contratar uma VM.
+O login compartilhado foi substituído por contas reais de e-mail e senha. O Supabase guarda os usuários e verifica as senhas; o servidor Node no Render faz as chamadas de autenticação. Não é necessário instalar dependências, usar Docker ou contratar uma VM. Para guardar decks e wishlist na conta, aplique o SQL descrito em [Listas da conta](ListasDaConta.md).
 
 O código está pronto para configurar. Nenhum projeto, conta de provedor ou serviço de e-mail foi criado e nenhuma credencial real foi utilizada nesta implementação.
 
@@ -46,7 +46,7 @@ Live Server sozinho não implementa as rotas `/api/auth/*`. Sem o Node ou sem as
 
 1. Abra **Login → Cadastre-se**, informe e-mail e uma senha própria e confirme a senha.
 2. Confira a mensagem de confirmação e o usuário em **Authentication → Users** no Supabase.
-3. Confirme o e-mail, volte ao site e entre. A biblioteca deve mostrar seu endereço de e-mail.
+3. Confirme o e-mail, volte ao site e entre. A biblioteca deve mostrar seu endereço de e-mail. A persistência das listas requer também o SQL de [Listas da conta](ListasDaConta.md).
 4. Importe um deck, ajuste quantidades, recarregue e confira os dados.
 5. Saia. A URL direta `my-decks.html` deve pedir login. Entre com outra conta: a biblioteca anterior não deve aparecer.
 6. Havendo listas da versão anterior no mesmo navegador/origem, a primeira abertura de uma biblioteca nova oferece **Recuperar decks anteriores deste navegador**. A cópia exige confirmação e preserva os dados originais. Não importe listas de outra pessoa em uma máquina compartilhada.
@@ -55,9 +55,9 @@ Live Server sozinho não implementa as rotas `/api/auth/*`. Sem o Node ou sem as
 
 - A sessão é validada em `/auth/v1/user` no Supabase. Tokens ficam em cookies `HttpOnly`, `SameSite=Lax` e `Secure` em HTTPS, sem `localStorage` ou `sessionStorage`. A renovação usa o refresh token e atualiza os cookies; a saída revoga a sessão atual no provedor. A API não registra senhas nem devolve tokens ao JavaScript.
 - Operações de escrita exigem origem configurada. Login/cadastro validam entradas e têm limitação em memória de 10 tentativas por endereço de e-mail e 100 por IP de conexão em 10 minutos, além dos limites do Supabase. O servidor não confia em `X-Forwarded-For` arbitrário. No Render, conexões de proxy podem compartilhar esse limite; réplicas e reinícios não compartilham os contadores. Para tráfego maior, será preciso rever essa proteção.
-- **Contas** são persistidas no Supabase e funcionam em outros dispositivos. **Decks** continuam locais, em `teamSandwich.myDecks.v1:<id-do-usuario>`. Não há sincronização ou backup de decks na nuvem. Limpar os dados do navegador apaga as listas; mantenha os arquivos TXT originais. A separação por conta é de interface/armazenamento local, não criptografia contra alguém com acesso ao perfil do navegador ou às ferramentas de desenvolvimento.
+- **Contas, decks e wishlist** ficam no Supabase após aplicar a [migração das listas](ListasDaConta.md). As listas podem ser recuperadas em outros dispositivos. Cópias antigas e rascunhos ainda podem existir no navegador; não são criptografados contra alguém com acesso ao perfil ou às ferramentas de desenvolvimento.
 - Inicializar/revalidar o acesso requer rede. Falhas do serviço bloqueiam a interface; cookies não são apagados por indisponibilidade temporária. A conta é revalidada ao retornar à aba e periodicamente enquanto a página está visível.
-- Recuperação automática de senha, login social, edição/exclusão de conta e sincronização de decks não fazem parte desta entrega. Não habilite MFA obrigatório para esses usuários sem implementar o fluxo correspondente.
+- Recuperação automática de senha, login social e edição/exclusão de conta pela interface não fazem parte desta entrega. Não habilite MFA obrigatório para esses usuários sem implementar o fluxo correspondente.
 - O [plano Free do Supabase](https://supabase.com/pricing) informa 50 mil usuários ativos mensais, banco de 500 MB, 2 projetos ativos e pausa após uma semana de inatividade. É um plano gratuito, não um período de teste. O uso precisa respeitar também limites de e-mail e API. Estimativa para Auth: **US$ 0/mês dentro dessas cotas**, mais o Render e SMTP nos respectivos planos gratuitos; domínio próprio e excessos não estão incluídos.
 
 ## Validação da implementação

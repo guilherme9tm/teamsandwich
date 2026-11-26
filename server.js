@@ -46,6 +46,7 @@ function createServer({ apiKey = process.env.TOPDECK_API_KEY, fetchImpl = fetch,
     try {
       const url = new URL(request.url, 'http://localhost');
       if (url.pathname.startsWith('/api/auth/')) return await handleAuth(request, response, url.pathname, json);
+      if (url.pathname.startsWith('/api/library/')) return await handleAuth.library(request, response, url.pathname, json);
       if (request.method !== 'GET' && request.method !== 'HEAD') return json(response, 405, { error: 'methodNotAllowed' });
       if (url.pathname === '/api/topdeck/tournaments') {
         const page = Math.max(1, Math.min(1000, Number.parseInt(url.searchParams.get('page'), 10) || 1));

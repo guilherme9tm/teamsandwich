@@ -4,6 +4,11 @@ const AppStorage = (() => {
   const fallback = new Map();
   function storage(kind) {
     return {
+      keys() {
+        const keys = new Set([...fallback.keys()].filter(key => key.startsWith(`${kind}:`)).map(key => key.slice(kind.length + 1)));
+        try { for (let index = 0; index < window[kind].length; index++) keys.add(window[kind].key(index)); } catch { /* Storage may be blocked. */ }
+        return [...keys].filter(key => typeof key === 'string');
+      },
       getItem(key) {
         if (fallback.has(`${kind}:${key}`)) return fallback.get(`${kind}:${key}`);
         try { return window[kind].getItem(key); }

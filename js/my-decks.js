@@ -5,6 +5,7 @@
   const owner = DeckAccess.user()?.id;
   const legacyKey = 'teamSandwich.myDecks.v1';
   const key = `${legacyKey}:${owner}`;
+  const cacheKey = `teamSandwich.cloudCache.v1:${owner}:decks`;
   const escape = value => String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
   const id = () => crypto.randomUUID();
   const validCount = (value, min) => Number.isSafeInteger(value) && value >= min && value <= 1000;
@@ -27,6 +28,15 @@
   }
   if (!guard()) return;
   const emptyDetail = $('deckDetail').innerHTML;
+  let library;
+  try { library = await AccountLibrary.open('decks'); }
+  catch (error) {
+    I18N.bind($('deckSessionStatus'), ['libraryNotConfigured', 'authNotConfigured'].includes(error.message) ? error.message : 'libraryUnavailable');
+    $('deckLoadRetry').hidden = false;
+    $('deckLoadRetry').onclick = () => window.location.reload();
+    return;
+  }
+  if (!guard()) return;
 
   function canAnimate(element) {
     return element.isConnected && typeof element.animate === 'function'
@@ -88,8 +98,10 @@
   }
   function persist() {
     if (!guard() || readFailed) return;
-    const saved = AppStorage.local.setItem(key, JSON.stringify({ version: 1, decks }));
-    status(saved ? 'changesSaved' : 'deckStorageUnavailable', !saved);
+    // Retain the existing local copy for migration/rollback; cloud acknowledgement
+    // alone controls the visible saved status.
+    AppStorage.local.setItem(cacheKey, JSON.stringify({ version: 1, decks }));
+    try { library.save(decks); } catch { status('libraryInvalidData', true); }
   }
   function current() { return decks.find(deck => deck.id === selected); }
   function totals(cards) {
@@ -399,29 +411,20 @@
   };
   window.addEventListener('authChanged', guard);
   window.addEventListener('pageshow', guard);
-  window.addEventListener('storage', event => {
-    if (!guard() || event.key !== key && event.key !== null) return;
-    try {
-      decks = read(); readFailed = false; boxes();
-      if (current()) detail(); else $('deckDetail').innerHTML = emptyDetail;
-      I18N.updateDOM();
-      $('importDeck').disabled = false;
-      status('deckLibraryUpdated');
-    } catch {
-      readFailed = true;
-      $('importDeck').disabled = true;
-      $('deckDetail').innerHTML = emptyDetail;
-      I18N.updateDOM();
-      status('deckLibraryReadError', true);
-    }
+  decks = library.items;
+  AccountLibrary.controls(library, $('libraryControls'), $('saveStatus'), () => {
+    if (!guard()) return;
+    decks = library.items; boxes();
+    if (current()) detail(); else $('deckDetail').innerHTML = emptyDetail;
+    I18N.updateDOM();
   });
-  try { decks = read(); } catch { readFailed = true; status('deckLibraryReadError', true); }
   $('deckAccount').textContent = DeckAccess.user().email;
-  $('importLegacyDecks').hidden = readFailed || AppStorage.local.getItem(key) !== null || AppStorage.local.getItem(legacyKey) === null;
+  const localSource = AppStorage.local.getItem(key) !== null ? key : legacyKey;
+  $('importLegacyDecks').hidden = library.revision > 0 || decks.length > 0 || AppStorage.local.getItem(localSource) === null;
   $('importLegacyDecks').onclick = () => {
     if (!guard() || !window.confirm(I18N.t('authImportLegacyConfirm'))) return;
     try {
-      const legacy = read(legacyKey);
+      const legacy = read(localSource);
       if (decks.length + legacy.length > 200) { status('deckLibraryLimit', true); return; }
       decks.push(...legacy.map(deck => ({ ...deck, id: id(), cards: deck.cards.map(card => ({ ...card, id: id() })) })));
       persist(); boxes(); $('importLegacyDecks').hidden = true;
