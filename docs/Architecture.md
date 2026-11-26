@@ -1,12 +1,12 @@
 # Arquitetura
 
-Atualizado em 18/11/2026. Este documento descreve o código implementado neste repositório.
+Atualizado em 26/11/2026. Este documento descreve o código implementado neste repositório.
 
 ## Diagnóstico e stack
 
 O projeto original é uma aplicação multipágina em HTML5, CSS e JavaScript clássico, sem React, bundler, banco de dados ou backend. Sidebar, pesquisa, lojas, importação TXT, paginação e galeria foram preservadas. Na revisão visual posterior solicitada pelo usuário, a interface passou a usar azul profundo, dourado e tipografia Segoe UI/Bahnschrift. Não foram fornecidas capturas junto ao pedido inicial; a revisão posterior utilizou a prévia real integrada do VS Code.
 
-A aplicação continua executável em hospedagem estática. `server.js` acrescenta um servidor Node opcional, sem dependências de produção, para servir os mesmos arquivos e consultar TopDeck com credenciais privadas. O único pacote instalado, `jsdom`, é uma dependência de desenvolvimento para testes de integração do DOM. Não há migrações porque não existe banco.
+O catálogo continua executável em hospedagem estática; contas exigem o servidor Node. `server.js` acrescenta um servidor Node, sem dependências de produção, para servir os mesmos arquivos e consultar TopDeck com credenciais privadas. O único pacote instalado, `jsdom`, é uma dependência de desenvolvimento para testes de integração do DOM. Contas usam Supabase Auth gerenciado; não há tabelas próprias ou migrações SQL. Consulte [Autenticação](Autenticacao.md).
 
 ## Estrutura e responsabilidades
 
@@ -20,7 +20,7 @@ A aplicação continua executável em hospedagem estática. `server.js` acrescen
 | `js/card-data.js` | Contrato comum, registro de provedores, adaptador Scryfall, cache e transporte Magic |
 | `js/pokemon-provider.js` | Transporte TCGdex, exclusão de Pocket, normalização, variantes e correspondência de coleções |
 | `js/prices.js` | Registros de preço, identificação de acabamento/moeda/fonte e formatação sem câmbio fixo |
-| `js/common.js` | Sidebar, pesquisa compartilhada, autenticação demonstrativa, idioma, jogo e navegação |
+| `js/common.js` | Sidebar, pesquisa compartilhada, estado de autenticação, idioma, jogo e navegação |
 | `js/lands.js` | Manifesto dos 14 ciclos, consultas exatas e filtros específicos de terrenos |
 | `competitive.html`, `js/competitive.js` | Torneios, classificações, decklists, importação colada, comparação e análise |
 | `js/tournament-data.js` | Adaptadores Limitless/TopDeck e normalização pública de resultados/decklists |
@@ -44,7 +44,7 @@ Fluxo competitivo: Limitless pública diretamente no navegador; TopDeck somente 
 
 ## Persistência e segurança
 
-Não há contas reais nem autenticação de senha. O demonstrativo local original continua existindo; não é adequado para acesso protegido. Senhas não são persistidas. O servidor não usa banco e só guarda cache temporário em memória. Preferências de idioma, lojas e layout ficam no navegador; imports e cache de catálogo ficam na sessão. Torneios não são persistidos em disco.
+Contas reais são verificadas pelo Supabase Auth via `server/auth.js`; a sessão usa cookies HttpOnly e o servidor não armazena senhas. `js/storage.js` obtém a identidade de `/api/auth/session`. O servidor não usa banco local e só guarda cache/contadores temporários em memória. Decks ficam no navegador, separados pelo ID da conta, sem sincronização central. A antiga senha compartilhada não libera acesso. Configuração e limites: [Autenticação](Autenticacao.md). Preferências de idioma, lojas e layout ficam no navegador; imports e cache de catálogo ficam na sessão. Torneios não são persistidos em disco.
 
 Chaves TopDeck são lidas de variável de ambiente, enviadas exclusivamente ao domínio fixo da fonte e nunca devolvidas ao frontend. O proxy admite somente listagem e classificação públicas, sem `view=staff`, rodadas, cadastro ou operações de escrita. Campos não necessários, como Discord e contato, são descartados na resposta ao cliente.
 

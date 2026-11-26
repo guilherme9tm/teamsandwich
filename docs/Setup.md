@@ -3,8 +3,8 @@
 ## Dependências
 
 - Aplicação estática: navegador moderno com Fetch, AbortController/AbortSignal.timeout, módulos Intl e dialog nativo. Não abrir por `file://`.
-- Servidor opcional e testes: Node.js 22.13+ (Node 24 recomendado) e npm.
-- Não há banco de dados, migrações, Docker, build ou dependência de produção.
+- Servidor para contas/TopDeck e testes: Node.js 22.13+ (Node 24 recomendado) e npm.
+- Não há banco local, migrações próprias, Docker, build ou dependência de produção. Contas usam Supabase Auth; veja [configuração de cadastro e login](Autenticacao.md).
 
 ## Instalação e servidor completo
 
@@ -38,11 +38,11 @@ Para manter o fluxo original, Live Server ou outro servidor estático também fu
 python -m http.server 5500
 ```
 
-Esse modo não disponibiliza o proxy TopDeck. Não execute ambos os servidores na mesma porta.
+Esse modo não disponibiliza contas, login ou o proxy TopDeck. Não execute ambos os servidores na mesma porta.
 
 Entradas úteis:
 
-- `login.html`: acesso a Meus Decks com `teamsandwich`; [teste e persistência local](MeusDecks.md).
+- `login.html`: cadastro e login com e-mail e senha (Supabase configurado); [teste e persistência local](MeusDecks.md).
 - `card.html`: catálogo automático de Magic.
 - `card.html?game=pokemon&name=Pikachu`: pesquisa Pokémon.
 - `card.html?view=lands`: catálogo especializado de terrenos.

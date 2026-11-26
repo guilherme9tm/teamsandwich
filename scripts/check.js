@@ -2,7 +2,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 const root = path.resolve(__dirname, '..');
-const scripts = [path.join(root, 'server.js'), ...['js', 'scripts', 'tests'].flatMap(directory => fs.readdirSync(path.join(root, directory)).filter(file => file.endsWith('.js')).map(file => path.join(root, directory, file)))];
+const scripts = [path.join(root, 'server.js'), ...['js', 'server', 'scripts', 'tests'].flatMap(directory => fs.readdirSync(path.join(root, directory)).filter(file => file.endsWith('.js')).map(file => path.join(root, directory, file)))];
 let failed = false;
 for (const script of scripts) {
   const result = spawnSync(process.execPath, ['--check', script], { encoding: 'utf8' });

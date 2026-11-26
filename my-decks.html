@@ -15,13 +15,16 @@
     <a href="index.html" data-i18n="backToSite">← Voltar ao site</a>
     <button id="deckLogout" class="deck-button" type="button" data-i18n="logout">Sair</button>
   </header>
+  <p id="deckSessionStatus" class="decks-workspace" role="status" data-i18n="authChecking">Verificando sua sessão…</p>
   <main id="decksWorkspace" class="decks-workspace" hidden>
     <div class="decks-topbar">
       <div><p class="deck-eyebrow">MAGIC: THE GATHERING · POKÉMON TCG</p><h1><span class="deck-title-prefix" data-i18n="myDecksPrefix">Meus</span> <span data-i18n="myDecksNoun">Decks</span></h1></div>
       <button id="importDeck" class="deck-button primary" type="button">↑ <span data-i18n="importMyDeck">Importar deck</span> <small>.txt</small></button>
       <input id="deckFile" type="file" accept=".txt,text/plain" hidden>
     </div>
-    <p class="deck-note" data-i18n="deckAutoSave">Salvo neste navegador · As alterações são salvas automaticamente.</p>
+    <p id="deckAccount" class="deck-note"></p>
+    <p class="deck-note" data-i18n="authLocalDecks">Sua conta funciona em outros dispositivos. Os decks ficam neste navegador, separados por conta.</p>
+    <button id="importLegacyDecks" type="button" class="deck-button" data-i18n="authImportLegacy" hidden>Recuperar decks anteriores deste navegador</button>
     <p id="saveStatus" role="status" aria-live="polite"></p>
     <div class="decks-layout">
       <aside class="deck-library" data-i18n-aria="savedDecks" aria-label="Decks salvos"><h2 data-i18n="yourLibrary">Sua biblioteca</h2><label for="deckFilter" data-i18n="game">Jogo</label><select id="deckFilter"><option value="all" data-i18n="allDeckGames">Todos os jogos</option><option value="mtg">Magic: The Gathering</option><option value="pokemon">Pokémon TCG</option></select><div id="deckBoxes" class="deck-boxes"></div></aside>

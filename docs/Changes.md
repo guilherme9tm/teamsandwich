@@ -56,6 +56,6 @@ Execução confirmada: 33 testes determinísticos aprovados e sintaxe/referênci
 - **Torneios:** escopo das buscas é o conjunto carregado. Player/archetype precisam de classificações; períodos longos podem exigir outras páginas. Há resultados sem decklists, arquétipo ou local. URLs de listas podem ser alteradas na origem.
 - **Fontes/termos:** TopDeck exige atribuição e restringe comercialização dos dados. Limitless não foi interpretada como licença irrestrita de redistribuição. Scrydex não foi contratada e a Pokémon TCG API depreciada não foi usada.
 - **Histórico:** tendências calculadas somente a partir dos campeonatos carregados; sem importador permanente ou série histórica completa.
-- **Contas:** autenticação local original continua demonstrativa. Não foi criada autenticação real nesta refatoração.
+- **Contas (atualização de 26/11/2026):** cadastro/login reais via Supabase Auth, sessão HttpOnly e decks locais separados por usuário. Configuração externa e entrega de e-mail ainda precisam de validação com credenciais reais; consulte [Autenticação](Autenticacao.md).
 
 Próximas melhorias possíveis: revisão visual com navegador disponível, validação TopDeck configurada, catálogo verificado de equivalências Pokémon e persistência histórica mediante necessidade concreta. Nenhuma dessas limitações é preenchida com dados simulados em produção.

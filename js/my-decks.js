@@ -1,7 +1,10 @@
-(() => {
+(async () => {
   'use strict';
   const $ = id => document.getElementById(id);
-  const key = 'teamSandwich.myDecks.v1';
+  await DeckAccess.ready;
+  const owner = DeckAccess.user()?.id;
+  const legacyKey = 'teamSandwich.myDecks.v1';
+  const key = `${legacyKey}:${owner}`;
   const escape = value => String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
   const id = () => crypto.randomUUID();
   const validCount = (value, min) => Number.isSafeInteger(value) && value >= min && value <= 1000;
@@ -14,7 +17,7 @@
   const gameName = game => game === 'pokemon' ? 'Pokémon TCG' : 'Magic: The Gathering';
 
   function guard() {
-    if (DeckAccess.allowed()) return true;
+    if (DeckAccess.allowed() && DeckAccess.user().id === owner) return true;
     $('decksWorkspace').hidden = true;
     $('deckDetail').replaceChildren();
     $('deckBoxes').replaceChildren();
@@ -57,8 +60,8 @@
     leave($('importDialog'), () => $('importDialog').close());
   }
 
-  function read() {
-    const raw = AppStorage.local.getItem(key);
+  function read(sourceKey = key) {
+    const raw = AppStorage.local.getItem(sourceKey);
     if (!raw) return [];
     const data = JSON.parse(raw);
     if (data.version !== 1 || !Array.isArray(data.decks) || data.decks.length > 200) throw new Error('invalidStorage');
@@ -391,7 +394,10 @@
       });
     }
   });
-  $('deckLogout').onclick = () => { DeckAccess.logout(); guard(); };
+  $('deckLogout').onclick = async () => {
+    try { await DeckAccess.logout(); guard(); } catch { status('authUnavailable', true); }
+  };
+  window.addEventListener('authChanged', guard);
   window.addEventListener('pageshow', guard);
   window.addEventListener('storage', event => {
     if (!guard() || event.key !== key && event.key !== null) return;
@@ -410,8 +416,20 @@
     }
   });
   try { decks = read(); } catch { readFailed = true; status('deckLibraryReadError', true); }
+  $('deckAccount').textContent = DeckAccess.user().email;
+  $('importLegacyDecks').hidden = readFailed || AppStorage.local.getItem(key) !== null || AppStorage.local.getItem(legacyKey) === null;
+  $('importLegacyDecks').onclick = () => {
+    if (!guard() || !window.confirm(I18N.t('authImportLegacyConfirm'))) return;
+    try {
+      const legacy = read(legacyKey);
+      if (decks.length + legacy.length > 200) { status('deckLibraryLimit', true); return; }
+      decks.push(...legacy.map(deck => ({ ...deck, id: id(), cards: deck.cards.map(card => ({ ...card, id: id() })) })));
+      persist(); boxes(); $('importLegacyDecks').hidden = true;
+    } catch { status('deckLibraryReadError', true); }
+  };
   $('importDeck').disabled = readFailed;
   boxes();
   if (current()) detail();
   $('decksWorkspace').hidden = false;
+  $('deckSessionStatus').hidden = true;
 })();

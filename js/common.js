@@ -646,7 +646,7 @@ function openLoginModal() {
 }
 
 function openSignupModal() {
-  openLoginModal();
+  window.location.href = DeckAccess.allowed() ? 'my-decks.html' : 'login.html?mode=signup';
 }
 
 function closeAuthModals() {
@@ -691,11 +691,12 @@ function updateUserUI() {
   renderAuth(sidebarActions);
 }
 
-function logoutUser() {
-  DeckAccess.logout();
-  AppStorage.local.removeItem('user');
-  updateUserUI();
-  if (window.location.pathname.endsWith('/my-decks.html')) window.location.replace('login.html');
+async function logoutUser() {
+  try {
+    await DeckAccess.logout();
+    updateUserUI();
+    if (window.location.pathname.endsWith('/my-decks.html')) window.location.replace('login.html');
+  } catch { window.alert(I18N.t('authUnavailable')); }
 }
 
 function initLangSelector() {
@@ -708,6 +709,7 @@ window.addEventListener('languageChanged', () => {
 });
 
 window.addEventListener('pageshow', updateUserUI);
+window.addEventListener('authChanged', updateUserUI);
 window.addEventListener('storage', event => {
   if (event.key === 'user' || event.key === null) updateUserUI();
 });

@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
   <title data-i18n="loginPageTitle">Login · Meus Decks — Team Sandwich</title>
   <link rel="icon" href="assets/icons/favicon.ico">
   <link rel="stylesheet" href="css/styles.css">
@@ -17,15 +18,23 @@
   <main class="deck-login">
     <div class="deck-welcome-art" aria-hidden="true"><img src="https://cards.scryfall.io/normal/front/f/c/fc817e07-c1f3-469f-9cf7-0945dea7400f.jpg" alt="" width="96" height="134" onerror="this.hidden=true"><img src="https://assets.tcgdex.net/en/base/basep/1/high.webp" alt="" width="96" height="134" onerror="this.hidden=true"></div>
     <p class="deck-eyebrow">MAGIC: THE GATHERING · POKÉMON TCG</p>
-    <h1 data-i18n="myDecks">Meus Decks</h1>
+    <h1 id="authHeading" data-i18n="myDecks">Meus Decks</h1>
     <p data-i18n="deckLoginIntro">Organize suas listas e acompanhe as cartas que faltam.</p>
     <form id="deckLoginForm">
-      <label for="deckPassword" data-i18n="accessPassword">Senha de acesso</label>
-      <input type="password" id="deckPassword" autocomplete="current-password" required autofocus aria-describedby="loginError">
+      <label for="authEmail" data-i18n="authEmail">E-mail</label>
+      <input type="email" id="authEmail" name="email" autocomplete="email" maxlength="254" required autofocus aria-describedby="loginError">
+      <label for="deckPassword" data-i18n="authPassword">Senha</label>
+      <input type="password" id="deckPassword" name="password" autocomplete="current-password" maxlength="128" required aria-describedby="loginError passwordHelp">
+      <p id="passwordHelp" class="deck-note" data-i18n="authPasswordHelp" hidden>Use pelo menos 8 caracteres.</p>
+      <div id="signupFields" hidden>
+        <label for="confirmPassword" data-i18n="authConfirmPassword">Confirmar senha</label>
+        <input type="password" id="confirmPassword" name="confirmPassword" autocomplete="new-password" maxlength="128" aria-describedby="loginError">
+      </div>
       <p id="loginError" class="deck-error" role="alert"></p>
-      <button type="submit" class="deck-button primary" data-i18n="enterMyDecks">Entrar em Meus Decks →</button>
+      <button id="authSubmit" type="submit" class="deck-button primary" data-i18n="login">Entrar</button>
+      <button id="switchAuth" type="button" class="deck-button" data-i18n="authNeedAccount">Ainda não tem conta? Cadastre-se</button>
     </form>
-    <p class="deck-note" data-i18n="localPrototype">Protótipo local. Seus decks ficam salvos neste navegador.</p>
+    <p class="deck-note" data-i18n="authLocalDecks">Sua conta funciona em outros dispositivos. Os decks ficam neste navegador, separados por conta.</p>
   </main>
   <script src="js/storage.js"></script>
   <script src="js/i18n.js"></script>

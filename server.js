@@ -2,8 +2,10 @@ const http = require('node:http');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const TournamentData = require('./js/tournament-data.js');
+const { createAuth } = require('./server/auth.js');
 
-function createServer({ apiKey = process.env.TOPDECK_API_KEY, fetchImpl = fetch, root = __dirname } = {}) {
+function createServer({ apiKey = process.env.TOPDECK_API_KEY, fetchImpl = fetch, root = __dirname, auth = {} } = {}) {
+  const handleAuth = createAuth({ fetchImpl, ...auth });
   const cache = new Map();
   const pending = new Map();
   let queue = Promise.resolve();
@@ -42,8 +44,9 @@ function createServer({ apiKey = process.env.TOPDECK_API_KEY, fetchImpl = fetch,
   }
   return http.createServer(async (request, response) => {
     try {
-      if (request.method !== 'GET' && request.method !== 'HEAD') return json(response, 405, { error: 'methodNotAllowed' });
       const url = new URL(request.url, 'http://localhost');
+      if (url.pathname.startsWith('/api/auth/')) return await handleAuth(request, response, url.pathname, json);
+      if (request.method !== 'GET' && request.method !== 'HEAD') return json(response, 405, { error: 'methodNotAllowed' });
       if (url.pathname === '/api/topdeck/tournaments') {
         const page = Math.max(1, Math.min(1000, Number.parseInt(url.searchParams.get('page'), 10) || 1));
         const start = url.searchParams.get('start') || new Date(Date.now() - 90 * 86400000).toISOString().slice(0, 10);

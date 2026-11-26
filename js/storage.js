@@ -1,5 +1,5 @@
-// Preferences and the existing demo account must not break the page when mobile
-// browsers disable storage. No password or authentication token is stored here.
+// Preferences must not break the page when browsers disable storage.
+// Passwords and authentication tokens are never stored here.
 const AppStorage = (() => {
   const fallback = new Map();
   function storage(kind) {
@@ -28,17 +28,57 @@ const AppStorage = (() => {
   return { local: storage('localStorage'), session: storage('sessionStorage') };
 })();
 
-// Local demonstration gate only; shared deployments must authenticate on a server.
+// Identity comes exclusively from the server's HttpOnly session cookies.
 const DeckAccess = (() => {
-  const key = 'teamSandwich.deckAccess.v1';
-  return {
-    allowed: () => AppStorage.session.getItem(key) === 'granted',
-    login(password) {
-      if (password !== 'teamsandwich') return false;
-      const saved = AppStorage.session.setItem(key, 'granted');
-      if (!saved) AppStorage.session.removeItem(key);
-      return saved;
+  let user = null, error = null, pending, revision = 0;
+  const broadcastKey = 'teamSandwich.authChanged.v1';
+  function update(next) { user = next || null; window.dispatchEvent(new Event('authChanged')); }
+  async function request(action, body) {
+    let response;
+    try {
+      response = await fetch(`/api/auth/${action}`, {
+        method: action === 'session' ? 'GET' : 'POST', credentials: 'same-origin', cache: 'no-store',
+        headers: { 'Content-Type': 'application/json' }, ...(body ? { body: JSON.stringify(body) } : {}),
+        signal: AbortSignal.timeout(15000)
+      });
+    } catch { throw new Error('authUnavailable'); }
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(result.error || 'authUnavailable');
+    return result;
+  }
+  function broadcast() { AppStorage.local.setItem(broadcastKey, `${Date.now()}:${Math.random()}`); }
+  async function refresh() {
+    if (!pending) {
+      const started = revision;
+      pending = (async () => {
+        try { const result = await request('session'); if (started === revision) { error = null; update(result.user); } }
+        catch (cause) { if (started === revision) { error = cause.message; update(null); } }
+      })().finally(() => { pending = null; });
+    }
+    return pending;
+  }
+  const api = {
+    allowed: () => !!user,
+    user: () => user && { ...user },
+    error: () => error,
+    refresh,
+    async login(email, password) {
+      if (pending) await pending;
+      const result = await request('login', { email, password });
+      revision++; error = null; update(result.user); broadcast(); return result;
     },
-    logout: () => AppStorage.session.removeItem(key)
+    async signup(email, password) {
+      if (pending) await pending;
+      const result = await request('signup', { email, password });
+      if (result.user) { revision++; error = null; update(result.user); broadcast(); }
+      return result;
+    },
+    async logout() { if (pending) await pending; await request('logout'); revision++; error = null; update(null); broadcast(); }
   };
+  api.ready = refresh();
+  window.addEventListener('storage', event => { if (event.key === broadcastKey || event.key === null) void refresh(); });
+  window.addEventListener('pageshow', event => { if (event.persisted) void refresh(); });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') void refresh(); });
+  window.setInterval(() => { if (document.visibilityState === 'visible') void refresh(); }, 300000);
+  return api;
 })();

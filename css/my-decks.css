@@ -77,6 +77,9 @@
 .deck-login > p:not(.deck-eyebrow) { color: var(--text-secondary); font-size: .88rem; }
 .deck-login form { margin: 26px 0; }
 .deck-login input { margin-top: 8px; }
+.deck-login label { display: block; margin-top: 16px; }
+.deck-login #loginError { min-height: 1.5em; }
+.deck-login .auth-success { color: var(--success); }
 .deck-login button { width: 100%; margin-top: 10px; }
 .deck-login, .decks-topbar, .deck-dialog[open] { animation: deck-surface-in 280ms cubic-bezier(.2,.7,.2,1) both; }
 .deck-dialog[open]::backdrop { animation: deck-backdrop-in 180ms ease-out; }

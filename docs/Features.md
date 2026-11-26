@@ -1,5 +1,9 @@
 # Funcionalidades
 
+## Contas e biblioteca
+
+Cadastro com e-mail, senha e confirmação; login, renovação de sessão e saída via Supabase Auth no servidor Node. Biblioteca local separada por usuário, com recuperação explícita das listas antigas, sem sincronização entre dispositivos. Exige configuração no Render/Supabase: [guia de autenticação](Autenticacao.md).
+
 ## Catálogo e navegação
 
 `card.html` inicia automaticamente o catálogo do jogo selecionado, sem botão de carga inicial. Pesquisa por nome e coleção, autocomplete, importação TXT, seleção de lojas, grade/lista, filtros e paginação existentes continuam disponíveis. Ao avançar além das cartas carregadas, a paginação busca o próximo lote automaticamente, sem botão `Load more cards` e sem baixar todo o catálogo antecipadamente. Skeleton e estado `aria-busy` acompanham a primeira consulta; falhas oferecem repetição sem recarregar o documento.
