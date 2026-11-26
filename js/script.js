@@ -231,6 +231,29 @@ function triggerImportFile() {
 }
 
 let popularSetsData = null;
+async function loadHeroCards() {
+  const slots = [...document.querySelectorAll('.hero-card-back')];
+  const game = CardData.game;
+  const names = game === 'pokemon' ? ['Pikachu', 'Charizard', 'Eevee'] : ['Lightning Bolt', 'Sol Ring', 'Black Lotus'];
+  const source = game === 'pokemon' ? 'TCGdex' : 'Scryfall';
+  const credit = document.getElementById('heroCardCredit');
+  if (credit) I18N.bind(credit, 'cardArtCredit', { source });
+  await Promise.allSettled(slots.map(async (slot, index) => {
+    const fallback = slot.querySelector('span');
+    try {
+      const card = await CardData.provider(game).named(names[index]);
+      const url = card.images.normal || card.images.small;
+      if (!slot.isConnected || !url || !/^https:\/\//i.test(url)) { I18N.bind(fallback, 'imageUnavailable'); return; }
+      const img = document.createElement('img');
+      img.alt = card.name; img.width = 488; img.height = 680; img.decoding = 'async';
+      img.onload = () => slot.classList.add('has-image');
+      img.onerror = () => { img.remove(); slot.classList.remove('has-image'); I18N.bind(fallback, 'imageUnavailable'); };
+      slot.href = gameUrl('card-detail.html', { id: card.id });
+      slot.title = card.name;
+      img.src = url; slot.append(img);
+    } catch { I18N.bind(fallback, 'imageUnavailable'); }
+  }));
+}
 async function loadPopularSets() {
   const grid = document.getElementById("popularSetsGrid");
   if (!grid) return;
@@ -285,5 +308,6 @@ document.addEventListener("DOMContentLoaded", () => {
   renderHomepageEvents(format);
   renderHomeStores();
   loadPopularSets();
+  void loadHeroCards();
 });
 

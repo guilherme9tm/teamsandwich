@@ -16,13 +16,20 @@
 .deck-library { border-right: 1px solid var(--border-medium); padding-right: 24px; }
 .deck-library h2 { font-size: .73rem; text-transform: uppercase; letter-spacing: .12em; color: var(--text-secondary); margin-bottom: 18px; }
 .deck-boxes { display: grid; gap: 14px; }
+#deckFilter { margin: 6px 0 18px; }
+.deck-cover { position: relative; flex: 0 0 54px; aspect-ratio: 245 / 337; display: grid; place-items: center; overflow: hidden; border-radius: 5px; background: var(--bg-primary); }
+.deck-cover img { position: absolute; width: 100%; height: 100%; object-fit: contain; }
+.deck-cover .deck-image-fallback { font-size: .6rem; padding: 3px; overflow-wrap: anywhere; }
+.deck-box-info { min-width: 0; }
+.deck-game-label { color: var(--gold); font-size: .72rem; margin-top: 6px; }
+.deck-printing { color: var(--text-secondary); font-size: .72rem; margin-top: -8px; }
 .deck-box { display: flex; align-items: center; gap: 20px; width: 100%; min-height: 110px; padding: 20px 16px; border: 1px solid var(--border-medium); border-radius: 12px; background: linear-gradient(135deg, var(--bg-elevated), var(--bg-secondary)); color: var(--text-primary); text-align: left; cursor: pointer; }
 .deck-box:hover, .deck-box[aria-pressed=true] { border-color: var(--gold); box-shadow: inset 3px 0 var(--gold); }
 .deck-box strong { display: block; font-size: .95rem; overflow-wrap: anywhere; }
 .deck-box small { display: block; color: var(--text-secondary); font-size: .72rem; margin-top: 7px; }
-.deck-stack-icon { flex-shrink: 0; position: relative; isolation: isolate; display: grid; place-items: center; width: 36px; height: 50px; border: 1px solid var(--gold); border-radius: 4px; color: var(--gold); background: #292c25; font-family: Georgia, serif; font-size: .8rem; box-shadow: 2px 3px 8px #0006; transform: rotate(5deg); }
-.deck-stack-icon::before, .deck-stack-icon::after { content: ''; position: absolute; inset: 0; background: #202821; border: 1px solid #a08c65; border-radius: 4px; z-index: -1; transform: translate(-5px, -3px) rotate(-10deg); }
-.deck-stack-icon::after { transform: translate(-9px, -4px) rotate(-18deg); z-index: -2; }
+.deck-welcome-art { display: flex; justify-content: center; align-items: center; padding: 10px; margin-bottom: 24px; }
+.deck-welcome-art img { width: 96px; height: 134px; object-fit: contain; border-radius: 6px; box-shadow: 0 8px 20px #0006; transform: rotate(-10deg); }
+.deck-welcome-art img + img { margin-left: -12px; transform: rotate(10deg); }
 .deck-detail { min-width: 0; }
 .deck-detail h2 { font-size: clamp(1.6rem, 3vw, 2.5rem); line-height: 1.2; letter-spacing: -.04em; overflow-wrap: anywhere; }
 .deck-inline-form { display: flex; align-items: end; gap: 12px; margin: 16px 0; flex-wrap: wrap; }
@@ -58,7 +65,6 @@
 .deck-card-actions .deck-button { padding: 3px 12px; font-size: 1.2rem; }
 .deck-remove { margin-left: auto; color: #edb3ac; background: none; border: 0; cursor: pointer; font-size: .73rem; }
 .deck-empty { text-align: center; padding: 80px 24px; color: var(--text-secondary); }
-.deck-empty .deck-stack-icon { margin: 0 auto 32px; }
 .deck-empty h2 { font-size: 1.5rem; color: var(--text-primary); margin-bottom: 12px; }
 .deck-dialog { width: min(620px, calc(100% - 28px)); max-height: 90vh; margin: auto; padding: 26px; border: 1px solid var(--border-strong); border-radius: 16px; background: var(--bg-secondary); color: var(--text-primary); overflow-y: auto; }
 .deck-dialog::backdrop { background: #000b; backdrop-filter: blur(4px); }
@@ -67,7 +73,6 @@
 .deck-dialog ul { padding-left: 20px; overflow-wrap: anywhere; }
 .deck-error, #saveStatus.deck-error { color: #ffb0a8; font-size: .85rem; margin: 10px 0; }
 .deck-login { width: min(430px, calc(100% - 36px)); margin: 9vh auto; padding: 30px; border: 1px solid var(--border-medium); border-radius: 18px; background: var(--bg-secondary); }
-.deck-login > .deck-stack-icon { margin: 0 0 28px 10px; }
 .deck-login h1 { font-size: 2.4rem; margin-bottom: 12px; }
 .deck-login > p:not(.deck-eyebrow) { color: var(--text-secondary); font-size: .88rem; }
 .deck-login form { margin: 26px 0; }

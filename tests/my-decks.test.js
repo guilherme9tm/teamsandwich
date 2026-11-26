@@ -19,6 +19,13 @@ function page(file = 'my-decks.html', { authenticated = true, local = {}, query 
       window.fetch = async (url, options) => {
         requests.push(url);
         if (offline) throw new Error('Offline');
+        if (url.includes('api.tcgdex.net')) {
+          if (url.includes('/series/')) return Response.json({ sets: [] });
+          if (url.includes('/sets?')) return Response.json([{ id: 'sv06' }]);
+          if (url.endsWith('/sets/sv06')) return Response.json({ cards: [{ id: 'sv06-001', name: 'Tangela', localId: '001' }] });
+          if (url.includes('/cards?')) return Response.json([{ id: 'sv06-001', name: 'Tangela' }]);
+          return Response.json({ id: 'sv06-001', name: 'Tangela', localId: '001', set: { id: 'sv06', name: 'Twilight Masquerade' }, image: 'https://assets.tcgdex.net/en/sv/sv06/001' });
+        }
         const entries = JSON.parse(options.body).identifiers;
         return Response.json({ object: 'list', data: entries.map((entry, index) => ({ id: `fixture-${index}`, name: entry.name, image_uris: { normal: 'https://example.com/card.jpg' } })) });
       };
@@ -45,6 +52,90 @@ function change(current, input, value) {
   input.value = value; input.dispatchEvent(new current.dom.window.Event('change', { bubbles: true }));
 }
 function saved(current) { return JSON.parse(current.dom.window.localStorage.getItem(storageKey)); }
+async function waitFor(predicate) {
+  const deadline = Date.now() + 6000;
+  while (!predicate()) {
+    if (Date.now() > deadline) assert.fail('Timed out waiting for card images');
+    await new Promise(resolve => setTimeout(resolve, 20));
+  }
+}
+
+test('Pokémon Live imports retain game, exact printing, real images and quantities after reload', async () => {
+  const current = page(); let reopened;
+  try {
+    await upload(current, 'Pokémon: 1\n4 Tangela TWM 1\nTrainer: 0\nEnergy: 0\nTotal Cards: 4', 'Pokemon.txt');
+    assert.equal(current.document.getElementById('saveImport').disabled, true);
+    change(current, current.document.getElementById('importGame'), 'pokemon');
+    assert.equal(current.document.getElementById('saveImport').disabled, false);
+    submit(current, 'importForm'); current.document.querySelector('.deck-box').click();
+    const deck = saved(current).decks[0];
+    assert.equal(deck.game, 'pokemon'); assert.equal(deck.cards[0].name, 'Tangela');
+    assert.equal(deck.cards[0].set, 'twm'); assert.equal(deck.cards[0].number, '1');
+    await waitFor(() => current.document.querySelector('.deck-card-art img'));
+    assert.equal(current.document.querySelector('.deck-card-art img').src, 'https://assets.tcgdex.net/en/sv/sv06/001/high.webp');
+    assert.equal(current.document.querySelector('.deck-cover img').src, current.document.querySelector('.deck-card-art img').src);
+    assert.equal(current.requests.some(url => url.includes('scryfall')), false);
+    assert.equal(current.document.querySelector('#addSection option[value="sideboard"]'), null);
+    change(current, current.document.querySelector('.owned-count'), '2');
+    const local = { [storageKey]: current.dom.window.localStorage.getItem(storageKey) };
+    reopened = page('my-decks.html', { local, query: current.dom.window.location.search });
+    assert.match(reopened.document.querySelector('.deck-detail-heading').textContent, /Pokémon TCG/);
+    assert.equal(reopened.document.querySelector('.owned-count').value, '2');
+    assert.deepEqual(current.errors, []); assert.deepEqual(reopened.errors, []);
+  } finally { current.dom.window.close(); reopened?.dom.window.close(); }
+});
+
+test('mixed libraries isolate same-name card images by game and filter without deleting decks', async () => {
+  const current = page();
+  try {
+    await upload(current, '4 Tangela', 'Magic.txt'); submit(current, 'importForm');
+    await upload(current, '4 Tangela', 'Pokemon.txt');
+    change(current, current.document.getElementById('importGame'), 'pokemon'); submit(current, 'importForm');
+    await waitFor(() => current.document.querySelectorAll('.deck-cover img').length === 2);
+    const boxes = current.document.querySelectorAll('.deck-box');
+    assert.equal(boxes[0].querySelector('img').src, 'https://example.com/card.jpg');
+    assert.match(boxes[1].querySelector('img').src, /^https:\/\/assets.tcgdex.net\//);
+    change(current, current.document.getElementById('deckFilter'), 'pokemon');
+    assert.equal(boxes[0].hidden, true); assert.equal(boxes[1].hidden, false);
+    assert.equal(saved(current).decks.length, 2);
+    boxes[1].click();
+    current.document.getElementById('addName').value = 'Tangela TWM 1'; submit(current, 'addCard');
+    assert.equal(saved(current).decks[1].cards[1].set, 'twm');
+    assert.equal(saved(current).decks[1].cards[1].name, 'Tangela');
+  } finally { current.dom.window.close(); }
+});
+
+test('a missing Pokémon printing never borrows another image or prevents later cards from loading', async () => {
+  const current = page();
+  try {
+    await upload(current, '1 Tangela TWM 99\n2 Tangela TWM 1', 'Pokemon.txt');
+    change(current, current.document.getElementById('importGame'), 'pokemon');
+    submit(current, 'importForm'); current.document.querySelector('.deck-box').click();
+    await waitFor(() => current.document.querySelectorAll('.deck-card')[1].querySelector('img'));
+    const tiles = current.document.querySelectorAll('.deck-card');
+    assert.equal(tiles[0].querySelector('img'), null);
+    assert.match(tiles[0].textContent, /Image unavailable/);
+    const img = tiles[1].querySelector('img');
+    img.dispatchEvent(new current.dom.window.Event('load'));
+    assert.equal(tiles[1].querySelector('.deck-card-art').classList.contains('has-image'), true);
+    img.dispatchEvent(new current.dom.window.Event('error'));
+    assert.equal(tiles[1].querySelector('img'), null);
+    change(current, tiles[1].querySelector('.owned-count'), '1');
+    assert.equal(saved(current).decks[0].cards[1].owned, 1);
+  } finally { current.dom.window.close(); }
+});
+
+test('legacy libraries without a game remain editable as Magic without losing card identities', () => {
+  const deck = { id: 'legacy', name: 'Old deck', cards: [{ id: 'card', name: 'Lightning Bolt', quantity: 4, owned: 2, section: 'main', set: 'm11', number: '146' }] };
+  const current = page('my-decks.html', { local: { [storageKey]: JSON.stringify({ version: 1, decks: [deck] }) }, query: '?deck=legacy' });
+  try {
+    assert.match(current.document.querySelector('.deck-detail-heading').textContent, /Magic: The Gathering/);
+    change(current, current.document.querySelector('.owned-count'), '3');
+    assert.equal(saved(current).decks[0].game, 'mtg');
+    assert.equal(saved(current).decks[0].cards[0].id, 'card');
+    assert.equal(saved(current).decks[0].cards[0].set, 'm11');
+  } finally { current.dom.window.close(); }
+});
 
 test('strict deck imports report exact invalid lines, combine duplicates and preserve sideboard', () => {
   const parsed = DeckImport.parse('4 Lightning Bolt\n2 Lightning Bolt\nwrong\n0 Island\n-2 Mountain\nSideboard\n2 Island\nSB: 1 Island', { requireQuantity: true });

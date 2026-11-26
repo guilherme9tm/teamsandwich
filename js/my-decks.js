@@ -10,6 +10,8 @@
   let fileRead = 0;
   let readFailed = false;
   const images = new Map();
+  const imageRequests = new Map();
+  const gameName = game => game === 'pokemon' ? 'Pokémon TCG' : 'Magic: The Gathering';
 
   function guard() {
     if (DeckAccess.allowed()) return true;
@@ -65,6 +67,8 @@
       if (!deck || typeof deck.id !== 'string' || ids.has(deck.id) || typeof deck.name !== 'string'
         || !deck.name.trim() || deck.name.length > 100 || !Array.isArray(deck.cards) || deck.cards.length > 1000) throw new Error('invalidStorage');
       ids.add(deck.id);
+      if (deck.game === undefined) deck.game = 'mtg';
+      if (!['mtg', 'pokemon'].includes(deck.game)) throw new Error('invalidStorage');
       const cardIds = new Set();
       for (const card of deck.cards) {
         if (!card || typeof card.id !== 'string' || cardIds.has(card.id) || typeof card.name !== 'string'
@@ -107,8 +111,12 @@
       button.type = 'button';
       button.className = 'deck-box';
       button.dataset.deckId = deck.id;
+      button.hidden = $('deckFilter').value !== 'all' && $('deckFilter').value !== deck.game;
       button.setAttribute('aria-pressed', String(deck.id === selected));
-      button.innerHTML = `<span class="deck-stack-icon" aria-hidden="true">TS</span><span><strong>${escape(deck.name)}</strong><small>${I18N.t('deckBoxCount', { count: total.quantity, status: total.missing ? I18N.t('pendingCopies', { count: total.missing }) : I18N.t('deckComplete') })}</small></span>`;
+      if (isNew) button.innerHTML = '<span class="deck-cover" aria-hidden="true"><span class="deck-image-fallback"></span></span><span class="deck-box-info"><strong></strong><small class="deck-game-label"></small><small class="deck-box-count"></small></span>';
+      button.querySelector('strong').textContent = deck.name;
+      button.querySelector('.deck-game-label').textContent = gameName(deck.game);
+      button.querySelector('.deck-box-count').textContent = I18N.t('deckBoxCount', { count: total.quantity, status: total.missing ? I18N.t('pendingCopies', { count: total.missing }) : I18N.t('deckComplete') });
       button.onclick = () => {
         if (!guard()) return;
         selected = deck.id;
@@ -116,6 +124,15 @@
         boxes(); detail();
       };
       $('deckBoxes').append(button);
+      const cover = deck.cards.find(card => card.section === 'main') || deck.cards[0];
+      const coverKey = cover ? imageKey(cover, deck.game) : '';
+      if (button.dataset.coverKey !== coverKey) {
+        button.dataset.coverKey = coverKey;
+        const art = button.querySelector('.deck-cover');
+        art.querySelector('img')?.remove(); art.classList.remove('has-image');
+        I18N.bind(art.querySelector('.deck-image-fallback'), cover ? 'loadingImage' : 'imageUnavailable');
+        if (cover) void loadImages([{ tile: art, card: cover }], deck.game);
+      }
       if (isNew) enter(button, Math.min(decks.indexOf(deck) * 35, 140));
     }
   }
@@ -134,7 +151,7 @@
     tile.className = 'deck-card';
     tile.dataset.cardId = card.id;
     tile.innerHTML = `<div class="deck-card-art"><span class="deck-image-fallback" data-i18n="loadingImage">${I18N.t('loadingImage')}</span></div>
-      <h3>${escape(card.name)}</h3><p class="deck-card-status" aria-live="polite"></p>
+      <h3>${escape(card.name)}</h3>${card.set && card.number ? `<p class="deck-printing">${escape(card.set.toUpperCase())} · ${escape(card.number)}</p>` : ''}<p class="deck-card-status" aria-live="polite"></p>
       <div class="deck-card-counts"><label><span data-i18n="requiredCopies">${I18N.t('requiredCopies')}</span><input class="required-count" type="number" min="1" max="1000" step="1" value="${card.quantity}" data-i18n-aria="requiredCardCopies" aria-label="${escape(I18N.t('requiredCardCopies', { name: card.name }))}"></label>
       <label><span data-i18n="ownedCopies">${I18N.t('ownedCopies')}</span><input class="owned-count" type="number" min="0" max="1000" step="1" value="${card.owned}" data-i18n-aria="ownedCardCopies" aria-label="${escape(I18N.t('ownedCardCopies', { name: card.name }))}"></label></div>
       <div class="deck-card-actions"><button type="button" class="deck-button minus" data-i18n-aria="decreaseOwned" aria-label="${escape(I18N.t('decreaseOwned', { name: card.name }))}">−</button><button type="button" class="deck-button plus" data-i18n-aria="increaseOwned" aria-label="${escape(I18N.t('increaseOwned', { name: card.name }))}">+</button><button type="button" class="deck-remove" data-i18n="remove">${I18N.t('remove')}</button></div>`;
@@ -178,40 +195,58 @@
     summary(tile, card);
     return tile;
   }
-  const imageKey = card => JSON.stringify([card.name.toLowerCase(), card.set || '', card.number || '']);
+  const imageKey = (card, game) => JSON.stringify([game, card.name.toLowerCase(), card.set || '', card.number || '']);
   function showImage(tile, card, url) {
     if (!tile.isConnected) return;
-    const art = tile.querySelector('.deck-card-art');
+    const art = tile.matches('.deck-cover') ? tile : tile.querySelector('.deck-card-art');
     I18N.bind(art.querySelector('.deck-image-fallback'), 'imageUnavailable');
     if (!url || !/^https:\/\//i.test(url)) return;
+    if (art.querySelector('img')?.getAttribute('src') === url) return;
+    art.querySelector('img')?.remove();
     const img = document.createElement('img');
     img.alt = card.name; img.loading = 'lazy'; img.width = 488; img.height = 680;
     img.onload = () => {
+      if (!img.isConnected) return;
       art.style.setProperty('--deck-card-image', `url(${JSON.stringify(img.currentSrc || img.src)})`);
       art.classList.add('has-image');
     };
     img.onerror = () => {
+      if (!img.isConnected) return;
       img.remove();
       art.style.removeProperty('--deck-card-image');
       art.classList.remove('has-image');
     };
     img.src = url; art.append(img);
   }
-  async function loadImages(items) {
+  async function loadImages(items, game) {
     const missing = [];
     for (const item of items) {
-      if (images.has(imageKey(item.card))) showImage(item.tile, item.card, images.get(imageKey(item.card)));
-      else missing.push(item);
+      const key = imageKey(item.card, game);
+      if (images.has(key)) { showImage(item.tile, item.card, images.get(key)); continue; }
+      if (!imageRequests.has(key)) {
+        let resolve;
+        const promise = new Promise(done => { resolve = done; });
+        imageRequests.set(key, promise);
+        missing.push({ ...item, key, resolve });
+      }
+      void imageRequests.get(key).then(url => {
+        if (item.tile.matches('.deck-cover') && item.tile.closest('.deck-box')?.dataset.coverKey !== key) return;
+        showImage(item.tile, item.card, url);
+      });
     }
-    for (let offset = 0; offset < missing.length; offset += 75) {
-      if (!DeckAccess.allowed()) return;
-      const batch = missing.slice(offset, offset + 75);
+    // Pokémon resolves one printing at a time so a missing source response cannot
+    // discard images already found for the rest of the deck.
+    const batchSize = game === 'pokemon' ? 1 : 30;
+    for (let offset = 0; offset < missing.length; offset += batchSize) {
+      const batch = missing.slice(offset, offset + batchSize);
       let result = [];
-      try { result = await CardData.provider('mtg').collection(batch.map(item => item.card)); } catch { /* Editing works offline. */ }
+      if (DeckAccess.allowed()) {
+        try { result = await CardData.provider(game).collection(batch.map(item => item.card)); } catch { /* Editing works offline. */ }
+      }
       batch.forEach((item, index) => {
         const url = result[index]?.images?.normal || result[index]?.images?.small || null;
-        if (url) images.set(imageKey(item.card), url);
-        showImage(item.tile, item.card, url);
+        if (url) images.set(item.key, url);
+        imageRequests.delete(item.key); item.resolve(url);
       });
     }
   }
@@ -225,6 +260,12 @@
       <details class="deck-add"><summary data-i18n="addCard">${I18N.t('addCard')}</summary><form id="addCard" class="deck-inline-form"><label><span data-i18n="cardName">${I18N.t('cardName')}</span><input id="addName" maxlength="200" data-i18n="cardExample" placeholder="${I18N.t('cardExample')}" required></label><label><span data-i18n="requiredCopies">${I18N.t('requiredCopies')}</span><input id="addQuantity" type="number" min="1" max="1000" step="1" value="1" required></label><label><span data-i18n="section">${I18N.t('section')}</span><select id="addSection"><option value="main" data-i18n="mainDeck">${I18N.t('mainDeck')}</option><option value="sideboard" data-i18n="sideboard">${I18N.t('sideboard')}</option></select></label><button class="deck-button" type="submit" data-i18n="add">${I18N.t('add')}</button></form><p id="addError" class="deck-error" role="alert"></p></details>
       <div id="deckSections"></div>`;
     $('deckTitle').textContent = deck.name;
+    const gameLabel = document.createElement('p'); gameLabel.className = 'deck-game-label'; gameLabel.textContent = gameName(deck.game);
+    $('deckTitle').after(gameLabel);
+    if (deck.game === 'pokemon') {
+      $('addSection').querySelector('[value="sideboard"]').remove();
+      I18N.bind($('addName'), 'pokemonCardExample');
+    }
     $('deckName').value = deck.name;
     $('deleteDeck').onclick = () => {
       if (!guard() || readFailed) return;
@@ -258,17 +299,21 @@
       const quantity = Number($('addQuantity').value);
       const section = $('addSection').value;
       if (!name || !validCount(quantity, 1)) return;
-      const existing = deck.cards.find(card => card.name.toLowerCase() === name.toLowerCase() && card.section === section && !card.set);
+      const parsed = DeckImport.parse(`${quantity} ${name}`, { game: deck.game, requireQuantity: true });
+      if (parsed.warnings.length || parsed.entries.length !== 1) return;
+      const entry = { ...parsed.entries[0], section };
+      const existing = deck.cards.find(card => card.name.toLowerCase() === entry.name.toLowerCase() && card.section === section && (card.set || '') === (entry.set || '') && (card.number || '') === (entry.number || ''));
       if (existing ? existing.quantity + quantity > 1000 : deck.cards.length >= 1000) {
         I18N.bind($('addError'), 'deckCardLimit'); return;
       }
       if (existing) existing.quantity += quantity;
-      else deck.cards.push({ id: id(), name, quantity, owned: 0, section });
+      else deck.cards.push({ ...entry, id: id(), owned: 0 });
       persist(); boxes(); detail();
     };
     const items = [];
     for (const [section, title] of [['main', 'mainDeck'], ['sideboard', 'sideboard']]) {
       const cards = deck.cards.filter(card => card.section === section);
+      if (deck.game === 'pokemon' && section === 'sideboard' && !cards.length) continue;
       const group = document.createElement('section');
       group.className = 'deck-section';
       group.innerHTML = `<h3 class="deck-section-title"><b data-i18n="${title}">${I18N.t(title)}</b> <span>${totals(cards).quantity}</span></h3><div class="deck-card-grid"></div>`;
@@ -285,11 +330,11 @@
       enter($('deckDetail').querySelector('.deck-detail-heading'));
       items.forEach((item, index) => enter(item.tile, Math.min(index * 35, 175)));
     }
-    void loadImages(items);
+    void loadImages(items, deck.game);
   }
   function preview() {
     let parsed;
-    try { parsed = DeckImport.parse($('importText').value, { requireQuantity: true }); }
+    try { parsed = DeckImport.parse($('importText').value, { game: $('importGame').value, requireQuantity: true }); }
     catch { I18N.bind($('importErrors'), 'deckImportLimit'); $('saveImport').disabled = true; return null; }
     const lines = $('importText').value.split(/\r?\n/);
     delete $('importErrors').dataset.i18n;
@@ -321,6 +366,8 @@
     } catch { status('deckFileReadError', true); }
   };
   $('importText').oninput = preview;
+  $('importGame').onchange = () => { I18N.bind($('importHelp'), $('importGame').value === 'pokemon' ? 'pokemonImportHelp' : 'importHelp'); preview(); };
+  $('deckFilter').onchange = boxes;
   $('cancelImport').onclick = closeImport;
   $('importDialog').addEventListener('cancel', event => { event.preventDefault(); closeImport(); });
   $('importForm').onsubmit = event => {
@@ -330,7 +377,7 @@
     const name = $('importName').value.trim();
     if (!name || !parsed?.entries.length || parsed.warnings.length) return;
     if (decks.length >= 200) { I18N.bind($('importErrors'), 'deckLibraryLimit'); return; }
-    decks.push({ id: id(), name, cards: parsed.entries.map(card => ({ ...card, id: id(), owned: 0 })) });
+    decks.push({ id: id(), name, game: $('importGame').value, cards: parsed.entries.map(card => ({ ...card, id: id(), owned: 0 })) });
     persist(); boxes(); closeImport();
   };
   window.addEventListener('languageChanged', () => {

@@ -24,6 +24,24 @@ Inicie com `npm start` e abra `http://127.0.0.1:5500`. Também funciona em um se
 
 ## Formato de importação
 
+### Magic e Pokémon
+
+Na janela de importação, selecione **Magic: The Gathering** ou **Pokémon TCG** antes de salvar. O jogo fica associado ao deck e é preservado ao recarregar. Decks antigos sem esse campo continuam sendo Magic. O filtro de jogo da biblioteca não apaga nem altera as listas.
+
+Para Pokémon, use nomes de cartas em inglês, conforme o catálogo integrado. Exemplo de formato (não é um deck completo de competição):
+
+```text
+Pokémon: 1
+4 Tangela TWM 1
+Trainer: 0
+Energy: 0
+Total Cards: 4
+```
+
+Os cabeçalhos com contagem do Pokémon TCG Live, inclusive `Treinador`, `Energia` e `Total de cartas`, são aceitos. A coleção e o número são preservados; a fonte confirma também o nome antes de associar a imagem. Cartas sem impressão informada são pesquisadas por nome. O formulário de adição manual também aceita `Tangela TWM 1`. Não há validação de formato competitivo ou da legalidade do deck.
+
+As capas da biblioteca usam a primeira carta do principal (ou a primeira entrada disponível). As imagens de Magic vêm da Scryfall e as de Pokémon do TCGdex. Consultas iguais compartilham o carregamento; o cache de imagens separa jogo, nome, coleção e número. Imagens ausentes ou falhas de rede mantêm uma mensagem de indisponibilidade, sem trocar por uma carta diferente. Edição e quantidades continuam disponíveis offline. O login e a biblioteca vazia exibem Sol Ring e Pikachu; a página inicial consulta cartas reais do jogo ativo.
+
 Aceita quantidade inteira de 1 a 1000 seguida do nome, por exemplo `4 Lightning Bolt`, `4x Lightning Bolt`, `2 Island`, exportações com impressão como `4 Lightning Bolt (M11) 146`, cabeçalhos `Deck`/`Mainboard` e `Sideboard`, além de prefixos `SB:`. Entradas repetidas na mesma seção e impressão são somadas. Cópias possuídas começam em zero. Linhas sem quantidade, com quantidade inválida ou acima do limite são enumeradas e impedem salvar até a correção. Limites: 256 KB por arquivo, 1000 entradas por deck e 200 decks. Nomes não encontrados no catálogo continuam editáveis com “Imagem indisponível”.
 
 ## Escopo

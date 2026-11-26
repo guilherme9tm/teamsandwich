@@ -36,7 +36,7 @@ function page(file, query = '', { failure = false, pokemonFailure = false, disab
           if (url.endsWith('/sets/sv06')) return Response.json({ cards: [{ id: 'sv06-001', name: 'Tangela', localId: '001' }] });
           if (url.includes('/sets')) return Response.json([{ id: 'sv06', name: 'Twilight Masquerade', cardCount: { total: 226 } }]);
           if (url.includes('/cards?')) return Response.json([{ id: 'sv06-001', name: 'Tangela', localId: '001', image: 'https://assets.tcgdex.net/en/sv/sv06/001' }]);
-          return Response.json({ id: 'sv06-001', name: 'Tangela', localId: '001', rarity: 'Rare Holo', category: 'Pokemon', set: { id: 'sv06', name: 'Twilight Masquerade' }, legal: { standard: true }, variants_detailed: [{ type: 'normal', variantId: 'verified', thirdParty: { tcgplayer: 1 }, pricing: { tcgplayer: { unit: 'USD', normal: { productId: 1, marketPrice: 1.25 } } } }] });
+          return Response.json({ id: 'sv06-001', name: 'Tangela', localId: '001', image: 'https://assets.tcgdex.net/en/sv/sv06/001', rarity: 'Rare Holo', category: 'Pokemon', set: { id: 'sv06', name: 'Twilight Masquerade' }, legal: { standard: true }, variants_detailed: [{ type: 'normal', variantId: 'verified', thirdParty: { tcgplayer: 1 }, pricing: { tcgplayer: { unit: 'USD', normal: { productId: 1, marketPrice: 1.25 } } } }] });
         }
         if (url.includes('/sets')) return Response.json({ object: 'list', data: [{ code: 'one', name: 'First set', icon_svg_uri: 'https://example.com/set.svg', set_type: 'expansion', card_count: 100, released_at: '2026-11-01' }] });
         if (url.includes('/cards/search?')) {
@@ -58,6 +58,35 @@ function page(file, query = '', { failure = false, pokemonFailure = false, disab
   }
   return { dom, errors, requests, allowSearch: () => { rejectSearch = false; } };
 }
+test('home showcases provider card images and printing links for each game without language refetches', async () => {
+  for (const game of ['mtg', 'pokemon']) {
+    const { dom, requests, errors } = page('index.html', `?game=${game}`);
+    try {
+      const document = dom.window.document;
+      await waitFor(() => document.querySelectorAll('.hero-card-back img').length === 3, `${game} hero images`);
+      const slots = [...document.querySelectorAll('.hero-card-back')];
+      for (const slot of slots) {
+        const img = slot.querySelector('img');
+        assert.ok(img.alt);
+        assert.match(img.src, game === 'pokemon' ? /^https:\/\/assets.tcgdex.net\// : /^https:\/\/example.com\//);
+        assert.equal(new URL(slot.href).searchParams.get('game'), game);
+        assert.ok(new URL(slot.href).searchParams.get('id'));
+        img.dispatchEvent(new dom.window.Event('load'));
+        assert.ok(slot.classList.contains('has-image'));
+      }
+      const namedCalls = requests.filter(url => url.includes('/cards/named')).length;
+      const selector = document.querySelector('.lang-selector-select');
+      selector.value = 'pt'; selector.dispatchEvent(new dom.window.Event('change'));
+      assert.match(document.getElementById('heroCardCredit').textContent, /Imagens das cartas/);
+      assert.equal(requests.filter(url => url.includes('/cards/named')).length, namedCalls);
+      slots[0].querySelector('img').dispatchEvent(new dom.window.Event('error'));
+      assert.equal(slots[0].querySelector('img'), null);
+      assert.match(slots[0].textContent, /Imagem indisponível/);
+      assert.deepEqual(errors, []);
+    } finally { dom.window.close(); }
+  }
+});
+
 test('all page headers display the original Team Sandwich logo', () => {
   for (const file of ['index.html', 'card.html', 'card-detail.html', 'competitive.html']) {
     const dom = new JSDOM(fs.readFileSync(file, 'utf8'));

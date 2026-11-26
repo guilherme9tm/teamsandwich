@@ -89,6 +89,12 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .hero-card-back > span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--accent); font-family: var(--font-serif); font-size: 23px; font-weight: 600; z-index: 1; }
 .hero-card-back:nth-child(2) { left: 153px; top: 26px; transform: rotate(16deg); }
 .hero-card-back:nth-child(3) { left: 88px; top: 10px; transform: rotate(-2deg); background-color: var(--bg-elevated); border-color: var(--accent-dark); }
+.hero-card-back { overflow: hidden; }
+.hero-card-back > span { font-family: inherit; font-size: 12px; padding: 16px; text-align: center; }
+.hero-card-back img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; border-radius: inherit; }
+.hero-card-back.has-image::before, .hero-card-back.has-image::after, .hero-card-back.has-image > span { display: none; }
+.hero-card-back:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
+.hero-card-credit { position: absolute; bottom: 0; width: 100%; text-align: center; color: var(--text-muted); font-size: 10px; }
 .section-title { font-family: var(--font-serif); font-size: 21px; letter-spacing: -.025em; }
 .section-desc { font-size: 12px; margin-top: 3px; color: var(--text-muted); }
 .section-header { gap: 14px; }

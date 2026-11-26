@@ -12,8 +12,8 @@ const DeckImport = (() => {
       if (!line) continue;
       // Also accept headings exported as comments, without swallowing split card names.
       const heading = line.replace(/^(?:\/\/|#)\s*/, '').replace(/[:\s]+$/, '').toLowerCase();
-      if (game === 'pokemon' && /^(?:pokémon|pokemon|trainers?|energy)\s*:\s*\d+$/.test(heading)) { section = 'main'; continue; }
-      if (game === 'pokemon' && /^total cards\s*:\s*\d+$/.test(heading)) continue;
+      if (game === 'pokemon' && /^(?:pokémon|pokemon|trainers?|treinadores?|energy|energias?)\s*:\s*\d+$/.test(heading)) { section = 'main'; continue; }
+      if (game === 'pokemon' && /^total (?:cards|de cartas)\s*:\s*\d+$/.test(heading)) continue;
       if (/^(?:sideboard|side board|reserve)(?:\s*\(\d+\))?$/.test(heading)) { section = 'sideboard'; continue; }
       if (/^(?:deck|mainboard|main deck|commander|commanders|companion|pokemon|pokémon|trainer|trainers|energy)(?:\s*\(\d+\))?$/.test(heading)) { section = 'main'; continue; }
       if (/^(?:maybeboard|considering)(?:\s*\(\d+\))?$/.test(heading)) { section = 'ignored'; continue; }

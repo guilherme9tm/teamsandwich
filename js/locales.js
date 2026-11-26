@@ -1,5 +1,9 @@
 (() => {
   const labels = {
+    allDeckGames: ['All games', 'Todos os jogos', 'Todos los juegos', 'Tous les jeux', 'Alle Spiele'],
+    pokemonCardExample: ['E.g. Pikachu', 'Ex.: Pikachu', 'Ej.: Pikachu', 'Ex. : Pikachu', 'Z. B. Pikachu'],
+    pokemonImportHelp: ['Use English card names: 4 Tangela TWM 1. Pokémon TCG Live headings are accepted. Set and number identify the exact printing.', 'Use os nomes das cartas em inglês: 4 Tangela TWM 1. Cabeçalhos do Pokémon TCG Live são aceitos. Coleção e número identificam a impressão exata.', 'Usa nombres de cartas en inglés: 4 Tangela TWM 1. Se aceptan encabezados de Pokémon TCG Live. Colección y número identifican la edición exacta.', 'Utilisez les noms anglais : 4 Tangela TWM 1. Les en-têtes Pokémon TCG Live sont acceptés. Extension et numéro identifient l’édition exacte.', 'Englische Kartennamen verwenden: 4 Tangela TWM 1. Pokémon-TCG-Live-Überschriften werden unterstützt. Erweiterung und Nummer bestimmen die genaue Ausgabe.'],
+    cardArtCredit: ['Card images: {source}', 'Imagens das cartas: {source}', 'Imágenes de cartas: {source}', 'Images des cartes : {source}', 'Kartenbilder: {source}'],
     homePageTitle: ['Team Sandwich — Cards & Community', 'Team Sandwich — Cartas e comunidade', 'Team Sandwich — Cartas y comunidad', 'Team Sandwich — Cartes et communauté', 'Team Sandwich — Karten und Community'],
     catalogPageTitle: ['Card catalog — Team Sandwich', 'Catálogo de cartas — Team Sandwich', 'Catálogo de cartas — Team Sandwich', 'Catalogue de cartes — Team Sandwich', 'Kartenkatalog — Team Sandwich'],
     landsPageTitle: ['Lands — Team Sandwich', 'Terrenos — Team Sandwich', 'Tierras — Team Sandwich', 'Terrains — Team Sandwich', 'Länder — Team Sandwich'],
