@@ -132,7 +132,6 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .card-copy { display: flex; flex-direction: column; min-width: 0; flex: 1; padding: 8px 0 1px; width: 100%; }
 .card-price-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px 6px; min-width: 0; }
 .card .card-price { display: block; flex: 1 1 48px; min-width: 0; font-style: normal; font-weight: 700; font-size: 16px; letter-spacing: -.025em; color: var(--accent); margin: 0; overflow-wrap: anywhere; }
-.card-edition { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-muted); font-size: 10px; line-height: 1.7; }
 .card-actions-row { display: flex; flex: 0 0 auto; align-items: center; justify-content: flex-end; flex-wrap: nowrap; gap: 4px; margin: 0 0 0 auto; padding: 0; border: 0; }
 .card-actions-row .toggle-btn, .card-actions-row .btn-wishlist { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 38px; width: 38px; min-width: 38px; height: 38px; margin: 0; padding: 0; border-radius: 8px; border: 1px solid var(--border-medium); background: var(--bg-elevated); color: var(--text-secondary); }
 .card-actions-row .toggle-btn:hover, .card-actions-row .toggle-btn.active, .card-actions-row .btn-wishlist:hover, .card-actions-row .btn-wishlist.is-added { border-color: var(--accent); color: var(--accent); background: rgba(126, 164, 143, .12); }
@@ -265,6 +264,8 @@ dialog::backdrop { background: rgba(10, 14, 11, .85); backdrop-filter: blur(3px)
   .printing-price-row strong { text-align: left; }
 }
 @media (max-width: 760px) {
+  .card-actions-row .toggle-btn, .card-actions-row .btn-wishlist { flex-basis: 32px; width: 32px; min-width: 32px; height: 32px; border-radius: 7px; }
+  .card-actions-row svg { width: 15px; height: 15px; }
   .deck-tools-grid { grid-template-columns: 1fr; }
   .workspace-tabs { gap: 20px; }
   .workspace-tabs button { font-size: 12px; }
@@ -344,7 +345,6 @@ dialog::backdrop { background: rgba(10, 14, 11, .85); backdrop-filter: blur(3px)
   .workspace-controls > button { grid-column: 1 / -1; }
   .workspace dialog { padding: 20px; }
   .game-selector button { font-size: 10px; padding-inline: 8px; }
-  .card-edition { font-size: 9px; }
   .results-section { padding-inline: 12px; }
   .grid:not(.grid-list), .grid.grid-2 { gap: 10px; }
   .pagination-bar, .card-filters-bar, .search-info { padding-inline: 12px; }

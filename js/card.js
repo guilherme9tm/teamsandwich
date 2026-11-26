@@ -47,7 +47,6 @@ function renderCardElement(cardData, selected = getSelected(false)) {
         <button type="button" class="toggle-btn" onclick="toggleCard(this)" aria-expanded="false" data-i18n-aria="quickPreviewTooltip" data-i18n-title="quickPreviewTooltip" aria-label="${I18N.t('quickPreviewTooltip')}" title="${I18N.t('quickPreviewTooltip')}">${STORE_ACTION_SVG}</button>
       </div>
     </div>
-    <small class="card-edition" title="${escapeHTML(cardData.set_name || cardData.set || '')}">${escapeHTML(cardData.set_name || cardData.set || '')} · #${escapeHTML(cardData.collector_number || '')}</small>
     <div class="card-feedback"></div>
     </div>
   `;
@@ -111,7 +110,6 @@ async function enrichVisiblePrices(cards) {
         document.querySelectorAll('.card[data-printing-id]').forEach(element => {
           if (element.dataset.printingId !== card.id) return;
           element.querySelector('.card-price').textContent = CardPrices.format(CardPrices.main(card), I18N.current) || I18N.t('priceUnavailable');
-          const edition = element.querySelector('.card-edition'); edition.textContent = `${card.set_name || card.set} · #${card.collector_number}`; edition.title = card.set_name || card.set;
           element.querySelectorAll('[data-store-id]').forEach(link => {
             const site = storesForGame('pokemon').find(site => site.id === link.dataset.storeId);
             if (site) link.href = storeSearchUrl(site, card);
