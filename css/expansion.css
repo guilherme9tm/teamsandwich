@@ -94,7 +94,6 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .hero-card-back img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; border-radius: inherit; }
 .hero-card-back.has-image::before, .hero-card-back.has-image::after, .hero-card-back.has-image > span { display: none; }
 .hero-card-back:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
-.hero-card-credit { position: absolute; bottom: 0; width: 100%; text-align: center; color: var(--text-muted); font-size: 10px; }
 .section-title { font-family: var(--font-serif); font-size: 21px; letter-spacing: -.025em; }
 .section-desc { font-size: 12px; margin-top: 3px; color: var(--text-muted); }
 .section-header { gap: 14px; }
@@ -103,6 +102,11 @@ button:disabled { opacity: .45; cursor: not-allowed; }
 .popular-set-card { padding: 18px 16px; min-height: 88px; background: var(--bg-card); border-color: var(--border-subtle); border-radius: 10px; gap: 13px; }
 .popular-set-card:hover { background: var(--bg-elevated); box-shadow: none; border-color: var(--border-strong); transform: none; }
 .popular-set-code { width: 46px; height: 46px; padding: 4px; border: 1px solid var(--border-medium); border-radius: 9px; background: var(--bg-glass); font-size: 10px; letter-spacing: .04em; color: var(--text-secondary); }
+.set-symbol { display: grid; place-items: center; flex-shrink: 0; }
+.set-symbol > * { grid-area: 1 / 1; }
+.set-symbol img { width: 100%; height: 100%; max-width: 32px; max-height: 32px; object-fit: contain; }
+.set-symbol [hidden] { display: none !important; }
+.set-symbol-mtg img { filter: brightness(0) invert(.9); }
 .popular-set-info h4 { font-size: 13px; line-height: 1.5; }
 .popular-set-info p { font-size: 11px; margin-top: 3px; text-transform: capitalize; }
 .search-info, .card-filters-bar, .pagination-bar, .results-section, .search-load-controls, .lands-controls { max-width: 1400px; }

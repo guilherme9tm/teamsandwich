@@ -190,7 +190,13 @@ async function initPokemonSets() {
         const render = () => {
           const query = searchInput.value.trim().toLocaleLowerCase();
           const filtered = sets.filter(set => `${set.name} ${set.code}`.toLocaleLowerCase().includes(query));
-          directory.innerHTML = filtered.map(set => `<a class="popular-set-card" href="${gameUrl('card.html', { set: set.code })}"><span class="popular-set-code">${escapeHTML(set.code.toUpperCase())}</span><span class="popular-set-info"><h4>${escapeHTML(set.name)}</h4></span></a>`).join('');
+          directory.replaceChildren();
+          for (const set of filtered) {
+            const link = document.createElement('a'); link.className = 'popular-set-card'; link.href = gameUrl('card.html', { set: set.code });
+            const info = document.createElement('span'); info.className = 'popular-set-info';
+            const title = document.createElement('h4'); title.textContent = set.name;
+            info.append(title); link.append(createSetSymbol(set), info); directory.append(link);
+          }
           if (!filtered.length) directory.textContent = I18N.t('noCollectionsFound');
         };
         searchInput.oninput = render; render();

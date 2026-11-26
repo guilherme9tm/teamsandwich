@@ -235,9 +235,6 @@ async function loadHeroCards() {
   const slots = [...document.querySelectorAll('.hero-card-back')];
   const game = CardData.game;
   const names = game === 'pokemon' ? ['Pikachu', 'Charizard', 'Eevee'] : ['Lightning Bolt', 'Sol Ring', 'Black Lotus'];
-  const source = game === 'pokemon' ? 'TCGdex' : 'Scryfall';
-  const credit = document.getElementById('heroCardCredit');
-  if (credit) I18N.bind(credit, 'cardArtCredit', { source });
   await Promise.allSettled(slots.map(async (slot, index) => {
     const fallback = slot.querySelector('span');
     try {
@@ -274,11 +271,11 @@ async function loadPopularSets() {
       latestSets.forEach(set => {
         const year = set.released_at ? new Date(set.released_at).getFullYear() : '';
         const link = document.createElement('a'); link.className = 'popular-set-card'; link.href = gameUrl('card.html', { set: set.code });
-        const code = document.createElement('span'); code.className = 'popular-set-code'; code.textContent = set.code.toUpperCase();
+        const symbol = createSetSymbol(set);
         const info = document.createElement('div'); info.className = 'popular-set-info';
         const title = document.createElement('h4'); title.textContent = set.name;
         const detail = document.createElement('p'); detail.textContent = [year, `${set.card_count} ${I18N.t('catalogCardCount')}`].filter(Boolean).join(' · ');
-        info.append(title, detail); link.append(code, info); grid.append(link);
+        info.append(title, detail); link.append(symbol, info); grid.append(link);
       });
     } else {
       I18N.bind(status, 'noCollectionsFound'); grid.replaceChildren(status);

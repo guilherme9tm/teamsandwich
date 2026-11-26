@@ -77,7 +77,7 @@ test('home showcases provider card images and printing links for each game witho
       const namedCalls = requests.filter(url => url.includes('/cards/named')).length;
       const selector = document.querySelector('.lang-selector-select');
       selector.value = 'pt'; selector.dispatchEvent(new dom.window.Event('change'));
-      assert.match(document.getElementById('heroCardCredit').textContent, /Imagens das cartas/);
+      assert.equal(document.getElementById('heroCardCredit'), null);
       assert.equal(requests.filter(url => url.includes('/cards/named')).length, namedCalls);
       slots[0].querySelector('img').dispatchEvent(new dom.window.Event('error'));
       assert.equal(slots[0].querySelector('img'), null);

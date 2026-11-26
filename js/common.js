@@ -9,6 +9,21 @@ function gameUrl(path, params = {}) {
   return url.href;
 }
 
+function createSetSymbol(set) {
+  const symbol = document.createElement('span');
+  symbol.className = `popular-set-code set-symbol${CardData.game === 'mtg' ? ' set-symbol-mtg' : ''}`;
+  symbol.setAttribute('aria-hidden', 'true');
+  const fallback = document.createElement('span'); fallback.textContent = '◇'; symbol.append(fallback);
+  if (typeof set.icon_svg_uri === 'string' && /^https:\/\//i.test(set.icon_svg_uri)) {
+    const image = document.createElement('img');
+    image.alt = ''; image.width = 32; image.height = 32; image.loading = 'lazy'; image.style.visibility = 'hidden';
+    image.onload = () => { fallback.hidden = true; image.style.visibility = 'visible'; };
+    image.onerror = () => { image.remove(); fallback.hidden = false; };
+    image.src = set.icon_svg_uri; symbol.append(image);
+  }
+  return symbol;
+}
+
 function initGameNavigation() {
   const header = document.querySelector('.header');
   if (!header) return;
