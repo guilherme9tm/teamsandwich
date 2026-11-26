@@ -271,7 +271,7 @@ dialog::backdrop { background: rgba(10, 14, 11, .85); backdrop-filter: blur(3px)
   .header { flex-wrap: wrap; gap: 8px; padding: 12px; min-height: 0; }
   .header-logo { height: 32px; }
   .header-search-container { order: 4; flex: 1 1 100%; max-width: none; margin: 0; }
-  .header .header-actions-right { order: 2; flex: 1 1 100%; min-width: 0; max-width: 100%; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
+  .header .header-actions-right { order: 2; flex: 1 1 0; min-width: 0; max-width: 100%; justify-content: flex-end; flex-wrap: wrap; gap: 8px; }
   .header .user-actions { display: flex !important; min-width: 0; max-width: 100%; flex-wrap: wrap; justify-content: flex-end; padding-left: 0; border-left: 0; gap: 6px; }
   .header .user-actions > a, .header .user-actions > button { min-height: 38px; padding: 8px 10px; font-size: 11px; }
   .game-selector { order: 3; flex: 1 1 100%; justify-content: center; margin-left: 0; }
